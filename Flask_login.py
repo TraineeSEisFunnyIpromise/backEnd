@@ -42,7 +42,7 @@ def register():
         return jsonify({'error': 'Please provide username and password'})
     
 @app.route('/userinfo')
-def index():
+def yeet():
     return render_template('userinfo.html')
 
 @app.route('/test', methods=['POST'])

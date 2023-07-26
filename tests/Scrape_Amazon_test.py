@@ -1,5 +1,5 @@
 import unittest
-from Flask_login import some_function_to_test
+from Flask_login import login
 
 class TestApp(unittest.TestCase):
 	def test_Scraped_Data_FB(self):

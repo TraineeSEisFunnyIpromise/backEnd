@@ -1,5 +1,5 @@
 import unittest
-from Authentication import app
+from MainApp import app
 
 class TestLoginEndpoint(unittest.TestCase):
 

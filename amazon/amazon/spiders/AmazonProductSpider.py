@@ -1,25 +1,27 @@
-# -*- coding: utf-8 -*-
 import scrapy
-from amazon.items import AmazonItem
 
-class AmazonProductSpider(scrapy.Spider):
-  name = "AmazonDeals"
-  allowed_domains = ["amazon.com"]
-  
-  #Use working product URL below
-  start_urls = [
-     "http://www.amazon.com/dp/B0046UR4F4", "http://www.amazon.com/dp/B00JGTVU5A",
-     "http://www.amazon.com/dp/B00O9A48N2", "http://www.amazon.com/dp/B00UZKG8QU"
-     ]
- 
-  def parse(self, response):
-    items = AmazonItem()
-    title = response.xpath('//h1[@id="title"]/span/text()').extract()
-    sale_price = response.xpath('//span[contains(@id,"ourprice") or contains(@id,"saleprice")]/text()').extract()
-    category = response.xpath('//a[@class="a-link-normal a-color-tertiary"]/text()').extract()
-    availability = response.xpath('//div[@id="availability"]//text()').extract()
-    items['product_name'] = ''.join(title).strip()
-    items['product_sale_price'] = ''.join(sale_price).strip()
-    items['product_category'] = ','.join(map(lambda x: x.strip(), category)).strip()
-    items['product_availability'] = ''.join(availability).strip()
-    yield items
+# class AmazonSpider(scrapy.Spider):
+#     name = 'amazon'
+
+#     def parse(self, response):
+#         # Extract product IDs from search results
+#         product_ids = response.css('[data-asin]::attr(data-asin)').getall()
+
+        # # Yield the product IDs as Scrapy items
+        # for product_id in product_ids:
+        #     yield {
+        #         'product_id': product_id
+        #     }
+
+class AmazonSpider(scrapy.Spider):
+    name = 'amazon'
+
+    def __init__(self, response, keyword):
+        self.start_urls = [f'https://www.amazon.com/s?k={keyword}']  # Use keyword in start URL
+        # ... rest of your spider code
+        # Yield the product IDs as Scrapy items
+        product_ids = response.css('[data-asin]::attr(data-asin)').getall()
+        for product_id in product_ids:
+            yield {
+                'product_id': product_id
+            }

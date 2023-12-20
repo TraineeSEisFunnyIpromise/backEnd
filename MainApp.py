@@ -52,6 +52,25 @@ def register():
 def yeet():
     return render_template('userinfo.html')
 
+@app.route('/search', methods=['POST','GET'])
+def search_products():
+    if request.method == 'GET':  
+        # get data from request demo
+        # template = render_template('product.html', name='Product Name', price=19.99)
+        # return template
+        #a literal scraping process with spyderthingy
+        keyword = input("Enter search keyword: ")
+        process = CrawlerProcess({
+        'USER_AGENT': 'Mozilla/5.0 (compatible; MyScraper/1.0; +http://example.com)'
+    })
+        process.crawl(AmazonSpider, keyword=keyword)  # Pass keyword as argument
+        process.start()
+    elif request.method == 'POST':
+        #send data back to request which '/search'
+        return 0
+    else :
+        return 'methods not allowed', 405
+
 
 if __name__ == '__main__':
     app.run()

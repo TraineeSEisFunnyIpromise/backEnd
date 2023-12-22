@@ -59,12 +59,7 @@ def search_products():
         # template = render_template('product.html', name='Product Name', price=19.99)
         # return template
         #a literal scraping process with spyderthingy
-        keyword = input("Enter search keyword: ")
-        process = CrawlerProcess({
-        'USER_AGENT': 'Mozilla/5.0 (compatible; MyScraper/1.0; +http://example.com)'
-    })
-        process.crawl(AmazonSpider, keyword=keyword)  # Pass keyword as argument
-        process.start()
+        return 0
     elif request.method == 'POST':
         #send data back to request which '/search'
         return 0

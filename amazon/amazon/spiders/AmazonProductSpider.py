@@ -1,5 +1,5 @@
 import scrapy
-
+from scrapy.crawler import CrawlerProcess
 # class AmazonSpider(scrapy.Spider):
 #     name = 'amazon'
 
@@ -14,14 +14,30 @@ import scrapy
         #     }
 
 class AmazonSpider(scrapy.Spider):
-    name = 'amazon'
+    name = 'amazonspider'
+    # custom_feed = {
+    #     "/home/user/documents/items.json": {
+    #         "format": "json",
+    #         "indent": 4,
+    #     }
+    # }
 
-    def __init__(self, response, keyword):
-        self.start_urls = [f'https://www.amazon.com/s?k={keyword}']  # Use keyword in start URL
-        # ... rest of your spider code
+    def update_settings(self):
+        self.crawler.settings.set('USER_AGENT','Mozilla/5.0 (compatible; MyScraper/1.0; +http://google.com)')
+    # def update_settings(cls, settings):
+    #     super().update_settings(settings)
+    #     settings.set(priority="spider")
+
+
+    def __init__(self, keyword):
+        self.update_settings()
+        self.start_urls = f'https://www.amazon.com/s?k='.format(keyword)
         # Yield the product IDs as Scrapy items
-        product_ids = response.css('[data-asin]::attr(data-asin)').getall()
+        product_ids = keyword.css('[data-asin]::attr(data-asin)').getall()
         for product_id in product_ids:
             yield {
                 'product_id': product_id
             }
+
+
+

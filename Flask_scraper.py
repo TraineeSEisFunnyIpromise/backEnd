@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from amazon.items import AmazonItem
+from amazon.amazon.items import AmazonItem
+from scrapy.crawler import CrawlerProcess
 
 class AmazonProductSpider(scrapy.Spider):
   name = "AmazonDeals"
   allowed_domains = ["amazon.com"]
-  
-  #Use working product URL below
-  start_urls = [
-     "http://www.amazon.com/dp/B0046UR4F4", "http://www.amazon.com/dp/B00JGTVU5A",
-     "http://www.amazon.com/dp/B00O9A48N2", "http://www.amazon.com/dp/B00UZKG8QU"
-     ]
- 
+  start_urls = []
   def parse(self, response):
    items = AmazonItem()
    title = response.xpath('//h1[@id="title"]/span/text()').extract()
@@ -23,3 +18,22 @@ class AmazonProductSpider(scrapy.Spider):
    items['product_category'] = ','.join(map(lambda x: x.strip(), category)).strip()
    items['product_availability'] = ''.join(availability).strip()
    yield items
+
+
+def __init__(self, keyword):
+   keyword = input("Enter search keyword: ")
+   self.start_urls = [f'https://www.amazon.com/s?k={keyword}']
+
+def main():
+    keyword = input("Enter search keyword: ")
+    process.crawl(AmazonProductSpider, keyword=keyword)
+    process.start()
+
+process = CrawlerProcess(settings={
+    'FEED_URI':'Car.csv',
+    'FEED_FORMAT':'csv'
+})
+
+if __name__ == '__main__':
+   main()
+   

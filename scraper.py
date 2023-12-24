@@ -5,19 +5,6 @@ from scrapy.crawler import CrawlerProcess
 class AmazonProductSpider(scrapy.Spider):
     name = "AmazonDeals"
     # allowed_domains = ["amazon.com"]
-    # custom_settings = {
-    # 'DOWNLOADER_MIDDLEWARES' : 
-    # 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware' : None,
-    # 'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
-    # 'scrapy_fake_useragent.middleware.RandomUserAgentMiddleware': 400,
-    # 'scrapy_fake_useragent.middleware.RetryUserAgentMiddleware': 401,
-    # ## settings.py
-    # 'FAKEUSERAGENT_PROVIDERS' = 
-    #     'scrapy_fake_useragent.providers.FakeUserAgentProvider',  # This is the first provider we'll try
-    #     'scrapy_fake_useragent.providers.FakerProvider',  # If FakeUserAgentProvider fails, we'll use faker to generate a user-agent string for us
-    #     'scrapy_fake_useragent.providers.FixedUserAgentProvider',  # Fall back to USER_AGENT value
-    # }
-
     def parse(self, response):
         items = AmazonItem()
         items['product_name'] = response.css(".a-size-medium a-color-base a-text-normal::text").get()

@@ -1,0 +1,6 @@
+name: Run API KEY&Token
+env:
+  API_Key: ${{ secrets.API_KEY }}
+  Secret_Key: ${{ secrets.SECRET_KEY }}
+run: |
+  nvdeb_test_nbs

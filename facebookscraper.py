@@ -1,14 +1,20 @@
-import scrapy
-
 import requests
+from urllib.parse import urlencode
+search_query = input("Enter your search query for facebook: ")
+proxy_params = {
+      'api_key': '',
+      'url': 'https://www.facebook.com/search/top/?q={search_query}',
+      'render_js': True,
+  }
 
 response = requests.get(
-url='https://proxy.scrapeops.io/v1/',
-params={
-'api_key': '',
-'url': 'https://www.facebook.com/search/top/?q=car',
-}
+  url='https://proxy.scrapeops.io/v1/',
+  params=urlencode(proxy_params),
+  timeout=120,
 )
+
+print('Body: ', response.content)
+
 
 with open("response.txt", "w") as f:
 	f.write(str(response))

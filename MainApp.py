@@ -2,7 +2,8 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
-
+from amazonscraper import searcha
+from facebookscraper import searchf
 # instantiate the app
 app = Flask(__name__)
 
@@ -55,10 +56,7 @@ def yeet():
 @app.route('/search', methods=['POST','GET'])
 def search_products():
     if request.method == 'GET':  
-        # get data from request demo
-        # template = render_template('product.html', name='Product Name', price=19.99)
-        # return template
-        #a literal scraping process with spyderthingy
+        search_keyword = request.json
         return 0
     elif request.method == 'POST':
         #send data back to request which '/search'

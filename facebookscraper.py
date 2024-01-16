@@ -1,16 +1,20 @@
 import requests
 from urllib.parse import urlencode
-search_query = input("Enter your search query for facebook: ")
+
+# def searchf(search_query):
+#API use scraperops
+search_query = input("Enter your search query: ")
+print("Your search query for facebook is : "+ search_query)
 proxy_params = {
-      'api_key': '',
-      'url': 'https://www.facebook.com/search/top/?q={search_query}',
-      'render_js': True,
-  }
+'api_key': '',
+'url': 'https://www.facebook.com/search/top/?q=' + search_query,
+'render_js': True,
+}
 
 response = requests.get(
-  url='https://proxy.scrapeops.io/v1/',
-  params=urlencode(proxy_params),
-  timeout=120,
+url='https://proxy.scrapeops.io/v1/',
+params=urlencode(proxy_params),
+timeout=120,
 )
 
 print('Body: ', response.content)
@@ -21,6 +25,7 @@ with open("response.txt", "w") as f:
 
 with open("response_content.txt", "w") as f:
 	f.write(str(response.content))
+
 
 #target Xpath //*[@id="mount_0_0_x0"]/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]
 #target jspath document.querySelector("#mount_0_0_x0 > div > div:nth-child(1) > div > div.x9f619.x1n2onr6.x1ja2u2z > div > div > div.x78zum5.xdt5ytf.x1t2pt76.x1n2onr6.x1ja2u2z.x10cihs4 > div.x9f619.x2lah0s.x1nhvcw1.x1qjc9v5.xozqiw3.x1q0g3np.x78zum5.x1iyjqo2.x1t2pt76.x1n2onr6.x1ja2u2z.x1h6rjhl > div.x9f619.x1n2onr6.x1ja2u2z.xdt5ytf.x193iq5w.xeuugli.x1r8uery.x1iyjqo2.xs83m0k.x78zum5.x1t2pt76")

@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # The webpage URL
     URL = 'https://www.amazon.com/s?' + search_query
     #payload for search
-    payload = {'api_key': '','url': URL ,'us': 'amazon.com', 'device_type': 'desktop'}
+    payload = {'api_key': 'b9c4d81385407a68cbfc35e121f2cea9','url': URL ,'us': 'amazon.com', 'device_type': 'desktop'}
     #payload for the looping search product
     
     # HTTP Request

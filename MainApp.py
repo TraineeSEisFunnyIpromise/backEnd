@@ -5,7 +5,6 @@ from flask_cors import CORS
 from pymongo import MongoClient
 from compare import search_pattern
 from chatgptreqsender import receiveinputtest
-import hashlib
 #JWT thingy
 import jwt
 import datetime
@@ -15,7 +14,7 @@ from functools import wraps
 app = Flask(__name__)
 
 client = MongoClient('mongodb://localhost:27017')
-db = client['database1']
+db = client['Database1']
 usercollection = db['DB1']
 # enable CORS
 
@@ -24,10 +23,6 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 jwt = JWTManager(app)
 app.config['JWT_SECRET_KEY'] = 'Your_Secret_Key'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=1)
-
-@app.route('/ping', methods=['GET'])
-def ping_pong():
-    return jsonify('pong!')
 
 @app.route('/')
 def index():
@@ -38,26 +33,26 @@ def index():
 @app.route('/login', methods=['POST'])
 def login():
 	login_details = request.get_json() # store the json body request
-	user_from_db = usercollection.find_one({'username': login_details['username']})  # search for user in database
-
+	usernameA = login_details['username']
+	passA = login_details['password']
+	 # search for user in database
+	user_from_db = usercollection.find_one({"username": login_details["username"]}) # check if user exist
 	if user_from_db:
-		encrpted_password = hashlib.sha256(login_details['password'].encode("utf-8")).hexdigest()
-		if encrpted_password == user_from_db['password']:
-			access_token = create_access_token(identity=user_from_db['username']) # create jwt token
-			return jsonify(access_token=access_token), 200
-
-	return jsonify({'msg': 'The username or password is incorrect'}), 401
-
+		if (passA == user_from_db['password']):
+			# access_token = create_access_token(identity=user_from_db['username']) # create jwt token
+			return jsonify({'msg':'login successful'})
+	else:
+		return jsonify({'msg': 'The username or password is incorrect'})
     
 
 @app.route('/register', methods=['POST'])
 def register():
     new_user = request.get_json() # store the json body request
-    new_user["password"] = hashlib.sha256(new_user["password"].encode("utf-8")).hexdigest() # encrpt password
     doc = usercollection.find_one({"username": new_user["username"]}) # check if user exist
     if not doc:
         usercollection.insert_one(new_user)
         return jsonify({'msg': 'User created successfully'}), 201
+		
     else:
         return jsonify({'msg': 'Username already exists'}), 409
 
@@ -70,15 +65,11 @@ def update():
     result = collection.insert_one(data)
     if result.acknowledged:
         data = {
-        "name"        : data.get('name'),
-        "password"    : data.get('password'),
-        "info"         : data.get('info')
+        "userinfo"         : data.get('userinfo')
         }
-        print(data)
         collection.insert_one(data)
         return jsonify({'message': 'Registration successful'})
     else:
-        print(data)
         return jsonify({'error': 'Please provide username and password'})
     
 #view data seem it use dump? 
@@ -109,20 +100,6 @@ def search_products():
         return receiveinputtest(search_keyword)
     else :
         return 'methods not allowed', 405
-    
-
-@app.route('/search_test', methods=['POST','GET'])
-def search_test():
-    if request.method == 'GET':  
-
-        return print("fronend send to back")
-    elif request.method == 'POST':
-        #send data back to request which '/search'
-        return 0
-    else :
-        return 'methods not allowed', 405
-    
-
 
 
 #start app down here _main_

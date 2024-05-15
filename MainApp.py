@@ -4,7 +4,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from flask_cors import CORS
 from pymongo import MongoClient
 from compare import search_pattern
-from chatgptreqsender import receiveinputtest
+from chatgptreqsender import receiveinput
 #JWT thingy
 import jwt
 import datetime
@@ -75,29 +75,25 @@ def update():
 #view data seem it use dump? 
 #-----------------------------end of Login & Registration
 
-@app.route('/userinfo')
+@app.route('/userinfo', methods=['POST'])
 @jwt_required
 def profile():
-	current_user = get_jwt_identity() # Get the identity of the current user
-	user_from_db = usercollection.find_one({'username' : current_user})
+	# current_user = get_jwt_identity() # Get the identity of the current user
+	user_from_db = usercollection.find_one({'username' : 'admin'})
 	if user_from_db:
 		del user_from_db['_id'], user_from_db['password'] # delete data we don't want to return
 		return jsonify({'profile' : user_from_db }), 200
 	else:
 		return jsonify({'msg': 'Profile not found'}), 404
 
-@app.route('/search', methods=['POST','GET'])
+@app.route('/search', methods=['POST'])
 def search_products():
-    if request.method == 'GET':  
-        #Check word
-        search_keyword = request.json
-        #send to ChatGPT
-        # receive_input(search_keyword)
-        return usercollection.insert_one(search_keyword)
-    elif request.method == 'POST':
+    if request.method == 'POST':
         #send data back to request which '/search'
-        search_keyword = request.json
-        return receiveinputtest(search_keyword)
+        search_keyword = request.get_json()
+        searchword = search_keyword['keyword']
+        result = receiveinput(searchword)
+        return jsonify({'msg':result})
     else :
         return 'methods not allowed', 405
 

@@ -6,15 +6,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 import chromedriver_autoinstaller
 #All Spent
-SCRAPEOPS_API_KEY = ''
+# SCRAPEOPS_API_KEY = ''
+# bright data credential
+#wss://brd-customer-hl_4efe8bc2-zone-scraping_browser:95o4c2yp3b4u@brd.superproxy.io:9222
 #still have left
 ## Define OutsourceAPI Proxy Port Endpoint 
 username = ''
 password = ''
 proxy_options = {
     'proxy': {
-        'http': f'http://{username}:{password}@gate.smartproxy.com:7000',
-        'https': f'https://{username}:{password}@gate.smartproxy.com:7000',
+        'http': f'',
+        'https': f'',
         'no_proxy': 'localhost:127.0.0.1'
     },
     'prefs': {
@@ -54,6 +56,11 @@ search_input.send_keys(searchkeyword)
 search_btn = driver.find_element(By.XPATH,'/html/body/div[1]/header/div/div[1]/div[2]/div/form/div[3]/div/span/input')
 search_btn.click()
 wait.until(EC.url_changes('https://www.amazon.com/'))
-h1_text = soup.find('h1').text
-
+h1_text = soup.find_all('a',attrs={'class':'a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal'})
+#element target
+#<a class="a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal"
+print("finding a to class")
 print(h1_text)
+print("-----------------------------------------------")
+print("printall")
+print(soup)

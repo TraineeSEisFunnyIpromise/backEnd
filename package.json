@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "playwright": "^1.44.0",
+    "puppeteer": "^22.9.0",
+    "puppeteer-core": "^22.9.0",
     "scrapy": "^0.0.1"
   }
 }

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "asyncio": "^0.0.2",
     "playwright": "^1.44.0",
     "puppeteer": "^22.9.0",
     "puppeteer-core": "^22.9.0",

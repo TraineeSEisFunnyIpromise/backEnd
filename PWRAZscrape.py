@@ -93,7 +93,7 @@ async def extract_reviews(page):
 import asyncio
 
 async def main():
-  proxy_server = f"@gate.smartproxy.com:7000"
+  proxy_server = f"http://@gate.smartproxy.com:7000"
   async with async_playwright() as p:
     browser = await p.chromium.launch(proxy={  # Global proxy configuration
         "username":"",

@@ -7,7 +7,7 @@ search_term = input("please type some input: ")
 
 async def run():
     async with async_playwright() as p:
-        browser = await p.chromium.connect_over_cdp("")
+        browser = await p.chromium.connect_over_cdp("@brd.superproxy.io:9222")
         print("Connected to browser...")
         print("Sending requests via residential proxies...")
         
@@ -40,7 +40,7 @@ async def run():
             print(f"Found product: {item['url'],item['title']}, {item['price']}")
             print('Response Code: ',)
             print('Response Scraped Body: ', data_json)
-            with open("test1.json", "w") as outfile:
+            with open("sample.json", "w") as outfile:
                 outfile.write(data_json)
         await browser.close()
 

@@ -6,7 +6,8 @@ from pymongo import MongoClient
 from compare import search_pattern
 from chatgptreqsender import receiveinput
 from functools import wraps
-
+#time stuff
+from datetime import datetime, timedelta
 # instantiate the app
 app = Flask(__name__)
 
@@ -25,24 +26,29 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 300
 # Initialize Flask-Session
 Session(app)
 
-@app.route('/')
-def index():
-    if 'username' in session:
-        username = session['username']
-        user_data = usercollection.find_one(username)  # Function to fetch user data from MongoDB
-        if user_data:
-            return 'user data found'
-        else:
-            return 'User data not found'
-    else:
-        return 'Please log in to view user information'
+# @app.route('/')
+# def index():
+#     if 'username' in session:
+#         username = session['username']
+#         user_data = usercollection.find_one(username)  # Function to fetch user data from MongoDB
+#         if user_data:
+#             return 'user data found'
+#         else:
+#             return 'User data not found'
+#     else:
+#         return 'Please log in to view user information'
 
 #Session * i should seperate this
 
 # #Session status
-# @app.route('',methods=[''])
-# def something():
-#     return 
+@app.route('/sessioncheck',methods=['POST'])
+def something():
+			session.get('user')
+				# Calculate time left until session expires (server-side)
+			session_start_time = session.get('start_time')
+			now = datetime.utcnow()
+			duration_left = session_start_time + timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME']) - now
+			return 
 
 #Login & Register Section
 @app.route('/login', methods=['POST'])
@@ -54,11 +60,14 @@ def login():
 	user_from_db = usercollection.find_one({"username": login_details["username"]}) # check if user exist
 	if user_from_db:
 		if (passA == user_from_db['password']):
+			print("backend success  " + user_from_db)
             #providing token with JWT ...they said it bad?
 			session['username'] = usernameA  # Set username in session
 			return jsonify({'msg':'login successful'})
+		else:
+			return jsonify({'msg': 'The username or password is incorrect'})
 	else:
-		return jsonify({'msg': 'The username or password is incorrect'})
+		return jsonify({'msg':'Server is not avaliable'})
     
 
 @app.route('/register', methods=['POST'])

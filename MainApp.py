@@ -43,12 +43,13 @@ Session(app)
 # #Session status
 @app.route('/sessioncheck',methods=['POST'])
 def something():
-			session.get('user')
+			username = session.get('user')
 				# Calculate time left until session expires (server-side)
 			session_start_time = session.get('start_time')
-			now = datetime.utcnow()
+			now = datetime.utcnow
 			duration_left = session_start_time + timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME']) - now
-			return 
+			response = username + "  " + duration_left
+			return response
 
 #Login & Register Section
 @app.route('/login', methods=['POST'])

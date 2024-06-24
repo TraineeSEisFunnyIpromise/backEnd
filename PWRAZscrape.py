@@ -93,13 +93,8 @@ async def extract_reviews(page):
 import asyncio
 
 async def main():
-  proxy_server = f"http://@gate.smartproxy.com:7000"
   async with async_playwright() as p:
-    browser = await p.chromium.launch(proxy={  # Global proxy configuration
-        "username":"",
-        "password":"",
-        "server": proxy_server
-    }, headless=False)  # Adjust headless mode as needed
+    browser = await p.chromium.connect_over_cdp("@brd.superproxy.io:9222")
     context = await browser.new_context()
     page = await context.new_page()
     target_url="https://www.amazon.com/NQD-Control-Toddlers-Material-Birthday/dp/B0CWQGH32L/ref=sr_1_1_sspa?sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1"

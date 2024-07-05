@@ -46,7 +46,7 @@ async def extract_rating(review_element):
 
 # Save the extracted reviews to a csv file
 async def save_reviews_to_csv(reviews):
-        data = pd.DataFrame(reviews, columns=['product_colour','review_title','review_body','review_date','rating'])
+        data = pd.DataFrame(reviews, columns=['product_colour','review_title','review_body','review_date'])
         data.to_csv('amazon_product_reviews15.csv', index=False)
 
 # Perform a request and retries the request if it fails

@@ -9,6 +9,7 @@ with open('sample.json', 'r') as openfile:
 
 for line in json_object:
     url = line.get("url")
-    asin = re.search(r'/[dg]p/([^/]+)', json_object, flags=re.IGNORECASE)
+    asin = re.search(r'/[dg]p/([^/]+)', url, flags=re.IGNORECASE)
     if asin:
-        print(asin.group(1))
+        if asin.re.search():
+            print("something")

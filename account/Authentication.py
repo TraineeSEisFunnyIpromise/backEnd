@@ -32,7 +32,7 @@ auth_bp = Blueprint('auth', __name__)
 
 #--------------------------------------------Login Part--------------------------------------------
 
-@auth_bp.route('/auth/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST'])
 def login():
 	login_details = request.get_json() # store the json body request
 	usernameA = login_details['username']
@@ -44,23 +44,22 @@ def login():
   #process to check mongodb server with boolean didn't know python could just pull that move
 		if bool(is_mongodb_available()) != False:
 			if (passA == user_from_db['password']):
-				print("backend success  " + user_from_db)
 							#SESSION with Flask is Funni
 				session['username'] = usernameA  # Set username in session
     #return success
-				return jsonify({'msg':'login successful'})
+				return jsonify({'msg':'login successful'}),200
 			else:
     #return login not suckcess
-				return jsonify({'msg': 'The username or password is incorrect'})
+				return jsonify({'msg': 'The username or password is incorrect'}),200
 		else:
     #return database bad
-			return jsonify({'msg': 'The database is down!!!'})
+			return jsonify({'msg': 'The database is down!!!'}),504
 	else:
     #return server is fxck
-		return jsonify({'msg':'Server is not avaliable'})
+		return jsonify({'msg':'Server is not avaliable'}),400
 
 #---------------------------------------- Session status-------------------------------------------
-@auth_bp.route('/auth/sessioncheck',methods=['POST'])
+@auth_bp.route('/sessioncheck',methods=['POST'])
 def something():
 			username = session.get('user')
 				# Calculate time left until session expires (server-side)
@@ -73,7 +72,7 @@ def something():
 
 #----------------------------------------register part--------------------------------------------
 
-@auth_bp.route('/auth/register', methods=['POST'])
+@auth_bp.route('/register', methods=['POST'])
 def register():
     new_user = request.get_json() # store the json body request
     #below code literally check for juse username but who will check different password? aren't that leak already?

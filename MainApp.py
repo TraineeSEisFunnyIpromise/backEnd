@@ -1,5 +1,6 @@
 from flask import Flask
 from account.Authentication import auth_bp  # Import the blueprint
+from account.userinfo import userinformation_bp
 from flask_session import Session
 from flask_cors import CORS
 
@@ -13,7 +14,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 300
 Session(app)
 
 # Register the authentication blueprint
-app.register_blueprint(auth_bp)
+app.register_blueprint(auth_bp, url_prefix=('/auth'))
+app.register_blueprint(userinformation_bp, url_prefix='/userinfo')
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 # Your other application routes and logic here

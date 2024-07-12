@@ -1,5 +1,5 @@
 from flask import Flask
-from Authentication import auth_bp  # Import the blueprint
+from account.Authentication import auth_bp  # Import the blueprint
 from flask_session import Session
 from flask_cors import CORS
 

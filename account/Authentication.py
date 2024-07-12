@@ -1,10 +1,10 @@
-# app.py
+
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_session import Session
 from flask_cors import CORS
 from pymongo import MongoClient
-from compare import search_pattern
-from chatgptreqsender import receiveinput
+from comparesys.compare import search_pattern
+from reqandscrape.chatgptreqsender import receiveinput
 from functools import wraps
 #time stuff
 from datetime import datetime, timedelta

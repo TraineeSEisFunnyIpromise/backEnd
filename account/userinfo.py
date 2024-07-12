@@ -3,8 +3,8 @@ from flask import Flask, Blueprint, request, jsonify, session
 from flask_session import Session
 from flask_cors import CORS
 from pymongo import MongoClient
-from compare import search_pattern
-from chatgptreqsender import receiveinput
+from comparesys.compare import search_pattern
+from reqandscrape.chatgptreqsender import receiveinput
 from functools import wraps
 #time stuff
 from datetime import datetime, timedelta
@@ -16,12 +16,8 @@ db = client['Database1']
 usercollection = db['DB1']
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
-#JWT import
-# Configure secret key for session signing (important for security)
-app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (browser closed)
-app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
-app.config['PERMANENT_SESSION_LIFETIME'] = 300
+
+#for real thou no need to initialize the session it up in main...why i keep doing this?
 # Initialize Flask-Session
 Session(app)
 

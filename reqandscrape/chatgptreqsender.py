@@ -66,9 +66,6 @@ def select_headline(text):
 
 
 def segment_text(text):
-  """
-  Segments the text at "." (periods).
-  """
   segments = re.split(r"\.", text)  # Split at "."
   return segments
 

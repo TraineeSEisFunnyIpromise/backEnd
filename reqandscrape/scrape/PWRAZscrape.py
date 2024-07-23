@@ -92,19 +92,31 @@ async def extract_reviews(page):
 # Replace with your logic to fetch proxy details (e.g., API call)
 import asyncio
 
-async def main():
-  async with async_playwright() as p:
-    browser = await p.chromium.connect_over_cdp("@brd.superproxy.io:9222")
-    context = await browser.new_context()
-    page = await context.new_page()
-    target_url="https://www.amazon.com/NQD-Control-Toddlers-Material-Birthday/dp/B0CWQGH32L/ref=sr_1_1_sspa?sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1"
-    await perform_request_with_retry(page, target_url)
-    # Your existing code using the page object
-    review = await extract_reviews(page)
-    await save_reviews_to_csv(review)
+async def search_review(asin):
+  #check if list
+  if isinstance(asin,list):
+    async with async_playwright() as p:
+        browser = await p.chromium.connect_over_cdp("@brd.superproxy.io:9222")
+        context = await browser.new_context()
+        page = await context.new_page()
+        target_asins = asin
+        for asin in target_asins:
+            target_url = f"https://www.amazon.com/dp/{asin}"  # Construct URL using string formatting
+            await perform_request_with_retry(page, target_url)
+            # Your existing code using the page object
+            review = await extract_reviews(page)
+            await save_reviews_to_csv(review)
 
-    await page.close()
-    await context.close()
-    await browser.close()
+        target_url="https://www.amazon.com/dp/B0CWQGH32L"
+        await perform_request_with_retry(page, target_url)
+        # Your existing code using the page object
+        review = await extract_reviews(page)
+        await save_reviews_to_csv(review)
 
-asyncio.run(main())
+        await page.close()
+        await context.close()
+        await browser.close()
+
+
+        
+asyncio.run(search_review())

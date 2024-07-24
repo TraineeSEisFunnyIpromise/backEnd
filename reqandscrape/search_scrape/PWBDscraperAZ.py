@@ -30,20 +30,10 @@ async def scrape_amazon(search_term):
         print("Products loaded, parsing...")
 
         data = await parse_results(page)
-
-        filename = 'test1.csv'
-        print("Jsoning data")
-        data_json = json.dumps(data)
-        count = 0
-        for item in data:
-            count += 1
-            print(f"Found product: {item['url'],item['title']}, {item['price']}")
-            print('Response Code: ',)
-            print('Response Scraped Body: ', data_json)
-            with open(filename, "w") as outfile:
-                outfile.write(data_json)
+        save_data(data)
 
         await browser.close()
+        return data
 
 
 async def parse_results(page):
@@ -57,6 +47,42 @@ async def parse_results(page):
         });
     }''')
 
+async def save_data(data):
+    
+        filename = 'test1.csv'
+        print("Jsoning data")
+        data_json = json.dumps(data)
+        count = 0
+        for item in data:
+            count += 1
+            #finding URL, Title and Price
+            print(f"Found product: {item['url'],item['title']}, {item['price']}")
+            print('Response Code: ',)
+            print('Response Scraped Body: ', data_json)
+            with open(filename, "w") as outfile:
+                outfile.write(data_json)
+
+async def save_scrape_data(data):
+        print("Jsoning data")
+        data_json = json.dumps(data)
+        response_data = []
+        count = 0
+        for item in data:
+            count += 1
+            #finding URL, Title and Price
+            response_data = item['url'],item['title'], item['price']
+        return response_data
+
+async def save_scrape_test_data():
+        data = ""
+        data_json = json.dumps(data)
+        response_data = []
+        count = 0
+        for item in data_json:
+            count += 1
+            #finding URL, Title and Price
+            response_data = item['url'],item['title'], item['price']
+        return response_data
 
 # when want to use it independently
 search_term = input("Please type some input: ")

@@ -85,6 +85,7 @@ def cutthatnull(text):
    print("------")
    return storea
 
+#what will use
 def receiveinput(text):
    set_text = segment_text(change_data(text))
    storea = []
@@ -94,6 +95,7 @@ def receiveinput(text):
    print("------")
    return storea
 
+#run test
 def receiveinputtest(text):
    set_text = segment_text(text)
    storea = []

@@ -1,7 +1,8 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
-from reqandscrape.search_scrape.PWBDscraperAZ import save_scrape_test_data
+from comparesys.comparefile.prod_compare import compare_test
+from comparesys.comparefile.prod_compare import compare_prod
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app
@@ -26,10 +27,11 @@ compare_bp = Blueprint('compare', __name__)
 
 #--------------------------------------------search Prod sender Part--------------------------------------------
 @compare_bp.route('/compare', methods=['POST'])
-def compare_prod():
+def compare():
 	response = request.get_json() # store the json body request
 	inputa = response['search_refined']
-	response = compare_prod(inputa)
+	response = compare_test
+	print(inputa)
 	return response
 
 #--------------------------------------------compare test sender Part--------------------------------------------@search_bp.route('/search_prod', methods=['POST'])
@@ -37,6 +39,6 @@ def compare_prod():
 def compare_test():
 	response = request.get_json() # store the json body request
 	inputa = response['search_refined']
-	response = save_scrape_test_data()
+	response = compare_prod(inputa)
 	print(inputa)
 	return response

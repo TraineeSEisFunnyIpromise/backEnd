@@ -85,6 +85,6 @@ async def save_scrape_test_data():
         return response_data
 
 # when want to use it independently
-search_term = input("Please type some input: ")
-asyncio.run(scrape_amazon(search_term))
+# search_term = input("Please type some input: ")
+# asyncio.run(scrape_amazon(search_term))
 

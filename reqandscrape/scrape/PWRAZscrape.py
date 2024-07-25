@@ -106,17 +106,12 @@ async def search_review(asin):
             # Your existing code using the page object
             review = await extract_reviews(page)
             await save_reviews_to_csv(review)
-
-        target_url="https://www.amazon.com/dp/B0CWQGH32L"
-        await perform_request_with_retry(page, target_url)
+            await perform_request_with_retry(page, target_url)
         # Your existing code using the page object
-        review = await extract_reviews(page)
-        await save_reviews_to_csv(review)
+            review = await extract_reviews(page)
+            await save_reviews_to_csv(review)
 
         await page.close()
         await context.close()
         await browser.close()
 
-
-        
-asyncio.run(search_review())

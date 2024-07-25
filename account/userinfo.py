@@ -2,7 +2,6 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
-from comparesys.compare import search_pattern
 from reqandscrape.chatgptreqsender import receiveinput
 from functools import wraps
 #time stuff

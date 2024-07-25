@@ -2,8 +2,8 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from reqandscrape.chatgptreqsender import receiveinput
-from search_scrape.PWBDscraperAZ import save_scrape_test_data
-from scrape.PWRAZscrape import search_review
+from reqandscrape.search_scrape.PWBDscraperAZ import save_scrape_test_data
+from reqandscrape.scrape.PWRAZscrape import search_review
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app

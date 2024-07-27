@@ -1,7 +1,7 @@
 import regex as re
 import json
 
-# Opening JSON file
+# Opening JSON file a URL cleaner
 with open('sample.json', 'r') as openfile:
  
     # Reading from json file

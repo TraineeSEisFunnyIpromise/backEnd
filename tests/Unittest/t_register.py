@@ -1,5 +1,6 @@
 import unittest
-from MainApp import app, userinformation_bp  # Assuming app.py is in the same directory
+from MainApp import app
+from account.userinfo import userinformation_bp
 from pymongo import MongoClient  # For mocking (optional)
 
 class TestUserInfo(unittest.TestCase):

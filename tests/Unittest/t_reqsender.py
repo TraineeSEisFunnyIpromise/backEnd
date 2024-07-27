@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from reqandscrape.chatgptreqsender import change_data
+from reqandscrape.requestsender.chatgptreqsender import change_data
 
 class TestChangeData(unittest.TestCase):
     def test_successful_response(self):

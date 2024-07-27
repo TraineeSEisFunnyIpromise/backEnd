@@ -15,15 +15,12 @@ labels = ['Politics', 'Automobile', 'Sports', 'Business', 'World']
 
 
 
-def compare_prod(criteria_lists, text):
-	prediction = classifier(text, criteria_lists)  
+def compare_prod(criteria_lists, inputa):
+	prediction = classifier(inputa, criteria_lists)
+	return prediction
 
-	print(prediction['sequence']) 
-	print(prediction['labels']) 
-	print(prediction['scores'])
-
-def compare_test(criteria_lists, text):
-	prediction = classifier(text, criteria_lists)  
+def compare_test(criteria_lists, inputa):
+	prediction = classifier(inputa, criteria_lists)  
 
 	print(prediction['sequence']) 
 	print(prediction['labels']) 

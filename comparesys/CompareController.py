@@ -1,8 +1,8 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
-from comparesys.comparefile.prod_compare import compare_test
-from comparesys.comparefile.prod_compare import compare_prod
+from comparesys.comparefile.compare_rating import compare_test
+from comparesys.comparefile.compare_rating import compare_prod
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app

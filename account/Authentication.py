@@ -3,8 +3,8 @@ from flask import Flask, Blueprint, request, jsonify, session
 from flask_session import Session
 from flask_cors import CORS
 from pymongo import MongoClient
-from comparesys.comparefile.compare import search_pattern
-from reqandscrape.chatgptreqsender import receiveinput
+from comparesys.comparefile.compare_text import search_pattern
+from reqandscrape.requestsender.chatgptreqsender import receiveinput
 from functools import wraps
 #time stuff
 from datetime import datetime, timedelta

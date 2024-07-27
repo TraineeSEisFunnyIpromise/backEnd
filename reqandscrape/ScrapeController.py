@@ -1,9 +1,10 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
-from reqandscrape.chatgptreqsender import receiveinput
-from reqandscrape.search_scrape.PWBDscraperAZ import save_scrape_test_data
+from reqandscrape.requestsender.chatgptreqsender import receiveinput
+from reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon
 from reqandscrape.scrape.PWRAZscrape import search_review
+from comparesys.CompareController import compare
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app
@@ -31,25 +32,26 @@ search_bp = Blueprint('search', __name__)
 #--------------------------------------------criteria sender Part--------------------------------------------
 
 @search_bp.route('/compare_test', methods=['POST'])
-def search_criteria():
+def search_criteria_sender():
 	response = request.get_json() # store the json body request
 	inputa = response['search_input']
-	response = receiveinput(inputa)
+	response = compare(inputa)
+	print(inputa)
 	return response
 
 
 #--------------------------------------------search Prod sender Part--------------------------------------------
 @search_bp.route('/search_prod', methods=['POST'])
-def search_prod():
+def search_prod_sender():
 	response = request.get_json() # store the json body request
-	inputa = response['search_refined']
-	response = search_prod(inputa)
+	inputa = response['search']
+	response = scrape_amazon(inputa)
 	return response
 
 #--------------------------------------------search Review sender Part--------------------------------------------@search_bp.route('/search_prod', methods=['POST'])
 @search_bp.route('/search_review', methods=['POST'])
-def search_review():
+def search_review_sender():
 	response = request.get_json() # store the json body request
-	inputa = response['search_refined']
+	inputa = response['search']
 	response = search_review(inputa)
 	return response

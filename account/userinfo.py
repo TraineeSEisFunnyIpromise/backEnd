@@ -2,7 +2,7 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
-from reqandscrape.chatgptreqsender import receiveinput
+from reqandscrape.requestsender.chatgptreqsender import receiveinput
 from functools import wraps
 #time stuff
 from datetime import datetime, timedelta

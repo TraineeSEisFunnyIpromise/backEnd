@@ -43,14 +43,15 @@ def login():
 	if user_from_db:
   #process to check mongodb server with boolean didn't know python could just pull that move
 		if bool(is_mongodb_available()) != False:
+     #return success
 			if (passA == user_from_db['password']):
 							#SESSION with Flask is Funni
 				session['username'] = usernameA  # Set username in session
-    #return success
-				return jsonify({'msg':'login successful'}),200
+   
+				return jsonify({'msg':'login successful'}),202
 			else:
     #return login not suckcess
-				return jsonify({'msg': 'The username or password is incorrect'}),200
+				return jsonify({'msg': 'The username or password is incorrect'}),401
 		else:
     #return database bad
 			return jsonify({'msg': 'The database is down!!!'}),504

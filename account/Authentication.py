@@ -85,6 +85,8 @@ def register():
     doc = usercollection.find_one({"username": new_user["username"]}) # check if user exist like
     #after checking logic
     if not doc:#pass
+            # Add user ID to the new user data
+        new_user['user_id'] = user_id
         usercollection.insert_one(new_user)
         return jsonify({'msg': 'User created successfully'}), 201
 		

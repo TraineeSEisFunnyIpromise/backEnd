@@ -56,15 +56,16 @@ def update():
 
 @userinformation_bp.route('/Information', methods=['POST'])
 def userinfo():
-    session_id = session.get('session_id')
+	session_id = session.get('session_id')
     # Retrieve user data based on session_id (replace with your logic)
-    user_data = {'username': 'John Doe', 'email': 'johndoe@example.com'}  # Example data
-    return jsonify(user_data)
-	# if user_from_db:
-	# 	del user_from_db['_id'], user_from_db['password'] # delete data we don't want to return
-	# 	return jsonify({'profile' : user_from_db }), 200
-	# else:
-	# 	return jsonify({'msg': 'Profile not found'}), 404
+#     user_data = {'username': 'John Doe', 'email': 'johndoe@example.com'}  # Example data
+#     print(user_data)
+#     return jsonify(user_data)
+	if user_from_db:
+		del user_from_db['_id'], user_from_db['password'] # delete data we don't want to return
+		return jsonify({'profile' : user_from_db }), 200
+	else:
+		return jsonify({'msg': 'Profile not found'}), 404
      
 @userinformation_bp.route('/Delete', methods=['POST'])
 def Delete():

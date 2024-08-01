@@ -8,6 +8,7 @@ from reqandscrape.requestsender.chatgptreqsender import receiveinput
 from functools import wraps
 #time stuff
 from datetime import datetime, timedelta
+import uuid
 # instantiate the app
 app = Flask(__name__)
 
@@ -46,9 +47,11 @@ def login():
      #return success
 			if (passA == user_from_db['password']):
 							#SESSION with Flask is Funni
-				session['username'] = usernameA  # Set username in session
+				# session['username'] = usernameA  # Set username in session
+				session_id = str(uuid.uuid4())  # Generate a unique session ID
+				session['session_id'] = session_id
    
-				return jsonify({'msg':'login successful'}),202
+				return jsonify({'session_id': session_id,'msg':'login successful'}),202
 			else:
     #return login not suckcess
 				return jsonify({'msg': 'The username or password is incorrect'}),401

@@ -18,8 +18,8 @@ Session(app)
 # Register the authentication blueprint
 app.register_blueprint(auth_bp, url_prefix=('/auth'))
 app.register_blueprint(userinformation_bp, url_prefix='/userinfo')
-app.register_blueprint(search_bp, url_prefix='/search')
-app.register_blueprint(compare_bp, url_prefix='/compare')
+# app.register_blueprint(search_bp, url_prefix='/search')
+# app.register_blueprint(compare_bp, url_prefix='/compare')
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 # Your other application routes and logic here

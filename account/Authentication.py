@@ -13,7 +13,7 @@ import uuid
 app = Flask(__name__)
 
 client = MongoClient('mongodb://localhost:6000')
-db = client['Database1']
+db = client['Database2']
 usercollection = db['db1']
 # enable CORS
 # CORS(app, resources={r'/*': {'origins': '*'}})
@@ -24,7 +24,7 @@ app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (
 app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
 app.config['PERMANENT_SESSION_LIFETIME'] = 300
 
-encrypted_username = '' #literally exist for use in userinfo HALP
+__encrypted_username = '' #literally exist for use in userinfo HALP
 auth_bp = Blueprint('auth', __name__)
 
 #-------------------------------------import and setpu stuff ---------------------------------------
@@ -110,6 +110,12 @@ def check_database():
     message = "Database is empty."
     data = None
   return jsonify({'message': message})
+
+def receiveusername(username):
+      __encrypted_username = username
+
+def yeetusername():
+      return __encrypted_username
 
 def is_mongodb_available():
   result = False

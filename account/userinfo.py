@@ -2,7 +2,7 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
-from account.Authentication import encrypted_username
+from account.Authentication import yeetusername
 from reqandscrape.requestsender.chatgptreqsender import receiveinput
 
 from functools import wraps
@@ -12,8 +12,8 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 
 client = MongoClient('mongodb://localhost:6000')
-db = client['Database1']
-usercollection = db['DB1']
+db = client['Database2']
+usercollection = db['db1']
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 
@@ -42,11 +42,9 @@ def sessioncheck():
 @userinformation_bp.route('/Update', methods=['POST'])
 def update():
 		data = request.json
+		user = yeetusername
 		collection = db['DB1']
-		result = collection.insert_one(data)
-		user_id = data.get('user_id')
-		name = data.get('name')
-		if result.acknowledged:
+		if data["send" != '']:
 				data = {
         "userinfo"         : data.get('userinfo')
         }
@@ -58,7 +56,7 @@ def update():
 @userinformation_bp.route('/Information', methods=['POST'])
 def userinfo():
 	# user_id = usercollection.find_one({"user_id": encrypted_username}) 
-	user = usercollection.find_one(encrypted_username)  
+	user = usercollection.find_one(yeetusername())  
 	print(user)
 	if user:
 		 #this should be session check ut meh
@@ -74,7 +72,7 @@ def userinfo():
 def userinfo_test():
 	# user_id = usercollection.find_one({"user_id": encrypted_username}) 
 	user = {  "username": "admin",
-	 					"password:":"1234",
+					"password:":"1234",
             "about":"something",
             "question_r":"do you like banana",
             "answer_r":"Yes",
@@ -93,11 +91,13 @@ def userinfo_test():
      
 @userinformation_bp.route('/Delete', methods=['POST'])
 def Delete():
-	username = session['username']
+	data = request.json
+	username = data['username']
+	passA = data['password']
 	user_from_db = usercollection.find_one({'username' : username})
-	if user_from_db:
+	if passA == user_from_db['password']:
 		usercollection.remove(username)
-		return jsonify({'profile' : user_from_db }), 200
+		return jsonify({'msg' : 'remove succesful' }), 200
 	else:
 		return jsonify({'msg': 'Profile not found'}), 404
 	

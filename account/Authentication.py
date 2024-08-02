@@ -12,9 +12,9 @@ import uuid
 # instantiate the app
 app = Flask(__name__)
 
-client = MongoClient('mongodb://localhost:27017')
+client = MongoClient('mongodb://localhost:6000')
 db = client['Database1']
-usercollection = db['DB1']
+usercollection = db['db1']
 # enable CORS
 # CORS(app, resources={r'/*': {'origins': '*'}})
 #JWT import
@@ -42,6 +42,8 @@ def login():
 	print(login_details)
 	user_from_db = usercollection.find_one({"username": login_details["username"]}) 
 	print(user_from_db)
+	user_from_db_print_test = usercollection.find_one({"username": "admin"}) 
+	print(user_from_db_print_test)
 # man i hate how it look down here
 	if user_from_db:
   #process to check mongodb server with boolean didn't know python could just pull that move

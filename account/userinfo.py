@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 # instantiate the app
 app = Flask(__name__)
 
-client = MongoClient('mongodb://localhost:27017')
+client = MongoClient('mongodb://localhost:6000')
 db = client['Database1']
 usercollection = db['DB1']
 # enable CORS
@@ -69,20 +69,26 @@ def userinfo():
 			return jsonify({'error': 'User not found'}), 404
 	else:
 		return jsonify({'error': 'Unauthorized'}), 401
-	
 
-# @userinformation_bp.route('/userinfo', methods=['GET'])
-# def userinfo():
-#     session_id = request.cookies.get('session_id')
-#     if session_id and session_id in session:
-#         user_id = session[session_id]['user_id']
-#         user = usercollection.find_one({'_id': usercollection(user_id)})
-#         if user:
-#             return jsonify(user)
-#         else:
-#             return jsonify({'error': 'User not found'}), 404
-#     else:
-#         return jsonify({'error': 'Unauthorized'}), 401
+@userinformation_bp.route('/Information_test', methods=['POST'])
+def userinfo_test():
+	# user_id = usercollection.find_one({"user_id": encrypted_username}) 
+	user = {  "username": "admin",
+	 					"password:":"1234",
+            "about":"something",
+            "question_r":"do you like banana",
+            "answer_r":"Yes",
+            "roles": "Administrator",} 
+	print(user)
+	if user:
+		 #this should be session check ut meh
+		if user:
+		# Return user data (excluding sensitive information)
+			return jsonify({'username': user['username'], 'about': user['about']})  # Example
+		else:
+			return jsonify({'error': 'User not found'}), 404
+	else:
+		return jsonify({'error': 'Unauthorized'}), 401
 
      
 @userinformation_bp.route('/Delete', methods=['POST'])

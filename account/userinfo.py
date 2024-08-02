@@ -2,7 +2,9 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
+from account.Authentication import encrypted_username
 from reqandscrape.requestsender.chatgptreqsender import receiveinput
+
 from functools import wraps
 #time stuff
 from datetime import datetime, timedelta
@@ -44,7 +46,6 @@ def update():
 		result = collection.insert_one(data)
 		user_id = data.get('user_id')
 		name = data.get('name')
-		email = data.get('email')
 		if result.acknowledged:
 				data = {
         "userinfo"         : data.get('userinfo')
@@ -56,16 +57,33 @@ def update():
 
 @userinformation_bp.route('/Information', methods=['POST'])
 def userinfo():
-	session_id = session.get('session_id')
-    # Retrieve user data based on session_id (replace with your logic)
-#     user_data = {'username': 'John Doe', 'email': 'johndoe@example.com'}  # Example data
-#     print(user_data)
-#     return jsonify(user_data)
-	if user_from_db:
-		del user_from_db['_id'], user_from_db['password'] # delete data we don't want to return
-		return jsonify({'profile' : user_from_db }), 200
+	# user_id = usercollection.find_one({"user_id": encrypted_username}) 
+	user = usercollection.find_one(encrypted_username)  
+	print(user)
+	if user:
+		 #this should be session check ut meh
+		if user:
+		# Return user data (excluding sensitive information)
+			return jsonify({'username': user['username'], 'about': user['about']})  # Example
+		else:
+			return jsonify({'error': 'User not found'}), 404
 	else:
-		return jsonify({'msg': 'Profile not found'}), 404
+		return jsonify({'error': 'Unauthorized'}), 401
+	
+
+# @userinformation_bp.route('/userinfo', methods=['GET'])
+# def userinfo():
+#     session_id = request.cookies.get('session_id')
+#     if session_id and session_id in session:
+#         user_id = session[session_id]['user_id']
+#         user = usercollection.find_one({'_id': usercollection(user_id)})
+#         if user:
+#             return jsonify(user)
+#         else:
+#             return jsonify({'error': 'User not found'}), 404
+#     else:
+#         return jsonify({'error': 'Unauthorized'}), 401
+
      
 @userinformation_bp.route('/Delete', methods=['POST'])
 def Delete():

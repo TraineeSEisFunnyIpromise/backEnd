@@ -24,7 +24,7 @@ app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (
 app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
 app.config['PERMANENT_SESSION_LIFETIME'] = 300
 
-
+encrypted_username = '' #literally exist for use in userinfo HALP
 auth_bp = Blueprint('auth', __name__)
 
 #-------------------------------------import and setpu stuff ---------------------------------------
@@ -39,29 +39,30 @@ def login():
 	usernameA = login_details['username']
 	passA = login_details['password']
 # check if user exist
+	print(login_details)
 	user_from_db = usercollection.find_one({"username": login_details["username"]}) 
+	print(user_from_db)
 # man i hate how it look down here
 	if user_from_db:
   #process to check mongodb server with boolean didn't know python could just pull that move
 		if bool(is_mongodb_available()) != False:
-     #return success
+                  
 			if (passA == user_from_db['password']):
-							#SESSION with Flask is Funni
-				# session['username'] = usernameA  # Set username in session
-				session_id = str(uuid.uuid4())  # Generate a unique session ID
-				session['session_id'] = session_id
-   
-				return jsonify({'session_id': session_id,'msg':'login successful'}),202
-			else:
-    #return login not suckcess
+				encrypted_username = usernameA
+				# user_from_db['user_id']= session  # Store user ID in session
+				print(session)
+				return jsonify({'message': 'login successful'}), 202
+			else: #return login not suckcess
 				return jsonify({'msg': 'The username or password is incorrect'}),401
-		else:
-    #return database bad
+		else: #return database bad
 			return jsonify({'msg': 'The database is down!!!'}),504
-	else:
-    #return server is fxck
+	else: #return server is fxck
 		return jsonify({'msg':'Server is not avaliable'}),400
 
+
+@auth_bp.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
 #---------------------------------------- Session status-------------------------------------------
 @auth_bp.route('/sessioncheck',methods=['POST'])
 def something():
@@ -79,13 +80,13 @@ def something():
 @auth_bp.route('/register', methods=['POST'])
 def register():
     new_user = request.get_json() # store the json body request
+    user_id = str(uuid.uuid4())
     #below code literally check for juse username but who will check different password? aren't that leak already?
 		# bro who on earth check password of the similar name person? and if so isn't that we leak the info of account
 		# that have the same name???
     doc = usercollection.find_one({"username": new_user["username"]}) # check if user exist like
     #after checking logic
     if not doc:#pass
-            # Add user ID to the new user data
         new_user['user_id'] = user_id
         usercollection.insert_one(new_user)
         return jsonify({'msg': 'User created successfully'}), 201

@@ -97,13 +97,32 @@ def receiveinput(text):
 
 #run test
 def receiveinputtest():
-   set_text = sentence
+   set_text = segment_text((sentence))
    storea = []
+   counta = 0
+
    for i in range(len(set_text)):
       storea.append(select_headline(set_text[i]))
-   print(storea)
+
+   lenj = len(storea) +1
+
+   for i in range(len(storea)):
+      for j in range(lenj):
+          if storea[i] == None:
+              a = storea[j-1]
+              storea[j-1] = storea[i]
+              storea[i] = a
+
+   for i in range(len(storea)):
+       if storea[i] == None:
+           counta += 1
+   for i in range(counta):
+       storea.pop(0)
+   
    print("------")
+   print(storea)
+   print(counta)
    return storea
 #test
 # receiveinput(input("type here :"))
-# receiveinputtest(sentence)
+receiveinputtest()

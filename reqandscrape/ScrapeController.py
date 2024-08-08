@@ -1,7 +1,7 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
-from reqandscrape.requestsender.chatgptreqsender import receiveinput
+from reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
 from reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon
 from reqandscrape.scrape.PWRAZscrape import search_review
 from comparesys.CompareController import compare
@@ -27,19 +27,6 @@ search_bp = Blueprint('search', __name__)
 
 #-------------------------------------import and setpu stuff ---------------------------------------
 
-
-
-#--------------------------------------------criteria sender Part--------------------------------------------
-
-@search_bp.route('/compare_test', methods=['POST'])
-def search_criteria_sender():
-	response = request.get_json() # store the json body request
-	inputa = response['search_input']
-	response = compare(inputa)
-	print(inputa)
-	return response
-
-
 #--------------------------------------------search Prod sender Part--------------------------------------------
 @search_bp.route('/search_prod', methods=['POST'])
 def search_prod_sender():
@@ -49,9 +36,26 @@ def search_prod_sender():
 	return response
 
 #--------------------------------------------search Review sender Part--------------------------------------------@search_bp.route('/search_prod', methods=['POST'])
-@search_bp.route('/search_review', methods=['POST'])
-def search_review_sender():
+@search_bp.route('/search_prod_review', methods=['POST'])
+def search_prod_review_sender():
 	response = request.get_json() # store the json body request
 	inputa = response['search']
 	response = search_review(inputa)
+	return response
+
+
+#--------------------------------------------search test sender Part--------------------------------------------
+@search_bp.route('/search_criteria_test', methods=['POST'])
+def search_criteria_test_sender():
+	a = receiveinputtest()
+	response = a
+	return response
+
+#--------------------------------------------search criteria sender Part--------------------------------------------
+@search_bp.route('/search_criteria', methods=['POST'])
+def search_criteria_sender():
+
+	response = request.get_json() # store the json body request
+	inputa = response['search']
+	response = receiveinput(inputa)
 	return response

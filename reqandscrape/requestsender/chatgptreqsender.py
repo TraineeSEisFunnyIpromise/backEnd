@@ -96,8 +96,8 @@ def receiveinput(text):
    return storea
 
 #run test
-def receiveinputtest(text):
-   set_text = segment_text(text)
+def receiveinputtest():
+   set_text = sentence
    storea = []
    for i in range(len(set_text)):
       storea.append(select_headline(set_text[i]))

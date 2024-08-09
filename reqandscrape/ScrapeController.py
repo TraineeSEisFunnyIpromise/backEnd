@@ -56,6 +56,7 @@ def search_criteria_test_sender():
 def search_criteria_sender():
 
 	response = request.get_json() # store the json body request
-	inputa = response['search']
-	response = receiveinput(inputa)
+	inputsearch = response['searchData']
+	inputpeople = response['usertargetData']
+	response = receiveinput(inputsearch,inputpeople)
 	return response

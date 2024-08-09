@@ -22,8 +22,9 @@ import json
 import os
 
 openai_api_key = ""
+openai_api_key2 = ""
 
-def change_data(input):
+def change_data(input,group_target):
 	if openai_api_key is None:
 		raise ValueError("OpenAI API key is not set in environment variables.")
 
@@ -37,15 +38,18 @@ def change_data(input):
 	"model": "gpt-3.5-turbo",
 	"messages": [
 		{
-		"role": "system",
+		"role": "system", 
 		"content": "You are a helpful assistant."
 		},
 		{
 		"role": "user",
-		"content": "could you become an expert according to this input?"+input+"and after that give me a critiria limit 5 critiria"
+		"content": "could you provide a criteria list according to the product? "
+		+"the product"+input + "and for this group of people "+"group target : " + group_target
 		}
 	]
 	}
+    
+
 	response = requests.post(url, headers=headers, json=data)
 	# Check if the request was successful
 	if response.status_code == 200:
@@ -57,52 +61,123 @@ def change_data(input):
 		print("Error:", response.status_code, response.text)
 	return response.json()['choices'][0]['message']['content']
 
-def select_headline(text):
-  match = re.search(r"(.*):\s+(\w+)", text)  # Matches text followed by ":" and a word
-  if match:
-    return match.group(1) + ":"  # Captures group 1 (text before ":") and adds ":"
-  else:
-    return None  # Return None if no match
+
+#check word by chatGPT 55555555555555+
+def check_input_word(input,group_target):
+	if openai_api_key is None:
+		raise ValueError("OpenAI API key is not set in environment variables.")
+
+	url = "https://api.openai.com/v1/chat/completions"
+
+	headers = {
+	"Content-Type": "application/json",
+	"Authorization": f"Bearer {openai_api_key2}"
+	}
+	data = {
+	"model": "gpt-3.5-turbo",
+		"messages": [
+			{
+			"role": "system",
+			"content": "You are a helpful assistant."
+			},
+			{
+			"role": "user",
+			"content": """could you check that input product 
+			is it related to electric device or not and determine an input
+			is relevant to any of these categories: 
+			"1. Occupation: e.g., teacher, engineer, nurse, student\n"
+      "2. Age Group: e.g., child, teenager, young adult, adult, senior\n"
+      "3. Wealth Status: e.g., low income, middle income, high income\n\n".
+			please answer in true or false only : """ + "group target : " + group_target + "product target : "+ input
+			}
+		]
+	}
+	response = requests.post(url, headers=headers, json=data)
+	# Check if the request was successful
+	if response.status_code == 200:
+		print("------------------------------------------")
+		print('\n')
+		print(response.json()['choices'][0]['message']['content'])
+	else:
+		print("Error:", response.status_code, response.text)
+	return response.json()['choices'][0]['message']['content']
 
 
-def segment_text(text):
-  segments = re.split(r"\.", text)  # Split at "."
-  return segments
 
-def segment_semi(text):
-   storea = []
-   for i in range(len(text)):
-      storea.append(select_headline(text[i]))
-   print(storea)
-   print("------")
-   return storea
+def extract_criteria(text):
+    # Split the text by lines
+    lines = text.strip().split('\n')
+    
+    # Initialize arrays to store headings and details
+    headings = []
 
-def cutthatnull(text):
-   storea = []
-   for i in range(len(text)):
-      storea.append(select_headline(text[i]))
-   print(storea)
-   print("------")
-   return storea
+    for line in lines:
+        # Split the line at the first ":"
+        parts = line.split(":", 1)
+        if len(parts) == 2:
+            heading = parts[0].strip()
+            headings.append(heading)
+    return headings
+
+def pick_numbered_headlines(input_list):
+    # Initialize an empty list to store the filtered headlines
+    numbered_headlines = []
+
+    # Iterate through each item in the input list
+    for item in input_list:
+        # Check if the item starts with a number followed by a period
+        if item.strip().split('.')[0].isdigit():
+            # If it matches the condition, add it to the list of numbered headlines
+            numbered_headlines.append(item.strip())
+
+    return numbered_headlines
 
 #what will use
-def receiveinput(text):
-   set_text = segment_text(change_data(text))
-   storea = []
-   for i in range(len(set_text)):
-      storea.append(select_headline(set_text[i]))
-   print(storea)
-   print("------")
-   return storea
+def receiveinput(input_text,group_target):
+	storea = []
+	counta = 0
+	print("---------------------raw input----------------------")
+	print(input_text)
+	#check word 
+	if str.lower(check_input_word(input_text,group_target)) == "true":
+		print("---------------------setup input----------------------")
+		set_text = extract_criteria(change_data(input_text,group_target))
+		print(set_text)
+		print("----------------------------------------------------")
+
+		for i in range(len(set_text)):
+				storea.append((set_text[i]))
+
+		lenj = len(storea) +1
+
+		for i in range(len(storea)):
+				for j in range(lenj):
+						if storea[i] == None:
+								a = storea[j-1]
+								storea[j-1] = storea[i]
+								storea[i] = a
+		#remove None Value
+		for i in range(len(storea)):
+				if storea[i] == None:
+						counta += 1
+		for i in range(counta):
+				storea.pop(0)
+		pick_numbered_headlines(storea)
+
+		print("------")
+		print(storea)
+		return storea
+	else:
+		return "Invalid input"
 
 #run test
 def receiveinputtest():
-   set_text = segment_text((sentence))
+   set_text = extract_criteria((sentence))
    storea = []
    counta = 0
 
    for i in range(len(set_text)):
-      storea.append(select_headline(set_text[i]))
+      storea.append((set_text[i]))
 
    lenj = len(storea) +1
 
@@ -121,8 +196,8 @@ def receiveinputtest():
    
    print("------")
    print(storea)
-   print(counta)
    return storea
 #test
-# receiveinput(input("type here :"))
-receiveinputtest()
+# receiveinput("electric fan","student")
+# receiveinputtest()
+# check_input_word("electric fan","student")

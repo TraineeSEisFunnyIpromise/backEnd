@@ -1,10 +1,3 @@
-from openai import OpenAI
-import re
-import requests
-import json
-import os
-
-
 
 sentence = """Capacity: Do you usually toast for one or two people? Standard toasters have 2 slices, but wider models can handle 4.
 Slot size: Consider what types of bread you toast. If you like bagels or thick Texas toast, wider slots are a must. Long slots are handy for long slices of bread.
@@ -141,7 +134,9 @@ def receiveinput(input_text,group_target):
 	#check word 
 	if str.lower(check_input_word(input_text,group_target)) == "true":
 		print("---------------------setup input----------------------")
-		set_text = extract_criteria(change_data(input_text,group_target))
+		#what is goin on here is search -> extract criteria -> remove any headline that aren't 
+		#number included
+		set_text = pick_numbered_headlines(extract_criteria(change_data(input_text,group_target)))
 		print(set_text)
 		print("----------------------------------------------------")
 
@@ -163,6 +158,7 @@ def receiveinput(input_text,group_target):
 		for i in range(counta):
 				storea.pop(0)
 		pick_numbered_headlines(storea)
+
 
 		print("------")
 		print(storea)
@@ -193,10 +189,19 @@ def receiveinputtest():
            counta += 1
    for i in range(counta):
        storea.pop(0)
-   
+
+#save in csv for individual testing 
+   filename = 'test1_search_criteria.csv'
+   print("Jsoning data")
+   data_json = json.dumps(storea)
+   with open(filename, "w") as outfile:
+      outfile.write(data_json)
+
    print("------")
    print(storea)
    return storea
+
+
 #test
 # receiveinput("electric fan","student")
 # receiveinputtest()

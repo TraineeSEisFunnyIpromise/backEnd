@@ -1,39 +1,35 @@
 import asyncio
 from playwright.async_api import async_playwright
+from Review_scraper.PWRAZscrape import search_review
+
+from URLcleaner import urlcleaner
 import csv
 import json
-URL = "https://www.shopee.com/search?keyword="
-
-async def scrape_amazon(search_term):
+URL = "https://www.amazon.com/s?k="
+async def scrape_amazon(search_term, search_group):
     async with async_playwright() as p:
-        browser = await p.chromium.connect_over_cdp("@brd.superproxy.io:9222")
-        print("Connected to browser...")
-        print("Sending requests via residential proxies...")
+        if search_group != '':
+            search = search_term + " for " + search_group
 
-        # Create a new page
+        browser = await p.chromium.connect_over_cdp("u@brd.superproxy.io:9222")
         page = await browser.new_page()
-        page.set_default_navigation_timeout(2 * 60 * 1000)
+        await page.goto(URL)
 
-        # Go to Amazon.com
-        await page.goto(URL, wait_until="domcontentloaded")
-        print("Navigated to home page")
-        await page.wait_for_selector("#twotabsearchtextbox", timeout=30000)
-
-        # Type a search term in the search input
-        print("Search phrase")
-        await page.fill("#twotabsearchtextbox", search_term)
-        print("Entered search term")
+        # Enter search term and get product data
+        await page.fill("#twotabsearchtextbox", search)
         await page.press("#twotabsearchtextbox", "Enter")
+        await page.wait_for_selector(".s-card-container")
+        products = await parse_results(page)
 
-        # Wait for the products to load
-        await page.wait_for_selector(".s-card-container", timeout=30000)
-        print("Products loaded, parsing...")
+        # For each product, scrape reviews and add them to the product data
+        for product in products:
+            asin = urlcleaner(product["url"])  # Function to extract ASIN from URL
+            reviews = await search_review(asin)  # Scrape reviews using your review scraping function
+            product["reviews"] = reviews  # Add reviews to the product data
 
-        data = await parse_results(page)
-        save_data(data)
-
+        # Save the combined data
+        await save_data(products)
         await browser.close()
-        return data
 
 
 async def parse_results(page):
@@ -43,48 +39,28 @@ async def parse_results(page):
                 url: el.querySelector("a")?.getAttribute("href"),
                 title: el.querySelector("h2 span")?.innerText,
                 price: el.querySelector(".a-price > .a-offscreen")?.innerText,
+                rating: el.querySelector(".a-icon-alt")?.innerText,
             };
         });
     }''')
 
 async def save_data(data):
-    
-        filename = 'test1.csv'
+        filename = 'test10.csv'
         print("Jsoning data")
         data_json = json.dumps(data)
         count = 0
         for item in data:
             count += 1
             #finding URL, Title and Price
-            print(f"Found product: {item['url'],item['title']}, {item['price']}")
+            print(f"Found product: {item['url'],item['title']}, {item['price']}, {item['rating']}")
             print('Response Code: ',)
             print('Response Scraped Body: ', data_json)
             with open(filename, "w") as outfile:
                 outfile.write(data_json)
 
-async def save_scrape_data(data):
-        print("Jsoning data")
-        data_json = json.dumps(data)
-        response_data = []
-        count = 0
-        for item in data:
-            count += 1
-            #finding URL, Title and Price
-            response_data = item['url'],item['title'], item['price']
-        return response_data
-
-async def save_scrape_test_data():
-        data = ""
-        data_json = json.dumps(data)
-        response_data = []
-        count = 0
-        for item in data_json:
-            count += 1
-            #finding URL, Title and Price
-            response_data = item['url'],item['title'], item['price']
-        return response_data
-
 # when want to use it independently
 # search_term = input("Please type some input: ")
+# from reqandscrape.requestsender.chatgptreqsender import receiveinput
+# search_term = "electic fan for student "
 # asyncio.run(scrape_amazon(search_term))
 

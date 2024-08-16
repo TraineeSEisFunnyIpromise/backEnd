@@ -1,8 +1,8 @@
 from flask import Flask
 from account.Authentication import auth_bp  # Import the blueprint
 from account.userinfo import userinformation_bp
-from reqandscrape.ScrapeController import search_bp
-from comparesys.CompareController import compare_bp
+from Reqandscrape.ScrapeController import search_bp
+# from comparesys.CompareController import compare_bp
 from flask_session import Session
 from flask_cors import CORS
 

@@ -4,7 +4,7 @@ from flask_session import Session
 from flask_cors import CORS
 from pymongo import MongoClient
 from comparesys.comparefile.compare_text import search_pattern
-from reqandscrape.requestsender.chatgptreqsender import receiveinput
+from Reqandscrape.Requestsender.chatgptreqsender import receiveinput
 from functools import wraps
 #time stuff
 from datetime import datetime, timedelta
@@ -39,17 +39,19 @@ def login():
 	usernameA = login_details['username']
 	passA = login_details['password']
 # check if user exist
-	print(login_details)
+	# print(login_details)
 	user_from_db = usercollection.find_one({"username": login_details["username"]}) 
-	print(user_from_db)
-	user_from_db_print_test = usercollection.find_one({"username": "admin"}) 
-	print(user_from_db_print_test)
+	# print(user_from_db)
+	# user_from_db_print_test = usercollection.find_one({"username": "admin"}) 
+	# print(user_from_db_print_test)
 # man i hate how it look down here
 	if user_from_db:
   #process to check mongodb server with boolean didn't know python could just pull that move
 		if bool(is_mongodb_available()) != False:
                   
 			if (passA == user_from_db['password']):
+				session['username'] = usernameA  # Store the username in the session
+				print(f"Session after login: {session}")
 				encrypted_username = usernameA
 				# user_from_db['user_id']= session  # Store user ID in session
 				print(session)

@@ -3,7 +3,6 @@ from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
 from account.Authentication import yeetusername
-from reqandscrape.requestsender.chatgptreqsender import receiveinput
 
 from functools import wraps
 #time stuff
@@ -55,18 +54,33 @@ def update():
 
 @userinformation_bp.route('/Information', methods=['POST'])
 def userinfo():
-	# user_id = usercollection.find_one({"user_id": encrypted_username}) 
-	user = usercollection.find_one(yeetusername())  
-	print(user)
-	if user:
-		 #this should be session check ut meh
-		if user:
-		# Return user data (excluding sensitive information)
-			return jsonify({'username': user['username'], 'about': user['about']})  # Example
-		else:
-			return jsonify({'error': 'User not found'}), 404
-	else:
-		return jsonify({'error': 'Unauthorized'}), 401
+	    # Check if the user is logged in by verifying the session
+    if 'username' in session:
+        username = session['username']
+        
+        # Find the user in the database using the username from the session
+        user = usercollection.find_one({"username": username})
+        
+        if user:
+            # Return user data (excluding sensitive information)
+            return jsonify({'username': user['username'], 'about': user.get('about', 'No information available')}), 200
+        else:
+            return jsonify({'error': 'User not found'}), 404
+    else:
+        # User is not logged in or session has expired
+        return jsonify({'error': 'Unauthorized'}), 401
+	# # user_id = usercollection.find_one({"user_id": encrypted_username}) 
+	# user = usercollection.find_one(yeetusername())  
+	# print(user)
+	# if user:
+	# 	 #this should be session check ut meh
+	# 	if user:
+	# 	# Return user data (excluding sensitive information)
+	# 		return jsonify({'username': user['username'], 'about': user['about']})  # Example
+	# 	else:
+	# 		return jsonify({'error': 'User not found'}), 404
+	# else:
+	# 	return jsonify({'error': 'Unauthorized'}), 401
 
 @userinformation_bp.route('/Information_test', methods=['POST'])
 def userinfo_test():

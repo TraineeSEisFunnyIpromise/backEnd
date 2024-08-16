@@ -1,10 +1,8 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
-from reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
-from reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon
-from reqandscrape.scrape.PWRAZscrape import search_review
-from comparesys.CompareController import compare
+from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
+from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app
@@ -25,30 +23,18 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 300
 
 search_bp = Blueprint('search', __name__)
 
-#-------------------------------------import and setpu stuff ---------------------------------------
+#-------------------------------------import and setup stuff ---------------------------------------
 
 #--------------------------------------------search Prod sender Part--------------------------------------------
 @search_bp.route('/search_prod', methods=['POST'])
 def search_prod_sender():
 	response = request.get_json() # store the json body request
-	inputa = response['search']
-	response = scrape_amazon(inputa)
-	return response
-
-#--------------------------------------------search Review sender Part--------------------------------------------@search_bp.route('/search_prod', methods=['POST'])
-@search_bp.route('/search_prod_review', methods=['POST'])
-def search_prod_review_sender():
-	response = request.get_json() # store the json body request
-	inputa = response['search']
-	response = search_review(inputa)
-	return response
-
-
-#--------------------------------------------search test sender Part--------------------------------------------
-@search_bp.route('/search_criteria_test', methods=['POST'])
-def search_criteria_test_sender():
-	a = receiveinputtest()
-	response = a
+	inputsearch = response['searchData'] 
+	inputpeople = response['usertargetData']
+	response = scrape_amazon(inputsearch,inputpeople)
+	if session==True:
+		target_user = usercollection.find(session['username'])
+		usercollection[target_user].insert({"productdata":response})
 	return response
 
 #--------------------------------------------search criteria sender Part--------------------------------------------
@@ -59,4 +45,22 @@ def search_criteria_sender():
 	inputsearch = response['searchData']
 	inputpeople = response['usertargetData']
 	response = receiveinput(inputsearch,inputpeople)
+	if session==True:
+		target_user = usercollection.find(session['username'])
+		usercollection[target_user].insert({"criteria":response})
 	return response
+
+#--------------------------------------------search test  Part--------------------------------------------
+@search_bp.route('/search_criteria_test', methods=['POST'])
+def search_criteria_test_sender():
+	a = receiveinputtest()
+	response = a
+	return response
+
+@search_bp.route('/search_prod_test', methods=['POST'])
+def search_prod_sender():
+	response = request.get_json() # store the json body request
+	inputa = response['search']
+	response = scrape_amazon(search_criteria_test_sender)
+	return response
+

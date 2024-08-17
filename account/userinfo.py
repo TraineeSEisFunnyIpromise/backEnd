@@ -35,7 +35,7 @@ def sessioncheck():
 			now = datetime.utcnow
 			duration_left = session_start_time + timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME']) - now
 			response = username + "  " + duration_left
-			return response
+			return jsonify(response)
 
 #----------------------------------------User info part--------------------------------------------
 @userinformation_bp.route('/Update', methods=['POST'])

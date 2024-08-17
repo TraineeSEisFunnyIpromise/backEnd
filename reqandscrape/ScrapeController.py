@@ -35,7 +35,7 @@ def search_prod_sender():
 	if session==True:
 		target_user = usercollection.find(session['username'])
 		usercollection[target_user].insert({"productdata":response})
-	return response
+	return jsonify(response)
 
 #--------------------------------------------search criteria sender Part--------------------------------------------
 @search_bp.route('/search_criteria', methods=['POST'])
@@ -48,19 +48,19 @@ def search_criteria_sender():
 	if session==True:
 		target_user = usercollection.find(session['username'])
 		usercollection[target_user].insert({"criteria":response})
-	return response
+	return jsonify(response)
 
 #--------------------------------------------search test  Part--------------------------------------------
 @search_bp.route('/search_criteria_test', methods=['POST'])
 def search_criteria_test_sender():
 	a = receiveinputtest()
 	response = a
-	return response
+	return jsonify(response)
 
 @search_bp.route('/search_prod_test', methods=['POST'])
 def search_prod_sender_test():
 	response = request.get_json() # store the json body request
 	inputa = response['search']
-	response = scrape_amazon(search_criteria_test_sender)
-	return response
+	response = "Hit on prod"
+	return jsonify(response)
 

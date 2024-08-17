@@ -3,7 +3,7 @@ version: '3.7'
 services:
     mongodb:
         image: mongo:latest
-        container_name: Database2
+        container_name: Database1
         restart: always
         environment:
             MONGO_INITDB_DATABASE: db1

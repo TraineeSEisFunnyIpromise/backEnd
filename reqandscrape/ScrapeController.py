@@ -29,8 +29,11 @@ search_bp = Blueprint('search', __name__)
 @search_bp.route('/search_prod', methods=['POST'])
 def search_prod_sender():
 	response = request.get_json() # store the json body request
-	inputsearch = response['searchData'] 
-	inputpeople = response['usertargetData']
+	#format data
+	print(response)
+	inputsearch = response[1] 
+	inputpeople = response[0]
+	print(inputpeople,inputsearch)
 	response = scrape_amazon(inputsearch,inputpeople)
 	if session==True:
 		target_user = usercollection.find(session['username'])
@@ -42,8 +45,9 @@ def search_prod_sender():
 def search_criteria_sender():
 
 	response = request.get_json() # store the json body request
-	inputsearch = response['searchData']
-	inputpeople = response['usertargetData']
+	inputsearch = response[1] 
+	inputpeople = response[0]
+	print(inputpeople,inputsearch)
 	response = receiveinput(inputsearch,inputpeople)
 	if session==True:
 		target_user = usercollection.find(session['username'])
@@ -53,9 +57,10 @@ def search_criteria_sender():
 #--------------------------------------------search test  Part--------------------------------------------
 @search_bp.route('/search_criteria_test', methods=['POST'])
 def search_criteria_test_sender():
+	response = request.get_json() # store the json body request
 	a = receiveinputtest()
-	response = a
-	return jsonify(response)
+	print(response)
+	return jsonify(a)
 
 @search_bp.route('/search_prod_test', methods=['POST'])
 def search_prod_sender_test():

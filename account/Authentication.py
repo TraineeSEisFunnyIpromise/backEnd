@@ -16,7 +16,7 @@ client = MongoClient('mongodb://localhost:6000')
 db = client['Database2']
 usercollection = db['db1']
 # enable CORS
-# CORS(app, resources={r'/*': {'origins': '*'}})
+CORS(app, resources={r'/*': {'origins': '*'}})
 #JWT import
 # Configure secret key for session signing (important for security)
 app.config['SECRET_KEY'] = 'your_secret_key'

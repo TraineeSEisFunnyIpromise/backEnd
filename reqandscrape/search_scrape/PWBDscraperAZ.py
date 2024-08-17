@@ -12,7 +12,7 @@ async def scrape_amazon(search_term, search_group):
         if search_group != '':
             search = search_term + " for " + search_group
 
-        browser = await p.chromium.connect_over_cdp("u@brd.superproxy.io:9222")
+        browser = await p.chromium.connect_over_cdp("@brd.superproxy.io:9222")
         page = await browser.new_page()
         await page.goto(URL)
 
@@ -23,10 +23,11 @@ async def scrape_amazon(search_term, search_group):
         products = await parse_results(page)
 
         # For each product, scrape reviews and add them to the product data
-        for product in products:
+        for idx, product in enumerate(products):
             asin = urlcleaner(product["url"])  # Function to extract ASIN from URL
             reviews = await search_review(asin)  # Scrape reviews using your review scraping function
             product["reviews"] = reviews  # Add reviews to the product data
+            product["id"] = idx + 1  # Add a unique id to each product
 
         # Save the combined data
         await save_data(products)

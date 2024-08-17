@@ -58,7 +58,7 @@ def search_criteria_test_sender():
 	return response
 
 @search_bp.route('/search_prod_test', methods=['POST'])
-def search_prod_sender():
+def search_prod_sender_test():
 	response = request.get_json() # store the json body request
 	inputa = response['search']
 	response = scrape_amazon(search_criteria_test_sender)

@@ -2,7 +2,6 @@ from flask import Flask
 from account.Authentication import auth_bp  # Import the blueprint
 from account.userinfo import userinformation_bp
 from Reqandscrape.ScrapeController import search_bp
-# from comparesys.CompareController import compare_bp
 from flask_session import Session
 from flask_cors import CORS
 
@@ -19,7 +18,6 @@ Session(app)
 app.register_blueprint(auth_bp, url_prefix=('/auth'))
 app.register_blueprint(userinformation_bp, url_prefix='/userinfo')
 app.register_blueprint(search_bp, url_prefix='/search')
-# app.register_blueprint(compare_bp, url_prefix='/compare')
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 # Your other application routes and logic here

@@ -3,6 +3,7 @@ from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
 from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon
+from Reqandscrape.zeroshotclassify import compare_prod,compare_test
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app
@@ -53,6 +54,20 @@ def search_criteria_sender():
 		target_user = usercollection.find(session['username'])
 		usercollection[target_user].insert({"criteria":response})
 	return jsonify(response)
+
+#--------------------------------------------search criteria sender Part--------------------------------------------
+@search_bp.route('/critandprod', methods=['POST'])
+def zeroshotstuff():
+
+	response = request.get_json() # store the json body request
+	inputdata = response[1] 
+	inputcriteria = response[0]
+	result = compare_test()
+	# result = compare_prod(inputdata,inputcriteria)
+	# if session==True:
+	# 	target_user = usercollection.find(session['username'])
+	# 	usercollection[target_user].insert({"zeroshoted":result})
+	return jsonify(result)
 
 #--------------------------------------------search test  Part--------------------------------------------
 @search_bp.route('/search_criteria_test', methods=['POST'])

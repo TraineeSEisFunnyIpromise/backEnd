@@ -3,7 +3,7 @@ from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
 from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon
-from Reqandscrape.zeroshotclassify import compare_prod,compare_test
+from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app
@@ -56,13 +56,15 @@ def search_criteria_sender():
 	return jsonify(response)
 
 #--------------------------------------------search criteria sender Part--------------------------------------------
+
+
 @search_bp.route('/critandprod', methods=['POST'])
 def zeroshotstuff():
 
 	response = request.get_json() # store the json body request
 	inputdata = response[1] 
 	inputcriteria = response[0]
-	result = compare_test()
+	result = calculate_the_zeroshot(inputdata,inputcriteria)
 	# result = compare_prod(inputdata,inputcriteria)
 	# if session==True:
 	# 	target_user = usercollection.find(session['username'])
@@ -80,7 +82,12 @@ def search_criteria_test_sender():
 @search_bp.route('/search_prod_test', methods=['POST'])
 def search_prod_sender_test():
 	response = request.get_json() # store the json body request
-	inputa = response['search']
-	response = "Hit on prod"
+	inputa = response[0]
+	response = open("resultscraper\_response_az_content.txt", 'r')
 	return jsonify(response)
 
+@search_bp.route('/critandprod_test', methods=['POST'])
+def zeroshotstuff_test():
+	result = calculate_the_zeroshot_test()
+	print(result)
+	return jsonify(result)

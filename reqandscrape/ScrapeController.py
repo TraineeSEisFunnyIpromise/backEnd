@@ -3,9 +3,12 @@ from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
 from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon
+from Reqandscrape.Search_scrape.URLcleaner import urlcleaner
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
 #time stuff
+from flask_cors import CORS
 from datetime import datetime, timedelta
+import json
 # instantiate the app
 app = Flask(__name__)
 
@@ -13,7 +16,7 @@ client = MongoClient('mongodb://localhost:27017')
 db = client['Database1']
 usercollection = db['DB1']
 # enable CORS
-# CORS(app, resources={r'/*': {'origins': '*'}})
+CORS(app, resources={r'/*': {'origins': '*'}})
 #JWT import
 # Configure secret key for session signing (important for security)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -83,7 +86,12 @@ def search_criteria_test_sender():
 def search_prod_sender_test():
 	response = request.get_json() # store the json body request
 	inputa = response[0]
-	response = open("resultscraper\_response_az_content.txt", 'r')
+	response = json_data_mock()
+	for idx, product in enumerate(response):
+			asin = urlcleaner(product["url"])  # Function to extract ASIN from URL
+			reviews = "sample review"  # Scrape reviews mock up
+			product["reviews"] = reviews  # Add reviews to the product data
+			product["id"] = idx + 1  # Add a unique id to each product
 	return jsonify(response)
 
 @search_bp.route('/critandprod_test', methods=['POST'])
@@ -91,3 +99,10 @@ def zeroshotstuff_test():
 	result = calculate_the_zeroshot_test()
 	print(result)
 	return jsonify(result)
+
+# Load the JSON data
+def json_data_mock():
+	input_file= "Reqandscrape\sample.json"
+	with open(input_file, encoding="utf-8") as json_file:
+		parsed_json = json.load(json_file)
+	return parsed_json

@@ -33,6 +33,10 @@ async def scrape_amazon(search_term, search_group):
         await save_data(products)
         await browser.close()
 
+#-------------------after this line it all about the function that use above-------
+
+#note this should create a seperate file but for some reason it can't find the file that contain
+#the fuction but this function consume too much time than it should soo.....brute force style
 
 async def parse_results(page):
     return await page.evaluate('''() => {
@@ -127,6 +131,7 @@ async def perform_request_with_retry(page, link):
                 raise Exception("Request timed out after multiple retries")
             await asyncio.sleep(random.uniform(1, 5))
 
+#---------extract review like scraped it-------------------
 async def extract_reviews(page):
     reviews = []
     while True:
@@ -145,6 +150,7 @@ async def extract_reviews(page):
         await next_page_button.click()
     return reviews
 
+#--------------the function that use all review task and combine to one-------------------
 async def search_review(asin):
     async with async_playwright() as p:
         browser = await p.chromium.connect_over_cdp("@brd.superproxy.io:9222")
@@ -159,8 +165,8 @@ async def search_review(asin):
         await page.close()
         await context.close()
         await browser.close()
-
         return reviews
+
 
 # when want to use it independently
 # search_term = input("Please type some input: ")

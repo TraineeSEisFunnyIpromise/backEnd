@@ -12,7 +12,7 @@ import uuid
 app = Flask(__name__)
 
 client = MongoClient('mongodb://localhost:6000')
-db = client['Database2']
+db = client['Database1']
 usercollection = db['db1']
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})

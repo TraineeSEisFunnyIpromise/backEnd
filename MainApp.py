@@ -6,6 +6,7 @@ from flask_session import Session
 from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r'/*': {'origins': '*'}})
 # Initialize Flask-Session
 # Configure Flask-Session (replace with your secret key)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -19,7 +20,7 @@ app.register_blueprint(auth_bp, url_prefix=('/auth'))
 app.register_blueprint(userinformation_bp, url_prefix='/userinfo')
 app.register_blueprint(search_bp, url_prefix='/search')
 # enable CORS
-CORS(app, resources={r'/*': {'origins': '*'}})
+
 # Your other application routes and logic here
 
 if __name__ == '__main__':

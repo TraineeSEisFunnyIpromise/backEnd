@@ -5,14 +5,24 @@ from playwright.async_api import async_playwright
 import regex as re
 import csv
 import json
+#inport file for cors
+from flask import Flask
+from flask_cors import CORS
+# instantiate the app
+app = Flask(__name__)
+# enable CORS
+CORS(app, resources={r'/*': {'origins': '*'}})
 #----------------------finding prod--------------------------------
 URL = "https://www.amazon.com/s?k="
+proxy_url = "http://localhost:3000/"
+bright_data_key = ""
+
 async def scrape_amazon(search_term, search_group):
     async with async_playwright() as p:
         if search_group != '':
             search = search_term + " for " + search_group
 
-        browser = await p.chromium.connect_over_cdp("@brd.superproxy.io:9222")
+        browser = await p.chromium.connect_over_cdp(bright_data_key)
         page = await browser.new_page()
         await page.goto(URL)
 
@@ -120,8 +130,10 @@ async def save_reviews_to_csv(reviews, filename='amazon_product_reviews.csv'):
 async def perform_request_with_retry(page, link):
     MAX_RETRIES = 5
     retry_count = 0
+
     while retry_count < MAX_RETRIES:
         try:
+            # Use the proxy URL
             await page.goto(link)
             break
         except Exception as e:
@@ -153,7 +165,7 @@ async def extract_reviews(page):
 #--------------the function that use all review task and combine to one-------------------
 async def search_review(asin):
     async with async_playwright() as p:
-        browser = await p.chromium.connect_over_cdp("@brd.superproxy.io:9222")
+        browser = await p.chromium.connect_over_cdp(bright_data_key)
         context = await browser.new_context()
         page = await context.new_page()
 
@@ -167,6 +179,32 @@ async def search_review(asin):
         await browser.close()
         return reviews
 
+#----test----
+async def search_review_test():
+    async with async_playwright() as p:
+        # browser = await p.chromium.connect_over_cdp(bright_data_key)
+        # context = await browser.new_context()
+        # page = await context.new_page()
+
+        # target_url = f"https://www.amazon.com/dp/{asin}"
+        # await perform_request_with_retry(page, target_url,proxy_url)
+        # reviews = await extract_reviews(page)
+        # await save_reviews_to_csv(reviews)
+
+        # await page.close()
+        # await context.close()
+        # await browser.close()
+        reviews = "test something"
+        return reviews
+def scrape_amazon_noasync(search_term, search_group):
+    result = scrape_amazon(search_term, search_group)
+    return result
+
+def json_data_mock():
+	input_file= "Reqandscrape\sample.json"
+	with open(input_file, encoding="utf-8") as json_file:
+		parsed_json = json.load(json_file)
+	return parsed_json
 
 # when want to use it independently
 # search_term = input("Please type some input: ")

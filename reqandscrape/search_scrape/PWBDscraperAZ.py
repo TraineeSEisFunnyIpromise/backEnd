@@ -4,6 +4,7 @@ from playwright.async_api import async_playwright
 # from URLcleaner import urlcleaner
 import regex as re
 import csv
+import pandas
 import json
 #inport file for cors
 from flask import Flask
@@ -14,12 +15,11 @@ app = Flask(__name__)
 CORS(app, resources={r'/*': {'origins': '*'}})
 #----------------------finding prod--------------------------------
 URL = "https://www.amazon.com/s?k="
-proxy_url = "http://localhost:3000/"
 bright_data_key = ""
 
 async def scrape_amazon(search_term, search_group):
     async with async_playwright() as p:
-        if search_group != '':
+        if (search_group != '' and search_group != None):
             search = search_term + " for " + search_group
 
         browser = await p.chromium.connect_over_cdp(bright_data_key)
@@ -61,18 +61,16 @@ async def parse_results(page):
     }''')
 
 async def save_data(data):
-        filename = 'test10.csv'
+        filename = pd.read_csv('Reqandscrape\Search_scrape\_temporary_save.csv')
         print("Jsoning data")
         data_json = json.dumps(data)
-        count = 0
-        for item in data:
-            count += 1
-            #finding URL, Title and Price
-            print(f"Found product: {item['url'],item['title']}, {item['price']}, {item['rating']}")
-            print('Response Code: ',)
-            print('Response Scraped Body: ', data_json)
-            with open(filename, "w") as outfile:
-                outfile.write(data_json)
+        # Clean data (example: remove duplicates, handle missing values)
+        filename.drop_duplicates()
+        filename.fillna(0, inplace=True)
+
+        print('Response Scraped Body: ', data_json)
+        with open(filename, "w") as outfile:
+            outfile.write(data_json)
 
 #--------------------------URL cleaner---------------------------------------
 
@@ -94,6 +92,7 @@ def urlcleaner(input_file):
                 result.append(asin)
     return result
 #----------------review scraping---------------------
+
 import asyncio
 import random
 import pandas as pd
@@ -123,7 +122,7 @@ async def extract_rating(review_element):
         ratings = "not available"
     return ratings.split()[0]
 
-async def save_reviews_to_csv(reviews, filename='amazon_product_reviews.csv'):
+async def save_reviews_to_csv(reviews, filename='_amazon_product_reviews.csv'):
     data = pd.DataFrame(reviews, columns=['review_title', 'review_body', 'rating'])
     data.to_csv(filename, mode='a', header=False, index=False)
 
@@ -172,7 +171,6 @@ async def search_review(asin):
         target_url = f"https://www.amazon.com/dp/{asin}"
         await perform_request_with_retry(page, target_url)
         reviews = await extract_reviews(page)
-        await save_reviews_to_csv(reviews)
 
         await page.close()
         await context.close()
@@ -196,10 +194,7 @@ async def search_review_test():
         # await browser.close()
         reviews = "test something"
         return reviews
-def scrape_amazon_noasync(search_term, search_group):
-    result = scrape_amazon(search_term, search_group)
-    return result
-
+    
 def json_data_mock():
 	input_file= "Reqandscrape\sample.json"
 	with open(input_file, encoding="utf-8") as json_file:
@@ -211,4 +206,3 @@ def json_data_mock():
 # from reqandscrape.requestsender.chatgptreqsender import receiveinput
 # search_term = "electic fan for student "
 # asyncio.run(scrape_amazon(search_term))
-

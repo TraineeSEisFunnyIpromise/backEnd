@@ -2,9 +2,15 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
-from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon_noasync,json_data_mock
+from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon,search_review_test,json_data_mock
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
 #time stuff
+
+# asyncio and werkzeug
+from werkzeug.wrappers import Request, Response
+from werkzeug.middleware.proxy_fix import ProxyFix
+import asyncio
+#
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import json
@@ -26,22 +32,57 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 300
 
 search_bp = Blueprint('search', __name__)
 
+#----------------------------------- Custom Middleware -----------------------------------
+def cors_middleware(app):
+    @Request.application
+    def middleware(request):
+        if request.method == "OPTIONS":
+            return Response("", status=204, headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization"
+            })
+
+        # Forward the request to the Flask app
+        response = app.full_dispatch_request()
+
+        # Modify the response headers to include CORS headers
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
+
+    return middleware
+
+# Apply the custom middleware
+app.wsgi_app = ProxyFix(cors_middleware(app))
 #-------------------------------------import and setup stuff ---------------------------------------
 
 #--------------------------------------------search Prod sender Part--------------------------------------------
-@search_bp.route('/search_prod', methods=['POST'])
-def search_prod_sender():
-	response = request.get_json() # store the json body request
-	#format data
-	print(response)
-	inputsearch = response[1] 
-	inputpeople = response[0]
-	print(inputpeople,inputsearch)
-	response = scrape_amazon_noasync(inputsearch,inputpeople)
-	if session==True:
-		target_user = usercollection.find(session['username'])
-		usercollection[target_user].insert({"productdata":response})
-	return jsonify(response)
+@search_bp.route('/scrape', methods=['POST'])
+async def scrape():
+    response = request.get_json()  # Store the JSON body request
+    inputsearch = response[1]
+    inputpeople = response[0]
+    results = await scrape_amazon(inputsearch, inputpeople)
+    # results = await search_review_test()
+    # Process scraped results (e.g., convert to JSON, store in database)
+    return jsonify(results)
+
+# @search_bp.route('/search_prod', methods=['POST'])
+# async def scrape(search_term, search_group):
+    # response = request.get_json()  # Store the JSON body request
+    # print(response)
+    # inputsearch = response[1]
+    # inputpeople = response[0]
+    # print(inputpeople, inputsearch)
+    # response = scrape_amazon(inputsearch, inputpeople)
+    # # if session:
+    # #     target_user = usercollection.find_one({"username": session['username']})
+    # #     if target_user:
+    # #         usercollection.update_one({"username": session['username']}, {"$set": {"productdata": response}})
+    # return jsonify(response)
+
 
 #--------------------------------------------search criteria sender Part--------------------------------------------
 @search_bp.route('/search_criteria', methods=['POST'])
@@ -84,8 +125,17 @@ def search_criteria_test_sender():
 def search_prod_sender_test():
 	response = request.get_json() # store the json body request
 	print(response)
-	response = json_data_mock()
+	response = search_review_test
 	return jsonify(response)
+
+@search_bp.route('/scrape_test', methods=['POST'])
+async def scrape_test():
+	response = request.get_json() # store the json body request
+	print(response)
+	# results = await scrape_amazon(inputsearch, inputpeople)
+	results = json_data_mock()
+	# Process scraped results (e.g., convert to JSON, store in database)
+	return jsonify(results)
 
 @search_bp.route('/critandprod_test', methods=['POST'])
 def zeroshotstuff_test():
@@ -96,3 +146,4 @@ def zeroshotstuff_test():
 	return jsonify(result)
 
 # Load the JSON data
+#test section

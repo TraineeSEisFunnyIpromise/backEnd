@@ -16,7 +16,6 @@ import os
 
 openai_api_key = ""
 openai_api_key2 = ""
-
 def change_data(input,group_target):
 	if openai_api_key is None:
 		raise ValueError("OpenAI API key is not set in environment variables.")

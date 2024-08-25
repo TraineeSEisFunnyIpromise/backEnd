@@ -2,10 +2,11 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
-from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon,search_review_test,json_data_mock
+from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon,json_data_mock,search_review_test
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
 #time stuff
-
+#nested asyncio nice
+import nest_asyncio
 # asyncio and werkzeug
 from werkzeug.wrappers import Request, Response
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -31,7 +32,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 300
 
 
 search_bp = Blueprint('search', __name__)
-
+nest_asyncio.apply()
 #----------------------------------- Custom Middleware -----------------------------------
 def cors_middleware(app):
     @Request.application
@@ -59,14 +60,26 @@ app.wsgi_app = ProxyFix(cors_middleware(app))
 #-------------------------------------import and setup stuff ---------------------------------------
 
 #--------------------------------------------search Prod sender Part--------------------------------------------
+
 @search_bp.route('/scrape', methods=['POST'])
 async def scrape():
     response = request.get_json()  # Store the JSON body request
     inputsearch = response[1]
     inputpeople = response[0]
-    results = await scrape_amazon(inputsearch, inputpeople)
-    # results = await search_review_test()
-    # Process scraped results (e.g., convert to JSON, store in database)
+    #(inputsearch,inputpeople)
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:  # No event loop is running
+        loop = None
+
+    if loop and loop.is_running():
+        # If there's a running loop, create a task for the async function
+        task = asyncio.ensure_future(scrape_amazon(inputsearch,inputpeople))
+        results = loop.run_until_complete(task)
+    else:
+        # If no loop is running, use asyncio.run()
+        results = asyncio.run(scrape_amazon(inputsearch,inputpeople))
+
     return jsonify(results)
 
 # @search_bp.route('/search_prod', methods=['POST'])
@@ -125,7 +138,7 @@ def search_criteria_test_sender():
 def search_prod_sender_test():
 	response = request.get_json() # store the json body request
 	print(response)
-	response = search_review_test
+	response = search_review_test()
 	return jsonify(response)
 
 @search_bp.route('/scrape_test', methods=['POST'])

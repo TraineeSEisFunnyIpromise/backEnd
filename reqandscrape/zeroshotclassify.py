@@ -47,7 +47,16 @@ def calculate_the_zeroshot(input_texts, dynamic_labels):
         total_scores[label] = total_scores[label] / len(input_texts)
         print(f"Total score for {label}: {total_scores[label]}")
 
-    return total_scores
+    # Create a list of column headers
+    headers = ["Label", "Score"]
+
+    # Create a list of data rows
+    data = [[label, total_scores[label]] for label in total_scores]
+    return {
+        "columns": headers,
+        "data": data
+        }
+
 
 
 #--------------------------- test input--------------------------

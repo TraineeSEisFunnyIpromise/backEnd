@@ -4,7 +4,7 @@ from playwright.async_api import async_playwright
 # from URLcleaner import urlcleaner
 import regex as re
 import csv
-import pandas
+import pandas as pd
 import json
 #inport file for cors
 from flask import Flask
@@ -14,7 +14,7 @@ app = Flask(__name__)
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 #----------------------finding prod--------------------------------
-URL = "https://www.amazon.com/s?k="
+URL = "https://www.amazon.com"
 bright_data_key = ""
 
 async def scrape_amazon(search_term, search_group):
@@ -24,24 +24,33 @@ async def scrape_amazon(search_term, search_group):
 
         browser = await p.chromium.connect_over_cdp(bright_data_key)
         page = await browser.new_page()
+        # target_URL = URL + re.sub(r"\s+", "+", search)
         await page.goto(URL)
-
+        print("======finding search=====")
         # Enter search term and get product data
+        #twotabsearchtextbox
+        #nav-search-submit-button
         await page.fill("#twotabsearchtextbox", search)
-        await page.press("#twotabsearchtextbox", "Enter")
-        await page.wait_for_selector(".s-card-container")
+        await page.press("#nav-search-submit-button", "Enter")
+        print("=======doing parse=========")
+        #.s-main-slot.s-result-list.s-search-results.sg-row
+        await page.wait_for_selector(".s-widget-container")
         products = await parse_results(page)
-
+        print("======Done parse=====")
         # For each product, scrape reviews and add them to the product data
+        
         for idx, product in enumerate(products):
             asin = urlcleaner(product["url"])  # Function to extract ASIN from URL
             reviews = await search_review(asin)  # Scrape reviews using your review scraping function
             product["reviews"] = reviews  # Add reviews to the product data
             product["id"] = idx + 1  # Add a unique id to each product
-
+        print("======Done review=====")
         # Save the combined data
         await save_data(products)
+        print("======closing headless browser=====")
         await browser.close()
+        print("======sending result=====")
+        return products
 
 #-------------------after this line it all about the function that use above-------
 
@@ -50,7 +59,7 @@ async def scrape_amazon(search_term, search_group):
 
 async def parse_results(page):
     return await page.evaluate('''() => {
-        return Array.from(document.querySelectorAll(".s-card-container")).map(el => {
+        return Array.from(document.querySelectorAll(".s-widget-container")).map(el => {
             return {
                 url: el.querySelector("a")?.getAttribute("href"),
                 title: el.querySelector("h2 span")?.innerText,
@@ -61,7 +70,7 @@ async def parse_results(page):
     }''')
 
 async def save_data(data):
-        filename = pd.read_csv('Reqandscrape\Search_scrape\_temporary_save.csv')
+        filename = pd.read_csv('_temporary_save.csv')
         print("Jsoning data")
         data_json = json.dumps(data)
         # Clean data (example: remove duplicates, handle missing values)
@@ -81,7 +90,9 @@ def is_asin(text):
 def urlcleaner(input_file):
     result = []
     json_object = json.load(input_file)
-    for line in json_object:
+    filtered_lines = [line for line in json_object if line.get("url")]
+
+    for line in filtered_lines:
         url = line.get("url")
         #culling the URL
         asin_match = re.search(r'/[dg]p/([^/?]+)', url, flags=re.IGNORECASE)
@@ -115,6 +126,23 @@ async def extract_review_body(review_element):
         body = "not available"
     return body
 
+async def extract_description_body(review_element):
+    try:#featurebullets_feature_div
+        body = await review_element.evaluate("(element) => element.querySelector('[data-hook=\"featurebullets_feature_div\"]').innerText")
+        body = body.replace("\n", "").strip()
+    except:
+        body = "not available"
+    return body
+
+# #productDetails_feature_div
+async def extract_description_body_extra(review_element):
+    try:#featurebullets_feature_div
+        body = await review_element.evaluate("(element) => element.querySelector('[data-hook=\"productDetails_feature_div\"]').innerText")
+        body = body.replace("\n", "").strip()
+    except:
+        body = "not available"
+    return body
+
 async def extract_rating(review_element):
     try:
         ratings = await review_element.evaluate("(element) => element.querySelector('[data-hook=\"review-star-rating\"]').innerText")
@@ -142,11 +170,20 @@ async def perform_request_with_retry(page, link):
                 raise Exception("Request timed out after multiple retries")
             await asyncio.sleep(random.uniform(1, 5))
 
-#---------extract review like scraped it-------------------
+# #---------extract review like scraped it-------------------
 async def extract_reviews(page):
     reviews = []
     while True:
+        # await page.wait_for_selector("[data-hook='featurebullets_feature_div']")
+        # review_elements = await page.query_selector_all("[data-hook='feature-bullets']")
+        # for review_element in review_elements:
+        #     desctiption_body = extract_description_body()
         await page.wait_for_selector("[data-hook='review']")
+        description_elements = await page.query_selector_all("[data-hook='review']")
+        for description_element in description_elements:
+            rating  = await extract_rating(review_element)
+            reviews.append((review_title, review_body, rating))
+
         review_elements = await page.query_selector_all("[data-hook='review']")
         for review_element in review_elements:
             review_title = await extract_review_title(review_element)
@@ -177,23 +214,15 @@ async def search_review(asin):
         await browser.close()
         return reviews
 
+
+def search_review_test(inputa,inputb):
+    result = "sameple text"
+    return result
+
 #----test----
-async def search_review_test():
-    async with async_playwright() as p:
-        # browser = await p.chromium.connect_over_cdp(bright_data_key)
-        # context = await browser.new_context()
-        # page = await context.new_page()
-
-        # target_url = f"https://www.amazon.com/dp/{asin}"
-        # await perform_request_with_retry(page, target_url,proxy_url)
-        # reviews = await extract_reviews(page)
-        # await save_reviews_to_csv(reviews)
-
-        # await page.close()
-        # await context.close()
-        # await browser.close()
-        reviews = "test something"
-        return reviews
+def noasync_amazonscrape(inputa,inputb):
+    result = scrape_amazon(inputa,inputb)
+    return result
     
 def json_data_mock():
 	input_file= "Reqandscrape\sample.json"
@@ -204,5 +233,3 @@ def json_data_mock():
 # when want to use it independently
 # search_term = input("Please type some input: ")
 # from reqandscrape.requestsender.chatgptreqsender import receiveinput
-# search_term = "electic fan for student "
-# asyncio.run(scrape_amazon(search_term))

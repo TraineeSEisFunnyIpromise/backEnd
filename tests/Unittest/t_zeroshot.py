@@ -1,13 +1,21 @@
 import unittest
 from unittest.mock import AsyncMock
-from Reqandscrape.zeroshotclassify import calculate_the_zeroshot_test
+from Reqandscrape.zeroshotclassify import calculate_the_zeroshot
 # Import your functions
 
 
-class TestReviewExtraction(unittest.TestCase):
+class TestCalculateZeroshot(unittest.TestCase):
+    def test_calculate_zeroshot(self):
+        # Sample input data
+        input_texts = ["This is a sample text about technology.", "This is another sample text about fashion."]
+        dynamic_labels = ["Technology", "Fashion", "Health"]
 
-    async def test_compare(self):
-        title = await calculate_the_zeroshot_test()
+        # Call the function
+        result = calculate_the_zeroshot(input_texts, dynamic_labels)
 
-        # Assert the extracted title is correct (modify based on your logic)
-        self.assertEqual(title, "This is a great product!")
+        # Assert that the output is not empty
+        self.assertIsNotNone(result)
+        self.assertGreater(len(result["data"]), 0)
+
+if __name__ == '__main__':
+    unittest.main()

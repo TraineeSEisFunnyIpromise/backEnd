@@ -6,28 +6,28 @@ from Reqandscrape.Requestsender.chatgptreqsender import change_data
 class TestChangeData(unittest.TestCase):
     def test_successful_response(self):
         response = change_data("electric fan")
-        # Assert the response structure and content (modify based on actual response format)
+        # Assert the response structure and content
         self.assertIsInstance(response, dict)
         self.assertIn('choices', response)
-        self.assertIn('message', response['choices'][0])
+        self.assertIn(True, response['choices'][0])
 
     def test_unsuccessful_response(self):
         response = change_data("someinput")
-        # Assert the response structure and content (modify based on actual response format)
+        # Assert the response structure and content
         self.assertIsInstance(response, dict)
         self.assertIn('choices', response)
-        self.assertIn('message', response['choices'][0])
+        self.assertIn(False, response['choices'][0])
     
     def test_successful_response_boolean(self):
         response = change_data("student")
-        # Assert the response structure and content (modify based on actual response format)
+        # Assert the response structure and content
         self.assertIsInstance(response, dict)
         self.assertIn('choices', response)
-        self.assertIn('message', response['choices'][0])
+        self.assertEqual('True', response['choices'][0])
 
     def test_unsuccessful_response_boolean(self):
         response = change_data("someinput")
-        # Assert the response structure and content (modify based on actual response format)
+        # Assert the response structure and content
         self.assertIsInstance(response, dict)
         self.assertIn('choices', response)
-        self.assertIn('message', response['choices'][0])
+        self.assertIn('False', response['choices'][0])

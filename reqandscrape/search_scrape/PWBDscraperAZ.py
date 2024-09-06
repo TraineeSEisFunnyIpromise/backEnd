@@ -1,7 +1,7 @@
 import asyncio
 from playwright.async_api import async_playwright
 # from Review_scraper.PWRAZscrape import search_review
-# from URLcleaner import urlcleaner
+import random
 import regex as re
 import csv
 import pandas as pd
@@ -17,41 +17,45 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 URL = "https://www.amazon.com"
 bright_data_key = ""
 
-async def scrape_amazon(search_term, search_group):
-    async with async_playwright() as p:
-        if (search_group != '' and search_group != None):
-            search = search_term + " for " + search_group
-
-        browser = await p.chromium.connect_over_cdp(bright_data_key)
-        page = await browser.new_page()
-        # target_URL = URL + re.sub(r"\s+", "+", search)
-        await page.goto(URL)
-        print("======finding search=====")
-        # Enter search term and get product data
-        #twotabsearchtextbox
-        #nav-search-submit-button
-        await page.fill("#twotabsearchtextbox", search)
-        await page.press("#nav-search-submit-button", "Enter")
-        print("=======doing parse=========")
-        #.s-main-slot.s-result-list.s-search-results.sg-row
-        await page.wait_for_selector(".s-widget-container")
-        products = await parse_results(page)
-        print("======Done parse=====")
-        # For each product, scrape reviews and add them to the product data
-        
-        for idx, product in enumerate(products):
-            asin = urlcleaner(product["url"])  # Function to extract ASIN from URL
-            reviews = await search_review(asin)  # Scrape reviews using your review scraping function
-            product["reviews"] = reviews  # Add reviews to the product data
-            product["id"] = idx + 1  # Add a unique id to each product
-        print("======Done review=====")
-        # Save the combined data
-        await save_data(products)
-        print("======closing headless browser=====")
-        await browser.close()
-        print("======sending result=====")
-        return products
-
+async def scrape_amazon(search_term,search_group):
+    print("check word")
+    if (search_group != '' and search_group != None):
+        search_term = search_term + " for " + search_group
+        print("word replaced")
+    if(search_term != ''):
+        async with async_playwright() as p:
+            browser = await p.chromium.connect_over_cdp(bright_data_key)
+            page = await browser.new_page()
+            # target_URL = URL + re.sub(r"\s+", "+", search)
+            await page.goto(URL)
+            print("======finding search=====")
+            # Enter search term and get product data
+            #twotabsearchtextbox
+            #nav-search-submit-button
+            await page.fill("#twotabsearchtextbox", search_term)
+            await page.press("#nav-search-submit-button", "Enter")
+            print("=======doing parse=========")
+            #.s-main-slot.s-result-list.s-search-results.sg-row
+            await page.wait_for_selector(".s-widget-container")
+            products = await parse_results(page)
+            print("======Done parse=====")
+            # For each product, scrape reviews and add them to the product data
+            
+            for idx, product in enumerate(products):
+                asin = urlcleaner(product["url"])  # Function to extract ASIN from URL
+                reviews = await search_review(asin)  # Scrape reviews using your review scraping function
+                product["reviews"] = reviews  # Add reviews to the product data
+                product["id"] = idx + 1  # Add a unique id to each product
+            print("======Done review=====")
+            # Save the combined data
+            await save_data(products)
+            print("======closing headless browser=====")
+            await browser.close()
+            print("======sending result=====")
+            return products
+    else:
+        print("no input")
+        return "no input"
 #-------------------after this line it all about the function that use above-------
 
 #note this should create a seperate file but for some reason it can't find the file that contain
@@ -70,16 +74,18 @@ async def parse_results(page):
     }''')
 
 async def save_data(data):
-        filename = pd.read_csv('_temporary_save.csv')
-        print("Jsoning data")
-        data_json = json.dumps(data)
-        # Clean data (example: remove duplicates, handle missing values)
-        filename.drop_duplicates()
-        filename.fillna(0, inplace=True)
+    filename = "_temporary_save.csv"  # Set the filename as a string
+    print("Jsoning data")
+    data_json = json.dumps(data)
 
-        print('Response Scraped Body: ', data_json)
-        with open(filename, "w") as outfile:
-            outfile.write(data_json)
+    # Clean data (example: remove duplicates, handle missing values)
+    data = pd.DataFrame(data)  # Convert data to DataFrame if necessary
+    data.drop_duplicates(inplace=True)  # Remove duplicates
+    data.fillna(0, inplace=True)  # Replace missing values with 0
+
+    print('Response Scraped Body: ', data_json)
+    with open(filename, "w") as outfile:
+        outfile.write(data_json)
 
 #--------------------------URL cleaner---------------------------------------
 
@@ -90,9 +96,7 @@ def is_asin(text):
 def urlcleaner(input_file):
     result = []
     json_object = json.load(input_file)
-    filtered_lines = [line for line in json_object if line.get("url")]
-
-    for line in filtered_lines:
+    for line in json_object:
         url = line.get("url")
         #culling the URL
         asin_match = re.search(r'/[dg]p/([^/?]+)', url, flags=re.IGNORECASE)
@@ -104,11 +108,11 @@ def urlcleaner(input_file):
     return result
 #----------------review scraping---------------------
 
-import asyncio
-import random
-import pandas as pd
-from datetime import datetime
-from playwright.async_api import async_playwright
+# import asyncio
+
+# import pandas as pd
+# from datetime import datetime
+# from playwright.async_api import async_playwright
 
 async def extract_review_title(review_element):
     try:
@@ -179,11 +183,6 @@ async def extract_reviews(page):
         # for review_element in review_elements:
         #     desctiption_body = extract_description_body()
         await page.wait_for_selector("[data-hook='review']")
-        description_elements = await page.query_selector_all("[data-hook='review']")
-        for description_element in description_elements:
-            rating  = await extract_rating(review_element)
-            reviews.append((review_title, review_body, rating))
-
         review_elements = await page.query_selector_all("[data-hook='review']")
         for review_element in review_elements:
             review_title = await extract_review_title(review_element)
@@ -198,7 +197,7 @@ async def extract_reviews(page):
         await next_page_button.click()
     return reviews
 
-#--------------the function that use all review task and combine to one-------------------
+# #--------------the function that use all review task and combine to one-------------------
 async def search_review(asin):
     async with async_playwright() as p:
         browser = await p.chromium.connect_over_cdp(bright_data_key)
@@ -219,7 +218,7 @@ def search_review_test(inputa,inputb):
     result = "sameple text"
     return result
 
-#----test----
+# #----test----
 def noasync_amazonscrape(inputa,inputb):
     result = scrape_amazon(inputa,inputb)
     return result
@@ -232,4 +231,7 @@ def json_data_mock():
 
 # when want to use it independently
 # search_term = input("Please type some input: ")
-# from reqandscrape.requestsender.chatgptreqsender import receiveinput
+# # from reqandscrape.requestsender.chatgptreqsender import receiveinput
+# search_term = "electricfan"
+# search_group = ""
+# asyncio.run(scrape_amazon(search_term,search_group))

@@ -67,6 +67,7 @@ async def scrape():
     inputsearch = response[1]
     inputpeople = response[0]
     #(inputsearch,inputpeople)
+    print("======doing task=====")
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:  # No event loop is running
@@ -76,26 +77,12 @@ async def scrape():
         # If there's a running loop, create a task for the async function
         task = asyncio.ensure_future(scrape_amazon(inputsearch,inputpeople))
         results = loop.run_until_complete(task)
+        print("======Done task=====")
     else:
         # If no loop is running, use asyncio.run()
         results = asyncio.run(scrape_amazon(inputsearch,inputpeople))
-
+        print("======sending result=====")
     return jsonify(results)
-
-# @search_bp.route('/search_prod', methods=['POST'])
-# async def scrape(search_term, search_group):
-    # response = request.get_json()  # Store the JSON body request
-    # print(response)
-    # inputsearch = response[1]
-    # inputpeople = response[0]
-    # print(inputpeople, inputsearch)
-    # response = scrape_amazon(inputsearch, inputpeople)
-    # # if session:
-    # #     target_user = usercollection.find_one({"username": session['username']})
-    # #     if target_user:
-    # #         usercollection.update_one({"username": session['username']}, {"$set": {"productdata": response}})
-    # return jsonify(response)
-
 
 #--------------------------------------------search criteria sender Part--------------------------------------------
 @search_bp.route('/search_criteria', methods=['POST'])
@@ -105,6 +92,7 @@ def search_criteria_sender():
 	inputpeople = response[0]
 	print(inputpeople,inputsearch)
 	response = receiveinput(inputsearch,inputpeople)
+	print("======yeeting data=====")
 	if session==True:
 		target_user = usercollection.find(session['username'])
 		usercollection[target_user].insert({"criteria":response})

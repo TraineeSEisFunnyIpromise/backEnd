@@ -1,11 +1,18 @@
-import asyncio
-from playwright.async_api import async_playwright
-# from Review_scraper.PWRAZscrape import search_review
-import random
-import regex as re
-import csv
-import pandas as pd
-import json
+#import stuff for selenium
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait as wait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, TimeoutException 
+import csv,random,json
+from selenium import webdriver
+from seleniumwire import webdriver as webdriver_wire
+from bs4 import BeautifulSoup
+
 #inport file for cors
 from flask import Flask
 from flask_cors import CORS
@@ -15,77 +22,144 @@ app = Flask(__name__)
 CORS(app, resources={r'/*': {'origins': '*'}})
 #----------------------finding prod--------------------------------
 URL = "https://www.amazon.com"
-bright_data_key = ""
+bright_data_endpoint = ""
 
-async def scrape_amazon(search_term,search_group):
-    print("check word")
-    if (search_group != '' and search_group != None):
-        search_term = search_term + " for " + search_group
-        print("word replaced")
-    if(search_term != ''):
-        async with async_playwright() as p:
-            browser = await p.chromium.connect_over_cdp(bright_data_key)
-            page = await browser.new_page()
-            # target_URL = URL + re.sub(r"\s+", "+", search)
-            await page.goto(URL)
-            print("======finding search=====")
-            # Enter search term and get product data
-            #twotabsearchtextbox
-            #nav-search-submit-button
-            await page.fill("#twotabsearchtextbox", search_term)
-            await page.press("#nav-search-submit-button", "Enter")
-            print("=======doing parse=========")
-            #.s-main-slot.s-result-list.s-search-results.sg-row
-            await page.wait_for_selector(".s-widget-container")
-            products = await parse_results(page)
-            print("======Done parse=====")
-            # For each product, scrape reviews and add them to the product data
-            
-            for idx, product in enumerate(products):
-                asin = urlcleaner(product["url"])  # Function to extract ASIN from URL
-                reviews = await search_review(asin)  # Scrape reviews using your review scraping function
-                product["reviews"] = reviews  # Add reviews to the product data
-                product["id"] = idx + 1  # Add a unique id to each product
-            print("======Done review=====")
-            # Save the combined data
-            await save_data(products)
-            print("======closing headless browser=====")
-            await browser.close()
-            print("======sending result=====")
-            return products
-    else:
-        print("no input")
-        return "no input"
-#-------------------after this line it all about the function that use above-------
 
-#note this should create a seperate file but for some reason it can't find the file that contain
-#the fuction but this function consume too much time than it should soo.....brute force style
+import asyncio
+from playwright.async_api import async_playwright
+# from Review_scraper.PWRAZscrape import search_review
+import random
+import regex as re
+import csv
+import pandas as pd
+import json
+#overhaul entire scraper man this literally similar how to replaced engine
+#----------------Selenium scraper------------------------
 
-async def parse_results(page):
-    return await page.evaluate('''() => {
-        return Array.from(document.querySelectorAll(".s-widget-container")).map(el => {
-            return {
-                url: el.querySelector("a")?.getAttribute("href"),
-                title: el.querySelector("h2 span")?.innerText,
-                price: el.querySelector(".a-price > .a-offscreen")?.innerText,
-                rating: el.querySelector(".a-icon-alt")?.innerText,
-            };
-        });
-    }''')
 
-async def save_data(data):
-    filename = "_temporary_save.csv"  # Set the filename as a string
-    print("Jsoning data")
-    data_json = json.dumps(data)
+# Options for Chrome driver
+# Navigate to the website
+def scrape_amazon(inputkeyword):
+	options = webdriver.ChromeOptions()
+	options.add_argument('--incognito')  # Open in incognito mode
+	options.add_argument('--disable-extensions')  # Disable extensions
+	options.add_argument('--disable-gpu')  # Disable GPU
+	options.add_argument('start-maximized')  # Start maximized
+	options.add_argument('disable-infobars')  # Disable infobars
+	options.add_argument('--headless')  # headless
 
-    # Clean data (example: remove duplicates, handle missing values)
-    data = pd.DataFrame(data)  # Convert data to DataFrame if necessary
-    data.drop_duplicates(inplace=True)  # Remove duplicates
-    data.fillna(0, inplace=True)  # Replace missing values with 0
+	# Replace with your proxy server URL
+	options.add_argument(f'--proxy-server={bright_data_endpoint}')
+	# Create a Selenium Wire driver
+	driver = webdriver_wire.Chrome(options=options)
+	driver.get("https://www.amazon.com")
 
-    print('Response Scraped Body: ', data_json)
-    with open(filename, "w") as outfile:
-        outfile.write(data_json)
+	# Log network requests after navigation
+	for request in driver.requests:
+			print(f"Request: {request.method} {request.url}")  # Inspect requests
+
+	driver.implicitly_wait(5)
+
+	keyword = str(inputkeyword)
+	search = driver.find_element(By.ID, 'twotabsearchtextbox')
+	search.send_keys(keyword)
+
+	# click search button
+	driver.implicitly_wait(1)
+	search_button = driver.find_element(By.ID, 'nav-search-submit-button')
+	search_button.click()
+
+	driver.implicitly_wait(5) 
+
+	while True:
+			try:
+					#class="s-pagination-item s-pagination-button"
+					driver.implicitly_wait(5)
+					next_button = driver.find_element(By.CLASS_NAME, "s-pagination-item s-pagination-button")
+					next_button.click()
+			except (NoSuchElementException, TimeoutException):
+					break  # If the "Next" button is not found, assume it's the last page
+
+	content = driver.page_source
+	soup = BeautifulSoup(content, 'html.parser')
+	items = soup.findAll('div', 'sg-col-inner')
+	item_sorting(items)
+	with open("raw_result.txt", "w",encoding="utf-8") as f:
+			for item in items:
+					text_content = str(item)
+					json_data = json.dumps(text_content, indent=4)
+					f.write(json_data + "\n")
+	#set data from search
+	#review scraping begin
+
+	# end process quit driver
+	driver.quit()
+
+# def review_scrape():
+# 	return
+
+# def item_sorting_review(items):
+# 	return
+
+def item_sorting(items):
+	product_asin = []
+	product_name = []
+	product_price = []
+	product_ratings = []
+	product_ratings_num = []
+	product_link = []
+	for item in items:
+			# find name
+			#class="a-size-base-plus a-color-base a-text-normal"
+			name = item.find_element(By.XPATH, './/span[@class="a-size-base-plus a-color-base a-text-normal"]')
+			product_name.append(name.text) 
+
+			# find ASIN number 
+			data_asin = item.get_attribute("data-asin")
+			product_asin.append(data_asin)
+
+			# find price
+			whole_price = item.find_elements(By.XPATH, './/span[@class="a-price-whole"]')
+			fraction_price = item.find_elements(By.XPATH, './/span[@class="a-price-fraction"]')
+			
+			if whole_price != [] and fraction_price != []:
+					price = '.'.join([whole_price[0].text, fraction_price[0].text])
+			else:
+					price = 0
+			product_price.append(price)
+
+			# find ratings box
+			#<class="a-icon a-icon-star-small a-star-small-4-5 aok-align-bottom">
+			ratings_box = item.find_elements(By.XPATH, './/div[@class="a-row a-size-small"]/span')
+
+			# find ratings and ratings_num
+			if ratings_box != []:
+					ratings = ratings_box[0].get_attribute('aria-label')
+					ratings_num = ratings_box[1].get_attribute('aria-label')
+			else:
+					ratings, ratings_num = 0, 0
+			
+			product_ratings.append(ratings)
+			product_ratings_num.append(str(ratings_num))
+			
+			# find 
+			#class="a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal">
+			link = item.find_element(By.XPATH, './/a[@class="a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal"]').get_attribute("href")
+			product_link.append(link)
+	save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link)
+
+
+def save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link):
+	data = []
+	data.append([product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link])
+	# Save data to CSV file
+	with open('search_result_recent.csv', 'w', newline='') as csvfile:
+			writer = csv.writer(csvfile)
+			writer.writerow(['Product Name', 'ASIN', 'Price', 'Ratings', 'Ratings Num', 'Link'])  # Write header row
+			writer.writerows(data)
+	# to check data scraped
+
+
 
 #--------------------------URL cleaner---------------------------------------
 

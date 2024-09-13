@@ -6,32 +6,43 @@ from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import random
+from selenium import webdriver
+from seleniumwire import webdriver as webdriver_wire
 
-# Initialize the Chrome WebDriver
-s = Service('')
+# Options for Chrome driver
 options = webdriver.ChromeOptions()
-web = 'https://www.amazon.com'
-#i legit wonder why this still up and realize i kinda dumb two time open driver for no reason
-# options.add_argument('--headless')
-options.add_argument('--incognito')
-# options.add_argument('--headless')
-options.add_argument('--disable-extensions')
-options.add_argument('start-maximized')
-options.add_argument('disable-infobars')
-# options.add_argument('--no-sandbox')
-#smartproxy ISP unauthorized yup back to Bright data
-options.add_argument('--proxy-server=')
-driver = webdriver.Chrome(options=options,service=s)
-driver.get(web)
+options.add_argument('--incognito')  # Open in incognito mode
+options.add_argument('--disable-extensions')  # Disable extensions
+options.add_argument('--disable-gpu')  # Disable GPU
+options.add_argument('start-maximized')  # Start maximized
+options.add_argument('disable-infobars')  # Disable infobars
+
+# Replace with your proxy server URL
+proxy_server_url = ""
+options.add_argument(f'--proxy-server={proxy_server_url}')
+
+# Create a Selenium Wire driver
+driver = webdriver_wire.Chrome(options=options)
+
+# Navigate to the website
+driver.get("https://www.amazon.com")
+
+# Log network requests after navigation
+for request in driver.requests:
+    print(f"Request: {request.method} {request.url}")  # Inspect requests
+
 driver.implicitly_wait(5)
+
 keyword = "wireless charger"
 search = driver.find_element(By.ID, 'twotabsearchtextbox')
 search.send_keys(keyword)
+
 # click search button
 search_button = driver.find_element(By.ID, 'nav-search-submit-button')
 search_button.click()
 
-driver.implicitly_wait(5)
+driver.implicitly_wait(5) 
+
 
 product_asin = []
 product_name = []
@@ -77,9 +88,10 @@ product_link = []
 #     link = item.find_element(By.XPATH, './/a[@class="a-link-normal a-text-normal"]').get_attribute("href")
 #     product_link.append(link)
 
+
 driver.quit()
 
-# # to check data scraped
+# to check data scraped
 # print(product_name)
 # print(product_asin)
 # print(product_price)

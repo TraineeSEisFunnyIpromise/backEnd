@@ -1,8 +1,8 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
-from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
-from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon,json_data_mock,search_review_test
+from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
+from Reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon,json_data_mock,search_review_test
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
 #time stuff
 #nested asyncio nice
@@ -75,12 +75,12 @@ async def scrape():
 
     if loop and loop.is_running():
         # If there's a running loop, create a task for the async function
-        task = asyncio.ensure_future(scrape_amazon(inputsearch,inputpeople))
+        task = asyncio.ensure_future(scrape_amazon(inputsearch))
         results = loop.run_until_complete(task)
         print("======Done task=====")
     else:
         # If no loop is running, use asyncio.run()
-        results = asyncio.run(scrape_amazon(inputsearch,inputpeople))
+        results = asyncio.run(scrape_amazon(inputsearch))
         print("======sending result=====")
     return jsonify(results)
 

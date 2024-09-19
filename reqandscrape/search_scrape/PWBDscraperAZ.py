@@ -22,7 +22,7 @@ app = Flask(__name__)
 CORS(app, resources={r'/*': {'origins': '*'}})
 #----------------------finding prod--------------------------------
 URL = "https://www.amazon.com"
-bright_data_endpoint = ""
+api_endpoint = ""
 
 
 import asyncio
@@ -54,10 +54,20 @@ async def scrape_amazon(inputkeyword):
 	options.add_argument('disable-infobars')  # Disable infobars
 	# options.add_argument("--headless")
 
+	#seleniumwire option 
+	seleniumwire_options_setting = {
+    "proxy": {
+        "http": api_endpoint,
+        "https": api_endpoint
+    },
+}
+
+	#end of seleniumwire option
+
 	# Replace with your proxy server URL
-	options.add_argument(f'--proxy-server={bright_data_endpoint}')
+	options.add_argument(f'--proxy-server={api_endpoint}')
 	# Create a Selenium Wire driver
-	driver = webdriver_wire.Chrome(options=options)
+	driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
 	driver.get("https://www.amazon.com")
 
 	# Log network requests after navigation
@@ -89,6 +99,7 @@ async def scrape_amazon(inputkeyword):
 	content = driver.page_source
 	soup = BeautifulSoup(content, 'html.parser')
 	items = soup.findAll('div', 'sg-col-inner')
+
 	#print(type(items))
 	with open("raw_result.txt", "w",encoding="utf-8") as f:
 			for item in items:
@@ -113,7 +124,11 @@ async def scrape_amazon(inputkeyword):
 			print("inside the text : ")
 			print(name)
 			print("\n")
-			product_name.append(name) 
+			if name == None:
+				print("bad")
+			else:
+				product_name.append(name)
+			product_name.append(name)
 	save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link)
 	print(product_name)
 	# end process quit driver
@@ -185,7 +200,36 @@ def save_data_csv(product_name, product_asin, product_price, product_ratings, pr
 			writer.writerows(data)
 	# to check data scraped
 
+def test1():
+	product_name = []
+	items = open("raw_result.txt", "r")
+	for item in items:
+			item_text = BeautifulSoup(item, 'lxml')
+			# print(item_text)
+			# print("\n")
+			# print(str(item_text))
+			print("--------------------------------------------")
+			print("type of data before finding : ",type(item_text))
+			# print("\n\n")
+			# find name
+			#class="a-size-base-plus a-color-base a-text-normal"
+			name = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
+			print("\n")
+			print("inside the text : ")
+			print(type(name))
+			print("\n")
+			try:
+				name = BeautifulSoup(name,'lxml')
+				print("convert to : ",type(name))
+				print("content : ",name)
+			except TypeError:
+				print("cant convert")
 
+			if name == None:
+				print("bad")
+			else:
+				product_name.append(name)
+	print(product_name)
 
 # #--------------------------URL cleaner---------------------------------------
 
@@ -323,15 +367,18 @@ def save_data_csv(product_name, product_asin, product_price, product_ratings, pr
 #     result = scrape_amazon(inputa,inputb)
 #     return result
     
-# def json_data_mock():
-# 	input_file= "Reqandscrape\sample.json"
-# 	with open(input_file, encoding="utf-8") as json_file:
-# 		parsed_json = json.load(json_file)
-# 	return parsed_json
+def json_data_mock():
+	input_file= "Reqandscrape\sample.json"
+	with open(input_file, encoding="utf-8") as json_file:
+		parsed_json = json.load(json_file)
+	return parsed_json
+
+def search_review_test():
+	return
 
 # when want to use it independently
 # search_term = input("Please type some input: ")
 # # from reqandscrape.requestsender.chatgptreqsender import receiveinput
-search_term = "binocular"
-# search_group = ""
-asyncio.run(scrape_amazon(search_term))
+# search_term = "binocular"
+# # search_group = ""
+# asyncio.run(scrape_amazon(search_term))

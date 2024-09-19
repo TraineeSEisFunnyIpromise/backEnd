@@ -52,6 +52,7 @@ async def scrape_amazon(inputkeyword):
 	options.add_argument('--disable-gpu')  # Disable GPU
 	options.add_argument('start-maximized')  # Start maximized
 	options.add_argument('disable-infobars')  # Disable infobars
+	options.add_argument('--blink-settings=imagesEnabled=false')
 	# options.add_argument("--headless")
 
 	#seleniumwire option 
@@ -120,15 +121,15 @@ async def scrape_amazon(inputkeyword):
 			# find name
 			#class="a-size-base-plus a-color-base a-text-normal"
 			name = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
-			print("\n")
-			print("inside the text : ")
-			print(name)
-			print("\n")
-			if name == None:
-				print("bad")
-			else:
-				product_name.append(name)
 			product_name.append(name)
+			price = item_text.find('span', class_='a-price-whole')
+			product_price.append(price)
+			rating = item_text.find('span', class_='a-row a-size-small')
+			product_ratings.append(rating)
+			link = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
+			product_link.append(link)
+			asin = urlcleaner(link)
+			product_asin.append(asin)
 	save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link)
 	print(product_name)
 	# end process quit driver
@@ -233,23 +234,23 @@ def test1():
 
 # #--------------------------URL cleaner---------------------------------------
 
-# def is_asin(text):
-#     # ASINs are typically 10-character alphanumeric strings..nice
-#     return bool(re.fullmatch(r'[A-Z0-9]{10}', text, flags=re.IGNORECASE))
+def is_asin(text):
+    # ASINs are typically 10-character alphanumeric strings..nice
+    return bool(re.fullmatch(r'[A-Z0-9]{10}', text, flags=re.IGNORECASE))
 
-# def urlcleaner(input_file):
-#     result = []
-#     json_object = json.load(input_file)
-#     for line in json_object:
-#         url = line.get("url")
-#         #culling the URL
-#         asin_match = re.search(r'/[dg]p/([^/?]+)', url, flags=re.IGNORECASE)
-#         if asin_match:
-#             asin = asin_match.group(1)
-#             # check is it a valid ASIN
-#             if is_asin(asin):
-#                 result.append(asin)
-#     return result
+def urlcleaner(input_file):
+    result = []
+    json_object = json.load(input_file)
+    for line in json_object:
+        url = line.get("url")
+        #culling the URL
+        asin_match = re.search(r'/[dg]p/([^/?]+)', url, flags=re.IGNORECASE)
+        if asin_match:
+            asin = asin_match.group(1)
+            # check is it a valid ASIN
+            if is_asin(asin):
+                result.append(asin)
+    return result
 # #----------------review scraping---------------------
 
 # # import asyncio

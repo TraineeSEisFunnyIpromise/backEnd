@@ -40,12 +40,6 @@ import json
 # Options for Chrome driver
 # Navigate to the website
 async def scrape_amazon(inputkeyword):
-	product_asin = []
-	product_name = []
-	product_price = []
-	product_ratings = []
-	product_ratings_num = []
-	product_link = []
 	options = webdriver.ChromeOptions()
 	options.add_argument('--incognito')  # Open in incognito mode
 	options.add_argument('--disable-extensions')  # Disable extensions
@@ -84,19 +78,34 @@ async def scrape_amazon(inputkeyword):
 	# click search button
 	driver.implicitly_wait(1)
 	search_button = driver.find_element(By.ID, 'nav-search-submit-button')
+	
 	search_button.click()
 
 	driver.implicitly_wait(5) 
 
+	#class="s-pagination-item s-pagination-next s-pagination-button s-pagination-separator"
+	# while True:
+  #   # Extract and append data from the current page
+  #   extract_and_append(driver, filename)
+
+  #   # Find the "Next" button and click it
+  #   next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "next-button")))
+  #   next_button.click()
+
+  #   # Increment page number
+  #   page_number += 1
+
+  #   # Check if this is the last page (adjust condition as needed)
+  #   if page_number > 10:  # Replace 10 with the actual number of pages
+  #       break
 	while True:
 			try:
 					#class="s-pagination-item s-pagination-button"
 					driver.implicitly_wait(5)
-					next_button = driver.find_element(By.CLASS_NAME, "s-pagination-item s-pagination-button")
+					next_button = driver.find_element(By.CLASS_NAME, "s-pagination-item s-pagination-next s-pagination-button s-pagination-separator")
 					next_button.click()
 			except (NoSuchElementException, TimeoutException):
 					break  # If the "Next" button is not found, assume it's the last page
-
 	content = driver.page_source
 	soup = BeautifulSoup(content, 'html.parser')
 	items = soup.findAll('div', 'sg-col-inner')
@@ -108,9 +117,22 @@ async def scrape_amazon(inputkeyword):
 					json_data = json.dumps(text_content, indent=4)
 					f.write(json_data + "\n")
 	#set data from search
+	item_sorting(items)
 	#review scraping begin
 	#print("Item : ",items)
-       
+	
+	# end process quit driver
+	driver.quit()
+
+
+def item_sorting(items):
+	product_asin = []
+	product_name = []
+	product_price = []
+	product_ratings = []
+	product_ratings_num = []
+	product_link = []
+
 	for item in items:
 			item_text = BeautifulSoup(str(item), 'lxml')
 			# print(item_text)
@@ -131,63 +153,6 @@ async def scrape_amazon(inputkeyword):
 			asin = urlcleaner(link)
 			product_asin.append(asin)
 	save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link)
-	print(product_name)
-	# end process quit driver
-	driver.quit()
-
-# def review_scrape():
-# 	return
-
-# def item_sorting_review(items):
-# 	return
-
-# def item_sorting(items):
-# 	product_asin = []
-# 	product_name = []
-# 	product_price = []
-# 	product_ratings = []
-# 	product_ratings_num = []
-# 	product_link = []
-# 	for item in items:
-# 			# find name
-# 			#class="a-size-base-plus a-color-base a-text-normal"
-# 			name = item.find_element(By.XPATH, './/span[@class="a-size-base-plus a-color-base a-text-normal"]')
-# 			product_name.append(name.text) 
-# 			print(name)
-
-# 			# find ASIN number 
-# 			data_asin = item.get_attribute("data-asin")
-# 			product_asin.append(data_asin)
-
-# 			# find price
-# 			whole_price = item.find_elements(By.XPATH, './/span[@class="a-price-whole"]')
-# 			fraction_price = item.find_elements(By.XPATH, './/span[@class="a-price-fraction"]')
-			
-# 			if whole_price != [] and fraction_price != []:
-# 					price = '.'.join([whole_price[0].text, fraction_price[0].text])
-# 			else:
-# 					price = 0
-# 			product_price.append(price)
-
-# 			# find ratings box
-# 			#<class="a-icon a-icon-star-small a-star-small-4-5 aok-align-bottom">
-# 			ratings_box = item.find_elements(By.XPATH, './/div[@class="a-row a-size-small"]/span')
-
-# 			# find ratings and ratings_num
-# 			if ratings_box != []:
-# 					ratings = ratings_box[0].get_attribute('aria-label')
-# 					ratings_num = ratings_box[1].get_attribute('aria-label')
-# 			else:
-# 					ratings, ratings_num = 0, 0
-			
-# 			product_ratings.append(ratings)
-# 			product_ratings_num.append(str(ratings_num))
-			
-# 			# find 
-# 			#class="a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal">
-# 			link = item.find_element(By.XPATH, './/a[@class="a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal"]').get_attribute("href")
-# 			product_link.append(link)
-# 	save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link)
 
 
 def save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link):

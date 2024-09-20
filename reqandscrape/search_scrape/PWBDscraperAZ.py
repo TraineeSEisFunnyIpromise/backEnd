@@ -166,36 +166,8 @@ def save_data_csv(product_name, product_asin, product_price, product_ratings, pr
 			writer.writerows(data)
 	# to check data scraped
 
-def test1():
-	product_name = []
-	items = open("raw_result.txt", "r")
-	for item in items:
-			item_text = BeautifulSoup(item, 'lxml')
-			# print(item_text)
-			# print("\n")
-			# print(str(item_text))
-			print("--------------------------------------------")
-			print("type of data before finding : ",type(item_text))
-			# print("\n\n")
-			# find name
-			#class="a-size-base-plus a-color-base a-text-normal"
-			name = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
-			print("\n")
-			print("inside the text : ")
-			print(type(name))
-			print("\n")
-			try:
-				name = BeautifulSoup(name,'lxml')
-				print("convert to : ",type(name))
-				print("content : ",name)
-			except TypeError:
-				print("cant convert")
 
-			if name == None:
-				print("bad")
-			else:
-				product_name.append(name)
-	print(product_name)
+
 
 # #--------------------------URL cleaner---------------------------------------
 
@@ -348,3 +320,34 @@ def search_review_test():
 # search_term = "binocular"
 # # search_group = ""
 # asyncio.run(scrape_amazon(search_term))
+
+def test1():
+	items = open("raw_result.txt", "r")
+	
+	product_asin = []
+	product_name = []
+	product_price = []
+	product_ratings = []
+	product_ratings_num = []
+	product_link = []
+
+	for item in items:
+			item_text = BeautifulSoup(str(item), 'lxml')
+			# print(item_text)
+			print("\n")
+			print(str(item_text))
+			print(type(item_text))
+			print("\n\n")
+			# find name
+			#class="a-size-base-plus a-color-base a-text-normal"
+			name = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
+			product_name.append(name)
+			price = item_text.find('span', class_='a-price-whole')
+			product_price.append(price)
+			rating = item_text.find('span', class_='a-row a-size-small')
+			product_ratings.append(rating)
+			link = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
+			product_link.append(link)
+			asin = urlcleaner(link)
+			product_asin.append(asin)
+	save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link)

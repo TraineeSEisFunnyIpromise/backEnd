@@ -21,7 +21,7 @@ app = Flask(__name__)
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 #----------------------finding prod--------------------------------
-URL = "https://www.amazon.com"
+URL = "http://www.amazon.com"
 api_endpoint = ""
 
 
@@ -33,13 +33,17 @@ import regex as re
 import csv
 import pandas as pd
 import json
+import bleach
 #overhaul entire scraper man this literally similar how to replaced engine
 #----------------Selenium scraper------------------------
 
 
 # Options for Chrome driver
 # Navigate to the website
-async def scrape_amazon(inputkeyword):
+async def scrape_amazon(inputkeyword,seach_group):
+	if search_group != "":
+		inputkeyword = inputkeyword + " " + search_group
+		return inputkeyword
 	options = webdriver.ChromeOptions()
 	options.add_argument('--incognito')  # Open in incognito mode
 	options.add_argument('--disable-extensions')  # Disable extensions
@@ -95,14 +99,17 @@ async def scrape_amazon(inputkeyword):
   #   # Increment page number
   #   page_number += 1
 
-  #   # Check if this is the last page (adjust condition as needed)
-  #   if page_number > 10:  # Replace 10 with the actual number of pages
-  #       break
+  #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[30]/div/div/span/a[3]
+  #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[28]/div/div/span/a[4]
+  #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[28]/div/div/span/a[5]
+  #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[28]/div/div/span/a[6]
+  #
+  #     
 	while True:
 			try:
 					#class="s-pagination-item s-pagination-button"
 					driver.implicitly_wait(5)
-					next_button = driver.find_element(By.CLASS_NAME, "s-pagination-item s-pagination-next s-pagination-button s-pagination-separator")
+					next_button = driver.find_element_by_xpath(By.CLASS_NAME, "s-pagination-item s-pagination-next s-pagination-button s-pagination-separator")
 					next_button.click()
 			except (NoSuchElementException, TimeoutException):
 					break  # If the "Next" button is not found, assume it's the last page
@@ -124,7 +131,6 @@ async def scrape_amazon(inputkeyword):
 	# end process quit driver
 	driver.quit()
 
-
 def item_sorting(items):
 	product_asin = []
 	product_name = []
@@ -133,8 +139,8 @@ def item_sorting(items):
 	product_ratings_num = []
 	product_link = []
 
-	for item in items:
-			item_text = BeautifulSoup(str(item), 'lxml')
+	for item_text in items:
+			# item_text = BeautifulSoup(item, 'lxml')
 			# print(item_text)
 			print("\n")
 			print(str(item_text))
@@ -143,16 +149,22 @@ def item_sorting(items):
 			# find name
 			#class="a-size-base-plus a-color-base a-text-normal"
 			name = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
+			name = clean_html(name)
 			product_name.append(name)
+
 			price = item_text.find('span', class_='a-price-whole')
+			price = clean_html(price)
 			product_price.append(price)
+			
 			rating = item_text.find('span', class_='a-row a-size-small')
+			rating = clean_html(rating)
 			product_ratings.append(rating)
+
 			link = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
+			link = clean_html(link)
 			product_link.append(link)
-			asin = urlcleaner(link)
-			product_asin.append(asin)
 	save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link)
+
 
 
 def save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link):
@@ -195,50 +207,6 @@ def urlcleaner(input_file):
 # # import pandas as pd
 # # from datetime import datetime
 # # from playwright.async_api import async_playwright
-
-# async def extract_review_title(review_element):
-#     try:
-#         title = await review_element.evaluate("(element) => element.querySelector('[data-hook=\"review-title\"]').innerText")
-#         title = title.replace("\n", "").strip()
-#     except:
-#         title = "not available"
-#     return title 
-
-# async def extract_review_body(review_element):
-#     try:
-#         body = await review_element.evaluate("(element) => element.querySelector('[data-hook=\"review-body\"]').innerText")
-#         body = body.replace("\n", "").strip()
-#     except:
-#         body = "not available"
-#     return body
-
-# async def extract_description_body(review_element):
-#     try:#featurebullets_feature_div
-#         body = await review_element.evaluate("(element) => element.querySelector('[data-hook=\"featurebullets_feature_div\"]').innerText")
-#         body = body.replace("\n", "").strip()
-#     except:
-#         body = "not available"
-#     return body
-
-# # #productDetails_feature_div
-# async def extract_description_body_extra(review_element):
-#     try:#featurebullets_feature_div
-#         body = await review_element.evaluate("(element) => element.querySelector('[data-hook=\"productDetails_feature_div\"]').innerText")
-#         body = body.replace("\n", "").strip()
-#     except:
-#         body = "not available"
-#     return body
-
-# async def extract_rating(review_element):
-#     try:
-#         ratings = await review_element.evaluate("(element) => element.querySelector('[data-hook=\"review-star-rating\"]').innerText")
-#     except:
-#         ratings = "not available"
-#     return ratings.split()[0]
-
-# async def save_reviews_to_csv(reviews, filename='_amazon_product_reviews.csv'):
-#     data = pd.DataFrame(reviews, columns=['review_title', 'review_body', 'rating'])
-#     data.to_csv(filename, mode='a', header=False, index=False)
 
 # async def perform_request_with_retry(page, link):
 #     MAX_RETRIES = 5
@@ -311,43 +279,34 @@ def json_data_mock():
 		parsed_json = json.load(json_file)
 	return parsed_json
 
-def search_review_test():
-	return
+def clean_html(input):
+    # Reaplce html tags from user input, see utils.test for examples
+
+    ok_tags = [u"a", u"img", u"strong", u"b", u"em", u"i", u"u", u"ul", u"li", u"p", u"br",  u"blockquote", u"code",u"\n"]
+    ok_attributes = {u"a": [u"href", u"rel"], u"img": [u"src", u"alt", u"title"]}
+    # all other tags: replace with the content of the tag
+
+    # If input contains link in the format:  then convert it to &lt; http:// &gt;
+    # This is because otherwise the library recognizes it as a tag and breaks the link.
+    input = re.sub("\&lt;(http\S+?)\&gt;", r'&lt; \1 &gt;', input)
+
+    cleaner = bleach.Cleaner(
+            # attributes=ok_attributes,
+            # tags=ok_tags,
+            strip=True)
+    output = cleaner.clean(input)
+    return output
+
+
+def test():
+	input_file = open("raw_result.txt","r",encoding="utf-8")
+	for items in input_file:
+		result = item_sorting(items)
+		print(result)
 
 # when want to use it independently
 # search_term = input("Please type some input: ")
 # # from reqandscrape.requestsender.chatgptreqsender import receiveinput
-# search_term = "binocular"
-# # search_group = ""
-# asyncio.run(scrape_amazon(search_term))
-
-def test1():
-	items = open("raw_result.txt", "r")
-	
-	product_asin = []
-	product_name = []
-	product_price = []
-	product_ratings = []
-	product_ratings_num = []
-	product_link = []
-
-	for item in items:
-			item_text = BeautifulSoup(str(item), 'lxml')
-			# print(item_text)
-			print("\n")
-			print(str(item_text))
-			print(type(item_text))
-			print("\n\n")
-			# find name
-			#class="a-size-base-plus a-color-base a-text-normal"
-			name = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
-			product_name.append(name)
-			price = item_text.find('span', class_='a-price-whole')
-			product_price.append(price)
-			rating = item_text.find('span', class_='a-row a-size-small')
-			product_ratings.append(rating)
-			link = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
-			product_link.append(link)
-			asin = urlcleaner(link)
-			product_asin.append(asin)
-	save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link)
+search_term = "binocular"
+search_group = ""
+asyncio.run(scrape_amazon(search_term))

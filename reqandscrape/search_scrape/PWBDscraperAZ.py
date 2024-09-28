@@ -88,45 +88,40 @@ async def scrape_amazon(inputkeyword,seach_group):
 	driver.implicitly_wait(5) 
 
 	#class="s-pagination-item s-pagination-next s-pagination-button s-pagination-separator"
-	# while True:
-  #   # Extract and append data from the current page
-  #   extract_and_append(driver, filename)
-
-  #   # Find the "Next" button and click it
-  #   next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "next-button")))
-  #   next_button.click()
-
-  #   # Increment page number
-  #   page_number += 1
-
   #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[30]/div/div/span/a[3]
   #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[28]/div/div/span/a[4]
   #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[28]/div/div/span/a[5]
   #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[28]/div/div/span/a[6]
-  #
-  #     
-	while True:
-			try:
-					#class="s-pagination-item s-pagination-button"
-					driver.implicitly_wait(5)
-					next_button = driver.find_element_by_xpath(By.CLASS_NAME, "s-pagination-item s-pagination-next s-pagination-button s-pagination-separator")
-					next_button.click()
-			except (NoSuchElementException, TimeoutException):
-					break  # If the "Next" button is not found, assume it's the last page
+  # 
+	while(True):
+		try: 
+			numberofpages=WebDriverWait(driver,3).until(EC.presence_of_element_located((By.XPATH, "//*[@class='s-pagination-item s-pagination-disabled']"))).text
+		except TimeoutException: 
+			print("The total number of pages was not found.")
+			driver.refresh()
+			continue
+		else:
+			break
+	print("Total number of pages: ",numberofpages)
+	
+
 	content = driver.page_source
 	soup = BeautifulSoup(content, 'html.parser')
 	items = soup.findAll('div', 'sg-col-inner')
 
-	#print(type(items))
-	with open("raw_result.txt", "w",encoding="utf-8") as f:
-			for item in items:
-					text_content = str(item)
-					json_data = json.dumps(text_content, indent=4)
-					f.write(json_data + "\n")
+	# #print(type(items))
+	# with open("raw_result.txt", "w",encoding="utf-8") as f:
+	# 		for item in items:
+	# 				text_content = str(item)
+	# 				json_data = json.dumps(text_content, indent=4)
+	# 				f.write(json_data + "\n")
+
+	
 	#set data from search
 	item_sorting(items)
 	#review scraping begin
 	#print("Item : ",items)
+	
 	
 	# end process quit driver
 	driver.quit()
@@ -142,28 +137,61 @@ def item_sorting(items):
 	for item_text in items:
 			# item_text = BeautifulSoup(item, 'lxml')
 			# print(item_text)
-			print("\n")
-			print(str(item_text))
-			print(type(item_text))
-			print("\n\n")
 			# find name
 			#class="a-size-base-plus a-color-base a-text-normal"
 			name = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
-			name = clean_html(name)
+			name = clean_html(str(name))
 			product_name.append(name)
 
 			price = item_text.find('span', class_='a-price-whole')
-			price = clean_html(price)
+			price = clean_html(str(price))
 			product_price.append(price)
 			
 			rating = item_text.find('span', class_='a-row a-size-small')
-			rating = clean_html(rating)
+			rating = clean_html(str(rating))
 			product_ratings.append(rating)
 
-			link = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
-			link = clean_html(link)
+			link = item_text.select("[data-asin] h2 a")
+			link = clean_html(str(link))
 			product_link.append(link)
 	save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link)
+
+#yup get review stuff
+def get_reviews(soup):
+    review_elements = soup.select("div.review")
+
+    scraped_reviews = []
+
+    for review in review_elements:
+
+        r_rating_element = review.select_one("i.review-rating")
+        r_rating = r_rating_element.text.replace("out of 5 stars", "") if r_rating_element else None
+
+        r_title_element = review.select_one("a.review-title")
+        r_title_span_element = r_title_element.select_one("span:not([class])") if r_title_element else None
+        r_title = r_title_span_element.text if r_title_span_element else None
+
+        r_content_element = review.select_one("span.review-text")
+        r_content = r_content_element.text if r_content_element else None
+
+        r_date_element = review.select_one("span.review-date")
+        r_date = r_date_element.text if r_date_element else None
+
+        r_verified_element = review.select_one("span.a-size-mini")
+        r_verified = r_verified_element.text if r_verified_element else None
+
+
+        r = {
+            "rating": r_rating,
+            "title": r_title,
+            "content": r_content,
+            "date": r_date,
+            "verified": r_verified,
+        }
+
+        scraped_reviews.append(r)
+
+    return scraped_reviews
 
 
 
@@ -175,6 +203,17 @@ def save_data_csv(product_name, product_asin, product_price, product_ratings, pr
 	with open('search_result_recent.csv', 'w', newline='',encoding="utf-8") as csvfile:
 			writer = csv.writer(csvfile)
 			writer.writerow(['Product Name', 'ASIN', 'Price', 'Ratings', 'Ratings Num', 'Link'])  # Write header row
+			writer.writerows(data)
+	# to check data scraped
+
+def save_data_csv_product(product_name, product_asin, product_price, product_ratings):
+
+	data = []
+	data.append([product_name, product_asin, product_price, product_ratings])
+	# Save data to CSV file
+	with open('search_result_product.csv', 'w', newline='',encoding="utf-8") as csvfile:
+			writer = csv.writer(csvfile)
+			writer.writerow(['Title', 'ASIN', 'Price', 'Product_Ratings', 'Ratings Score', 'Link'])  # Write header row
 			writer.writerows(data)
 	# to check data scraped
 
@@ -202,76 +241,64 @@ def urlcleaner(input_file):
     return result
 # #----------------review scraping---------------------
 
-# # import asyncio
+async def scrape_amazon_product(asin):
+	URL_link = asin
+	options = webdriver.ChromeOptions()
+	options.add_argument('--incognito')  # Open in incognito mode
+	options.add_argument('--disable-extensions')  # Disable extensions
+	options.add_argument('--disable-gpu')  # Disable GPU
+	options.add_argument('start-maximized')  # Start maximized
+	options.add_argument('disable-infobars')  # Disable infobars
+	options.add_argument('--blink-settings=imagesEnabled=false')
+	# options.add_argument("--headless")
 
-# # import pandas as pd
-# # from datetime import datetime
-# # from playwright.async_api import async_playwright
+	#seleniumwire option 
+	seleniumwire_options_setting = {
+    "proxy": {
+        "http": api_endpoint,
+        "https": api_endpoint
+    },
+}
 
-# async def perform_request_with_retry(page, link):
-#     MAX_RETRIES = 5
-#     retry_count = 0
+	#end of seleniumwire option
 
-#     while retry_count < MAX_RETRIES:
-#         try:
-#             # Use the proxy URL
-#             await page.goto(link)
-#             break
-#         except Exception as e:
-#             retry_count += 1
-#             print(f"Request failed: {e}, retrying {retry_count}/{MAX_RETRIES}")
-#             if retry_count == MAX_RETRIES:
-#                 raise Exception("Request timed out after multiple retries")
-#             await asyncio.sleep(random.uniform(1, 5))
+	# Replace with your proxy server URL
+	options.add_argument(f'--proxy-server={api_endpoint}')
+	# Create a Selenium Wire driver
+	driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
+	driver.get("https://www.amazon.com/dp/"+URL_link)
 
-# # #---------extract review like scraped it-------------------
-# async def extract_reviews(page):
-#     reviews = []
-#     while True:
-#         # await page.wait_for_selector("[data-hook='featurebullets_feature_div']")
-#         # review_elements = await page.query_selector_all("[data-hook='feature-bullets']")
-#         # for review_element in review_elements:
-#         #     desctiption_body = extract_description_body()
-#         await page.wait_for_selector("[data-hook='review']")
-#         review_elements = await page.query_selector_all("[data-hook='review']")
-#         for review_element in review_elements:
-#             review_title = await extract_review_title(review_element)
-#             review_body = await extract_review_body(review_element)
-#             rating = await extract_rating(review_element)
-#             reviews.append((review_title, review_body, rating))
+	# Log network requests after navigation
+	for request in driver.requests:
+			print(f"Request: {request.method} {request.url}")  # Inspect requests
 
-#         next_page_button = await page.query_selector("[class='a-last']")
-#         if not next_page_button or 'disabled' in await next_page_button.get_attribute('class'):
-#             break
-
-#         await next_page_button.click()
-#     return reviews
-
-# # #--------------the function that use all review task and combine to one-------------------
-# async def search_review(asin):
-#     async with async_playwright() as p:
-#         browser = await p.chromium.connect_over_cdp(bright_data_key)
-#         context = await browser.new_context()
-#         page = await context.new_page()
-
-#         target_url = f"https://www.amazon.com/dp/{asin}"
-#         await perform_request_with_retry(page, target_url)
-#         reviews = await extract_reviews(page)
-
-#         await page.close()
-#         await context.close()
-#         await browser.close()
-#         return reviews
+	driver.implicitly_wait(4)
 
 
-# def search_review_test(inputa,inputb):
-#     result = "sameple text"
-#     return result
+	driver.implicitly_wait(5) 
 
-# # #----test----
-# def noasync_amazonscrape(inputa,inputb):
-#     result = scrape_amazon(inputa,inputb)
-#     return result
+	#class="s-pagination-item s-pagination-next s-pagination-button s-pagination-separator"
+  #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[30]/div/div/span/a[3]
+  #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[28]/div/div/span/a[4]
+  #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[28]/div/div/span/a[5]
+  #//*[@id="search"]/div[1]/div[1]/div/span[1]/div[1]/div[28]/div/div/span/a[6]
+  #
+	content = driver.page_source
+	soup = BeautifulSoup(content, 'html.parser')
+	items = soup.findAll('div', 'sg-col-inner')
+
+	#print(type(items))
+	with open("raw_result_product.txt", "w",encoding="utf-8") as f:
+			for item in items:
+					text_content = str(item)
+					json_data = json.dumps(text_content, indent=4)
+					f.write(json_data + "\n")
+	#set data from search
+	#review scraping begin
+	#print("Item : ",items)
+	
+	# end process quit driver
+	driver.quit()
     
 def json_data_mock():
 	input_file= "Reqandscrape\sample.json"
@@ -300,7 +327,8 @@ def clean_html(input):
 
 def test():
 	input_file = open("raw_result.txt","r",encoding="utf-8")
-	for items in input_file:
+	input_file_convert = BeautifulSoup(str(input_file),"lxml")
+	for items in input_file_convert:
 		result = item_sorting(items)
 		print(result)
 
@@ -309,4 +337,4 @@ def test():
 # # from reqandscrape.requestsender.chatgptreqsender import receiveinput
 search_term = "binocular"
 search_group = ""
-asyncio.run(scrape_amazon(search_term))
+asyncio.run(scrape_amazon(search_term,search_group))

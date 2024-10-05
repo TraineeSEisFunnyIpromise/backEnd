@@ -3,7 +3,7 @@ from flask import Flask, Blueprint, request, jsonify, session
 from flask_session import Session
 from flask_cors import CORS
 from pymongo import MongoClient
-from Reqandscrape.Requestsender.chatgptreqsender import receiveinput
+from Reqandscrape.requestsender.chatgptreqsender import receiveinput
 from functools import wraps
 #time stuff
 from datetime import datetime, timedelta
@@ -11,7 +11,7 @@ import uuid
 # instantiate the app
 app = Flask(__name__)
 
-client = MongoClient('mongodb://localhost:6000')
+client = MongoClient('mongodb://localhost:59930:6000')
 db = client['Database1']
 usercollection = db['db1']
 # enable CORS
@@ -37,12 +37,8 @@ def login():
 	login_details = request.get_json() # store the json body request
 	usernameA = login_details['username']
 	passA = login_details['password']
-# check if user exist
 	# print(login_details)
 	user_from_db = usercollection.find_one({"username": login_details["username"]}) 
-	# print(user_from_db)
-	# user_from_db_print_test = usercollection.find_one({"username": "admin"}) 
-	# print(user_from_db_print_test)
 # man i hate how it look down here
 	if user_from_db:
   #process to check mongodb server with boolean didn't know python could just pull that move
@@ -52,7 +48,7 @@ def login():
 				session['username'] = usernameA  # Store the username in the session
 				print(f"Session after login: {session}")
 				encrypted_username = usernameA
-				# user_from_db['user_id']= session  # Store user ID in session
+				user_from_db['user_id']= session  # Store user ID in session
 				print(session)
 				return jsonify({'message': 'login successful'}), 202
 			else: #return login not suckcess

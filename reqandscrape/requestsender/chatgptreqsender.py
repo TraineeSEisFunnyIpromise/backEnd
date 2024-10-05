@@ -27,7 +27,7 @@ def change_data(input,group_target):
 	"Authorization": f"Bearer {openai_api_key}"
 	}
 	data = {
-	"model": "gpt-3.5-turbo",
+	"model": "gpt-4o-mini",
 	"messages": [
 		{
 		"role": "system", 
@@ -66,7 +66,7 @@ def check_input_word(input,group_target):
 	"Authorization": f"Bearer {openai_api_key2}"
 	}
 	data = {
-	"model": "gpt-3.5-turbo",
+	"model": "gpt-4o-mini",
 		"messages": [
 			{
 			"role": "system",
@@ -201,7 +201,4 @@ def receiveinputtest():
    return storea
 
 
-#test
 # receiveinput("electric fan","student")
-# receiveinputtest()
-# check_input_word("electric fan","student")

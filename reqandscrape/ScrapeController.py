@@ -2,7 +2,7 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
-from Reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon,json_data_mock,search_review_test
+from Reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon,json_data_mock
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
 #time stuff
 #nested asyncio nice
@@ -10,7 +10,7 @@ import nest_asyncio
 # asyncio and werkzeug
 from werkzeug.wrappers import Request, Response
 from werkzeug.middleware.proxy_fix import ProxyFix
-import asyncio
+import asyncio,csv
 #
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -80,7 +80,7 @@ async def scrape():
         print("======Done task=====")
     else:
         # If no loop is running, use asyncio.run()
-        results = asyncio.run(scrape_amazon(inputsearch))
+        results = asyncio.run(scrape_amazon(inputsearch,inputpeople))
         print("======sending result=====")
     return jsonify(results)
 
@@ -126,7 +126,10 @@ def search_criteria_test_sender():
 def search_prod_sender_test():
 	response = request.get_json() # store the json body request
 	print(response)
-	response = search_review_test()
+	with open('Reqandscrape\search_scrape\search_result_recent.csv', mode ='r')as file:
+		csvFile = csv.reader(file)
+		result = csvFile
+	response = result
 	return jsonify(response)
 
 @search_bp.route('/scrape_test', methods=['POST'])

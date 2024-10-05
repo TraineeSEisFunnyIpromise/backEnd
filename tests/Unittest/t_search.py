@@ -3,7 +3,7 @@ from unittest.mock import patch, AsyncMock
 import asyncio
 
 # Import your functions
-from Reqandscrape.Search_scrape.PWBDscraperAZ import search_review
+from Reqandscrape.search_scrape.PWBDscraperAZ import search_review
 
 class TestSearchReview(unittest.TestCase):
 
@@ -17,6 +17,10 @@ class TestSearchReview(unittest.TestCase):
 
         # Assert (verify the expected outcome)
         self.assertEqual(result, True)  # Expected to return the defined string
+
+    def test_scrape_product():
+        product_url = ""
+
 
 if __name__ == '__main__':
     unittest.main()

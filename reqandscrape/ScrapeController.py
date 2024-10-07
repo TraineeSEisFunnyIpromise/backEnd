@@ -2,11 +2,10 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
-from Reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon,json_data_mock
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
 #time stuff
 #nested asyncio nice
-import nest_asyncio
+import nest_asyncio,pandas
 # asyncio and werkzeug
 from werkzeug.wrappers import Request, Response
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -29,7 +28,6 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (browser closed)
 app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
 app.config['PERMANENT_SESSION_LIFETIME'] = 300
-
 
 search_bp = Blueprint('search', __name__)
 nest_asyncio.apply()
@@ -62,27 +60,18 @@ app.wsgi_app = ProxyFix(cors_middleware(app))
 #--------------------------------------------search Prod sender Part--------------------------------------------
 
 @search_bp.route('/scrape', methods=['POST'])
-async def scrape():
+def scrape():
     response = request.get_json()  # Store the JSON body request
-    inputsearch = response[1]
-    inputpeople = response[0]
+    inputsearch = response[0]
+    inputpeople = response[1]
     #(inputsearch,inputpeople)
     print("======doing task=====")
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:  # No event loop is running
-        loop = None
+    # scrape_amazon(inputsearch,inputpeople)
+    result = csv_to_json("search_result_recent.csv","search_result_dumb.json")
+    print("======sending result=====")
+    print(type(result))
 
-    if loop and loop.is_running():
-        # If there's a running loop, create a task for the async function
-        task = asyncio.ensure_future(scrape_amazon(inputsearch))
-        results = loop.run_until_complete(task)
-        print("======Done task=====")
-    else:
-        # If no loop is running, use asyncio.run()
-        results = asyncio.run(scrape_amazon(inputsearch,inputpeople))
-        print("======sending result=====")
-    return jsonify(results)
+    return jsonify(result)
 
 #--------------------------------------------search criteria sender Part--------------------------------------------
 @search_bp.route('/search_criteria', methods=['POST'])
@@ -136,7 +125,6 @@ def search_prod_sender_test():
 async def scrape_test():
 	response = request.get_json() # store the json body request
 	print(response)
-	# results = await scrape_amazon(inputsearch, inputpeople)
 	results = json_data_mock()
 	# Process scraped results (e.g., convert to JSON, store in database)
 	return jsonify(results)
@@ -151,3 +139,15 @@ def zeroshotstuff_test():
 
 # Load the JSON data
 #test section
+
+
+#dumb solution 
+
+
+# when want to use it independently
+# search_term = input("Please type some input: ")
+# # from reqandscrape.requestsender.chatgptreqsender import receiveinput
+# search_term = "binocular"
+# search_group = ""
+# asyncio.run(scrape_amazon(search_term,search_group))
+# asyncio.run(scrape_amazon_product(asin=["B095X25X25"]))

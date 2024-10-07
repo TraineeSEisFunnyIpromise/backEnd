@@ -1,3 +1,5 @@
+
+
 #import stuff for selenium
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -39,10 +41,29 @@ import bleach
 
 # Options for Chrome driver
 # Navigate to the website
-async def scrape_amazon(inputkeyword,search_group):
-	if search_group != "":
-		inputkeyword = inputkeyword + " for " + search_group
-		return inputkeyword
+def csv_to_json(csv_file_path, json_file_path):
+    # Initialize an empty list to store the data
+    data = []
+    
+    # Open the CSV file for reading
+    with open(csv_file_path, 'r') as csv_file:
+        # Create a CSV reader object
+        csv_reader = csv.DictReader(csv_file)
+        
+        # Iterate over each row in the CSV file
+        for row in csv_reader:
+            # Append each row (as a dictionary) to the data list
+            data.append(row)
+    
+    # Open the JSON file for writing
+    with open(json_file_path, 'w') as json_file:
+        # Write the data list to the JSON file
+        json.dump(data, json_file, indent=4)
+
+def scrape_amazon(inputkeyword,search_group):
+	print("\t start amazon")
+	result = []
+
 	options = webdriver.ChromeOptions()
 	options.add_argument('--incognito')  # Open in incognito mode
 	options.add_argument('--disable-extensions')  # Disable extensions
@@ -62,58 +83,66 @@ async def scrape_amazon(inputkeyword,search_group):
 
 	#end of seleniumwire option
 	try:
+		print("\t\t start process")
 		# Replace with your proxy server URL
 		options.add_argument(f'--proxy-server={api_endpoint}')
 		# Create a Selenium Wire driver
 		driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
 		driver.get("https://www.amazon.com")
 
-		# Log network requests after navigation
-		for request in driver.requests:
-				print(f"Request: {request.method} {request.url}")  # Inspect requests
-
-		driver.implicitly_wait(4)
-
+		driver.implicitly_wait(5)
+		inputkeyword = inputkeyword + " " + search_group
 		keyword = str(inputkeyword)
 		search = driver.find_element(By.ID, 'twotabsearchtextbox')
 		search.send_keys(keyword)
 
 		# click search button
-		driver.implicitly_wait(1)
+		driver.implicitly_wait(2)
 		search_button = driver.find_element(By.ID, 'nav-search-submit-button')
 		
 		search_button.click()
 
 		driver.implicitly_wait(5) 
+		print("before looping")
 		while True:
-				try:
+			print("looping")
+			driver.implicitly_wait(3)
+			try:
 						
 						#class="s-pagination-item s-pagination-button"
-						driver.implicitly_wait(5)
+						driver.implicitly_wait(6)
 						next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
 						next_button.click()
-				except (NoSuchElementException, TimeoutException):
-						break  # If the "Next" button is not found, assume it's the last page
-		
+			except (NoSuchElementException, TimeoutException):
+					break
+		print("end of loop")
 
 		content = driver.page_source
 		soup = BeautifulSoup(content, 'html.parser')
 		items = soup.findAll('div', 'sg-col-inner')
-
+		print("setting up data")
 		#print(type(items))
-		with open("raw_result.txt", "w",encoding="utf-8") as f:
+		with open("raw_result.txt", "w+",encoding="utf-8") as f:
+				print("enter loop raw result")
 				for item in items:
 						text_content = str(item)
 						json_data = json.dumps(text_content, indent=4)
 						f.write(json_data + "\n")
-
-		
+		print("item sorting")
 		#set data from search
 		item_sorting(items)
 		# end process quit driver
+		print("\t\t end process")
 		driver.quit()
 	except(ConnectionRefusedError,ConnectionAbortedError):
 		driver.quit()
+	print("setting up to get from csv to send")
+	with open('search_result_recent.csv', mode ='r')as file:
+		result = csv.reader(file)
+
+	
+	print("\t end amazon")
+	return result
 
 def item_sorting(items):
 	product_asin = []
@@ -194,7 +223,13 @@ def urlcleaner(input_file):
     return result
 # #----------------review scraping---------------------
 
-async def scrape_amazon_product(asin):
+def printingstuff():
+    for i in range(6):
+        print("hello")
+        i +=1
+		
+
+def scrape_amazon_product(asin):
 	options = webdriver.ChromeOptions()
 	options.add_argument('--incognito')  # Open in incognito mode
 	options.add_argument('--disable-extensions')  # Disable extensions
@@ -352,12 +387,3 @@ def test():
 		csv_reader = csv.reader(csvfile)
 		for row in csv_reader:
 			print(row)
-
-
-# when want to use it independently
-# search_term = input("Please type some input: ")
-# # from reqandscrape.requestsender.chatgptreqsender import receiveinput
-# search_term = "binocular"
-# search_group = ""
-# asyncio.run(scrape_amazon(search_term,search_group))
-# asyncio.run(scrape_amazon_product(asin=["B095X25X25"]))

@@ -82,60 +82,62 @@ def scrape_amazon(inputkeyword,search_group):
 }
 
 	#end of seleniumwire option
-	try:
-		print("\t\t start process")
-		# Replace with your proxy server URL
-		options.add_argument(f'--proxy-server={api_endpoint}')
-		# Create a Selenium Wire driver
-		driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
-		driver.get("https://www.amazon.com")
+	if(api_endpoint != ''):
+		try:
+			print("\t\t start process")
+			# Replace with your proxy server URL
+			options.add_argument(f'--proxy-server={api_endpoint}')
+			# Create a Selenium Wire driver
+			driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
+			driver.get("https://www.amazon.com")
 
-		driver.implicitly_wait(5)
-		inputkeyword = inputkeyword + " " + search_group
-		keyword = str(inputkeyword)
-		search = driver.find_element(By.ID, 'twotabsearchtextbox')
-		search.send_keys(keyword)
+			driver.implicitly_wait(5)
+			inputkeyword = inputkeyword + " " + search_group
+			keyword = str(inputkeyword)
+			search = driver.find_element(By.ID, 'twotabsearchtextbox')
+			search.send_keys(keyword)
 
-		# click search button
-		driver.implicitly_wait(2)
-		search_button = driver.find_element(By.ID, 'nav-search-submit-button')
-		
-		search_button.click()
+			# click search button
+			driver.implicitly_wait(2)
+			search_button = driver.find_element(By.ID, 'nav-search-submit-button')
+			
+			search_button.click()
 
-		driver.implicitly_wait(5) 
-		print("before looping")
-		while True:
-			print("looping")
-			driver.implicitly_wait(3)
-			try:
-						
-						#class="s-pagination-item s-pagination-button"
-						driver.implicitly_wait(6)
-						next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
-						next_button.click()
-			except (NoSuchElementException, TimeoutException):
-					break
-		print("end of loop")
+			driver.implicitly_wait(5) 
+			print("before looping")
+			while True:
+				print("looping")
+				driver.implicitly_wait(3)
+				try:
+							
+							#class="s-pagination-item s-pagination-button"
+							driver.implicitly_wait(6)
+							next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
+							next_button.click()
+				except (NoSuchElementException, TimeoutException):
+						break
+			print("end of loop")
 
-		content = driver.page_source
-		soup = BeautifulSoup(content, 'html.parser')
-		items = soup.findAll('div', 'sg-col-inner')
-		print("setting up data")
-		#print(type(items))
-		with open("raw_result.txt", "w+",encoding="utf-8") as f:
-				print("enter loop raw result")
-				for item in items:
-						text_content = str(item)
-						json_data = json.dumps(text_content, indent=4)
-						f.write(json_data + "\n")
-		print("item sorting")
-		#set data from search
-		item_sorting(items)
-		# end process quit driver
-		print("\t\t end process")
-		driver.quit()
-	except(ConnectionRefusedError,ConnectionAbortedError):
-		driver.quit()
+			content = driver.page_source
+			soup = BeautifulSoup(content, 'html.parser')
+			items = soup.findAll('div', 'sg-col-inner')
+			print("setting up data")
+			#print(type(items))
+			with open("raw_result.txt", "w+",encoding="utf-8") as f:
+					print("enter loop raw result")
+					for item in items:
+							text_content = str(item)
+							json_data = json.dumps(text_content, indent=4)
+							f.write(json_data + "\n")
+			print("item sorting")
+			#set data from search
+			item_sorting(items)
+			# end process quit driver
+			print("\t\t end process")
+			driver.quit()
+		except(ConnectionRefusedError,ConnectionAbortedError):
+			driver.quit()
+
 	print("setting up to get from csv to send")
 	with open('search_result_recent.csv', mode ='r')as file:
 		result = csv.reader(file)
@@ -182,11 +184,16 @@ def save_data_csv(product_name, product_asin, product_price, product_ratings, pr
 	data = []
 	data.append([product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link])
 	# Save data to CSV file
+
 	with open('search_result_recent.csv', 'w', newline='',encoding="utf-8") as csvfile:
 			writer = csv.writer(csvfile)
 			writer.writerow(['Product Name', 'ASIN', 'Price', 'Ratings', 'Ratings Num', 'Link'])  # Write header row
 			writer.writerows(data)
-	# to check data scraped
+
+	# save data to json file
+    # Save data to JSON file
+	with open('search_result_recent.json', 'a', encoding='utf-8') as jsonfile:
+		json.dump(data, jsonfile, indent=4)
 
 def save_data_csv_product(product_name, product_asin, product_price, product_ratings):
 
@@ -357,7 +364,9 @@ def get_product_detail(soup):
 def json_data_mock():
 	input_file= "Reqandscrape\sample.json"
 	with open(input_file, encoding="utf-8") as json_file:
-		parsed_json = json.load(json_file)
+		print()
+	converted_csv = csv_to_json()
+	parsed_json = json.load(converted_csv)
 	return parsed_json
 
 def clean_html(input):

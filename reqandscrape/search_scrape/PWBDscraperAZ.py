@@ -82,9 +82,10 @@ def scrape_amazon(inputkeyword,search_group):
 }
 
 	#end of seleniumwire option
+	print("start process")
 	if(api_endpoint != ''):
 		try:
-			print("\t\t start process")
+			print("\t\t processing")
 			# Replace with your proxy server URL
 			options.add_argument(f'--proxy-server={api_endpoint}')
 			# Create a Selenium Wire driver
@@ -132,53 +133,78 @@ def scrape_amazon(inputkeyword,search_group):
 			print("item sorting")
 			#set data from search
 			item_sorting(items)
+			#setting up ASIN
+			print("setting up asin")
+			asin_set = get_asin()
+			#begin product scraping
+			print("check asin for product scraping")
+			if asin_set is list and asin_set is not None:
+				print("scraping")
+				scrape_amazon_product(asin_set)
+			else:
+				print("Product scraping failed")
 			# end process quit driver
-			print("\t\t end process")
+			print("end of product scraping")
 			driver.quit()
+			print("\t\t end process")
 		except(ConnectionRefusedError,ConnectionAbortedError):
 			driver.quit()
+			print("\t\t end process")
+	else:
+		print("no proxy")
+		driver.quit()
 
-	print("setting up to get from csv to send")
-	with open('search_result_recent.csv', mode ='r')as file:
-		result = csv.reader(file)
+	
 
 	
 	print("\t end amazon")
 	return result
 
 def item_sorting(items):
-	product_asin = []
-	product_name = []
-	product_price = []
-	product_ratings = []
-	product_ratings_num = []
-	product_link = []
+    data = []
 
-	for item_text in items:
-			name = item_text.find('span', class_='a-size-medium a-color-base a-text-normal')
-			name = clean_html(str(name))
-			product_name.append(name)
+    for item_text in items:
+        product_name = clean_html(str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal')))
+        product_price = clean_html(str(item_text.find('span', class_='a-price-whole')))
+        product_ratings = clean_html(str(item_text.find('span', class_='a-row a-size-small')))
+        product_link = clean_html(str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text-color a-text-normal')))
 
-			price = item_text.find('span', class_='a-price-whole')
-			price = clean_html(str(price))
-			product_price.append(price)
-			
-			rating = item_text.find('span', class_='a-row a-size-small')
-			rating = clean_html(str(rating))
-			product_ratings.append(rating)
+        # Calculate product_asin using urlcleaner (if needed)
+        # product_asin = urlcleaner(product_link)
 
-			link = item_text.find('a',class_ = 'a-link-normal s-underline-text s-underline-link-text-color a-text-normal')
-			link = clean_html(str(link))
-			product_link.append(link)
-			
-			# product_asin.append(urlcleaner(link))
-			
-	save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link)
+        # Create a dictionary for each product
+        product_data = {
+            "product": product_name,
+            "price": product_price,
+            "rating": product_ratings,
+            "URL": product_link,
+            # "ASIN": product_asin
+        }
+
+        data.append(product_data)
+    # Clear the CSV file
+    with open('search_result_recent_test.csv', 'w', newline='', encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Product Name', 'ASIN', 'Price', 'Ratings', 'Ratings Num', 'Link'])  # Write header row
+
+    # Clear the JSON file
+    with open('search_result_recent_test.json', 'w', encoding='utf-8') as jsonfile:
+        json.dump([], jsonfile)
+    print(data)
+
+    # Write data to CSV
+    with open('search_result_recent_test.csv', 'a', newline='', encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(data)
+
+    # Write data to JSON
+    with open('search_result_recent_test.json', 'a', encoding='utf-8') as jsonfile:
+        json.dump(data, jsonfile, indent=4)
 
 #yup get review stuff
 
 
-
+#problem in saving data it appear that it append one of column in one chunk of data need urgent fix
 def save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link):
 
 	data = []
@@ -206,7 +232,9 @@ def save_data_csv_product(product_name, product_asin, product_price, product_rat
 			writer.writerows(data)
 	# to check data scraped
 
+def get_asin():
 
+	return None
 
 
 # #--------------------------URL cleaner---------------------------------------
@@ -273,6 +301,7 @@ def scrape_amazon_product(asin):
 					text_content = str(item)
 					json_data = json.dumps(text_content, indent=4)
 					f.write(json_data + "\n")
+		
 	# Log network requests after navigation
 	for request in driver.requests:
 			print(f"Request: {request.method} {request.url}")  # Inspect requests
@@ -362,12 +391,23 @@ def get_product_detail(soup):
 	
 
 def json_data_mock():
-	input_file= "Reqandscrape\sample.json"
+	input_file= "Reqandscrape/search_result_recent.json"
 	with open(input_file, encoding="utf-8") as json_file:
-		print()
-	converted_csv = csv_to_json()
-	parsed_json = json.load(converted_csv)
+		parsed_json = json.load(json_file)
 	return parsed_json
+
+def csv_json_mock():
+	input_file= pd.read_csv("search_result_recent.csv")
+	print(input_file)
+	input_file.dropna(axis=1,how="any")
+	print(input_file)
+	print(input_file.head(2 ))
+	# with open(input_file, encoding="utf-8") as json_file:
+	# 	print(json_file)
+	# 	parsed_json = json.load(json_file)
+	# jsoned_file = json.dumps(parsed_json,indent=4)
+	# return jsoned_file
+	
 
 def clean_html(input):
     # Reaplce html tags from user input, see utils.test for examples
@@ -387,12 +427,14 @@ def clean_html(input):
     return output
 
 
-def test():
+# def test():
 
-	# Replace 'raw_result.csv' with the actual name of your CSV file
-	input_file = "search_result_recent.csv"
+# 	# Replace 'raw_result.csv' with the actual name of your CSV file
+# 	input_file = "search_result_recent.txt"
+# 	#convert txt to csv
+# 	output_file = "test.csv"
+# 	convert_to_html = BeautifulSoup(input_file, "html.parser")
+# 	sorting_result = item_sorting(convert_to_html)
+# 	print(sorting_result)
 
-	with open(input_file, "r", encoding="utf-8") as csvfile:
-		csv_reader = csv.reader(csvfile)
-		for row in csv_reader:
-			print(row)
+# test()

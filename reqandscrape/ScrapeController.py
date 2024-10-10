@@ -3,6 +3,7 @@ from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
+from Reqandscrape.search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
 #time stuff
 #nested asyncio nice
 import nest_asyncio,pandas
@@ -66,8 +67,7 @@ def scrape():
     inputpeople = response[1]
     #(inputsearch,inputpeople)
     print("======doing task=====")
-    # scrape_amazon(inputsearch,inputpeople)
-    result = csv_to_json("search_result_recent.csv","search_result_dumb.json")
+    result = scrape_amazon(inputsearch,inputpeople)
     print("======sending result=====")
     print(type(result))
 
@@ -125,7 +125,7 @@ def search_prod_sender_test():
 async def scrape_test():
 	response = request.get_json() # store the json body request
 	print(response)
-	results = json_data_mock()
+	results = csv_json_mock()
 	# Process scraped results (e.g., convert to JSON, store in database)
 	return jsonify(results)
 

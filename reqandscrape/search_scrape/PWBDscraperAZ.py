@@ -48,6 +48,7 @@ def clear_csv(csv_file):
 # Navigate to the website
 
 def scrape_amazon(inputkeyword,search_group):
+	time = 0
 	print("\t start amazon")
 	result = []
 
@@ -80,30 +81,35 @@ def scrape_amazon(inputkeyword,search_group):
 			driver.get("https://www.amazon.com")
 
 			driver.implicitly_wait(5)
+			#merge word
 			inputkeyword = inputkeyword + " " + search_group
 			keyword = str(inputkeyword)
+			#finding search box
 			search = driver.find_element(By.ID, 'twotabsearchtextbox')
+			#set condition if detected abandon task
 			search.send_keys(keyword)
-
-			# click search button
+				# click search button
 			driver.implicitly_wait(2)
 			search_button = driver.find_element(By.ID, 'nav-search-submit-button')
-			
+				
 			search_button.click()
-
-			driver.implicitly_wait(5) 
+			wait_count = 0
+			driver.implicitly_wait(8) 
 			print("before looping")
 			while True:
 				print("looping")
-				driver.implicitly_wait(3)
+				driver.implicitly_wait(8)
 				try:
-							
-							#class="s-pagination-item s-pagination-button"
-							driver.implicitly_wait(6)
-							next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
-							next_button.click()
+								#class="s-pagination-item s-pagination-button"
+								driver.implicitly_wait(8)
+								next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
+								next_button.click()
+								wait_count = 0
 				except (NoSuchElementException, TimeoutException):
-						break
+					wait_count += 1
+					if wait_count >= 50 // 2:  # Check after half of max wait time
+						print("Error: Encountered delays for too long")
+						break  # Exit the loop if exceeded maximum wait attempts
 			print("end of loop")
 
 			content = driver.page_source
@@ -118,19 +124,18 @@ def scrape_amazon(inputkeyword,search_group):
 							json_data = json.dumps(text_content, indent=4)
 							f.write(json_data + "\n")
 			print("item sorting")
-			#set data from search
 			item_sorting(items)
-			#setting up ASIN
+				#setting up ASIN
 			print("setting up asin")
 			asin_set = get_asin()
-			#begin product scraping
+				#begin product scraping
 			print("check asin for product scraping")
 			if asin_set is list and asin_set is not None:
 				print("scraping")
 				scrape_amazon_product(asin_set)
 			else:
 				print("Product scraping failed")
-			# end process quit driver
+				# end process quit driver
 			print("end of product scraping")
 			driver.quit()
 			print("\t\t end process")
@@ -141,9 +146,13 @@ def scrape_amazon(inputkeyword,search_group):
 		print("no proxy")
 		driver.quit()
 
-	with open('search_result.json', 'w', encoding='utf-8') as json_file:
+	with open('search_result3.json', 'w', encoding='utf-8') as json_file:
+		
 		json.dump(result, json_file, ensure_ascii=False, indent=4)
 	print("\t end amazon")
+	if result == None:
+		print("result bad")
+		result = "bad"
 	return result
 
 def item_sorting(items):
@@ -152,53 +161,46 @@ def item_sorting(items):
 			data_price = []
 			data_ratings = []
 			data_link = []
-			data_test = []
-			data_test2 = []
+
 				# Clear the CSV file	
-			with open('search_result.json', 'w', encoding='utf-8') as jsonfile:
-					json.dump([], jsonfile)
 			with open('search_result2.json', 'w', encoding='utf-8') as jsonfile:
 					json.dump([], jsonfile)
 			with open('search_result3.json', 'w', encoding='utf-8') as jsonfile:
 					json.dump([], jsonfile)
-			
+
 			for item_text in items:
-					product_name = str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal'))
+					product_name = clean_html(str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal')))
 					data_name.append(product_name)
 					product_price = clean_html(str(item_text.find('span', class_='a-price-whole')))
 					data_price.append(product_price)
-					product_ratings = clean_html(str(item_text.find("span", class_ = 'a-size-base a-color-base')))
+					product_ratings = clean_html(str(item_text.find('span', class_ = 'a-size-base a-color-base')))
 					data_ratings.append(product_ratings)
-					#
-					product_link = str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text a-text-normal'))
+					product_link = str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal'))
+					product_link = urlcleaner(product_link)
 					data_link.append(product_link)
 
 					# Calculate product_asin using urlcleaner (if needed)
 					# product_asin = urlcleaner(product_link)
 					
 					# Create a dictionary for each product
-					product_data = {
-							"product": product_name,
-							"price": product_price,
-							"rating": product_ratings,
-							"URL": product_link,
-							# "ASIN": product_asin
-					}
-					data.append(product_data)
-					data_test.append(product_name)
-			data_test2.append(product_data)
-					# if(product_data['product'] is not None):
-					#     data.append(product_data)
-			print(data)
-			
-			
+					if product_name != None:
+						product_data = {
+								"product": product_name,
+								"price": product_price,
+								"rating": product_ratings,
+								"URL": product_link,
+								# "ASIN": product_asin
+						}
+						data.append(product_data)
+						# if(product_data['product'] is not None):
+						#     data.append(product_data)
 			# Write data to JSON
-			with open('search_result.json', 'a', encoding='utf-8') as jsonfile:
-					json.dump(data, jsonfile, indent=4)
-			with open('search_result2.json', 'a', encoding='utf-8') as jsonfile:
-					json.dump(data_test, jsonfile, indent=4)
 			with open('search_result3.json', 'a', encoding='utf-8') as jsonfile:
-					json.dump(data_test2, jsonfile, indent=4)
+					if jsonfile['product_name']:
+						print("bad")
+					else:	
+					  json.dump(data, jsonfile, indent=4)
+			
 
 def get_asin():
 
@@ -211,18 +213,15 @@ def is_asin(text):
     # ASINs are typically 10-character alphanumeric strings..nice
     return bool(re.fullmatch(r'[A-Z0-9]{10}', text, flags=re.IGNORECASE))
 
-def urlcleaner(input_file):
-    result = []
-    json_object = json.load(input_file)
-    for line in json_object:
-        url = line.get("url")
+def urlcleaner(url):
+    result = ''
         #culling the URL
-        asin_match = re.search(r'/[dg]p/([^/?]+)', url, flags=re.IGNORECASE)
-        if asin_match:
+    asin_match = re.search(r'/[dg]p/([^/?]+)', url, flags=re.IGNORECASE)
+    if asin_match:
             asin = asin_match.group(1)
-            # check is it a valid ASIN
+            # # check is it a valid ASIN
             if is_asin(asin):
-                result.append(asin)
+                result = asin
     return result
 # #----------------review scraping---------------------
 
@@ -353,7 +352,7 @@ def get_product_detail(soup):
 	
 
 def json_data_mock():
-	input_file= "Reqandscrape/search_result_recent.json"
+	input_file= "search_result3.json"
 	with open(input_file, encoding="utf-8") as json_file:
 		parsed_json = json.load(json_file)
 	return parsed_json
@@ -372,19 +371,18 @@ def csv_json_mock():
 	
 
 def clean_html(input):
-    # Reaplce html tags from user input, see utils.test for examples
-
-    # ok_tags = [u"a", u"img", u"strong", u"b", u"em", u"i", u"u", u"ul", u"li", u"p", u"br",  u"blockquote", u"code",u"\n"]
-    # ok_attributes = {u"a": [u"href", u"rel"], u"img": [u"src", u"alt", u"title"]}
-    # all other tags: replace with the content of the tag
-
-    # If input contains link in the format:  then convert it to &lt; http:// &gt;
-    # This is because otherwise the library recognizes it as a tag and breaks the link.
-    # input = re.sub("\&lt;(http\S+?)\&gt;", r'&lt; \1 &gt;', input)
     cleaner = bleach.Cleaner(
-            # attributes=ok_attributes,
-            # tags=ok_tags,
             strip=True
 						)
     output = cleaner.clean(input)
     return output
+
+
+# def test_is_asin():
+#     # Open the JSON file and inspect the results
+#     with open('search_result3.json', 'r') as jsonfile:
+#         data = json.load(jsonfile)
+#         for product in data:
+#             print(urlcleaner(product['URL']))
+
+# test_is_asin()

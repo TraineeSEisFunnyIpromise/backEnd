@@ -40,25 +40,12 @@ import bleach
 
 
 # Options for Chrome driver
+
+def clear_csv(csv_file):
+    with open(csv_file, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([])
 # Navigate to the website
-def csv_to_json(csv_file_path, json_file_path):
-    # Initialize an empty list to store the data
-    data = []
-    
-    # Open the CSV file for reading
-    with open(csv_file_path, 'r') as csv_file:
-        # Create a CSV reader object
-        csv_reader = csv.DictReader(csv_file)
-        
-        # Iterate over each row in the CSV file
-        for row in csv_reader:
-            # Append each row (as a dictionary) to the data list
-            data.append(row)
-    
-    # Open the JSON file for writing
-    with open(json_file_path, 'w') as json_file:
-        # Write the data list to the JSON file
-        json.dump(data, json_file, indent=4)
 
 def scrape_amazon(inputkeyword,search_group):
 	print("\t start amazon")
@@ -154,83 +141,64 @@ def scrape_amazon(inputkeyword,search_group):
 		print("no proxy")
 		driver.quit()
 
-	
-
-	
+	with open('search_result.json', 'w', encoding='utf-8') as json_file:
+		json.dump(result, json_file, ensure_ascii=False, indent=4)
 	print("\t end amazon")
 	return result
 
 def item_sorting(items):
-    data = []
+			data = []
+			data_name = []
+			data_price = []
+			data_ratings = []
+			data_link = []
+			data_test = []
+			data_test2 = []
+				# Clear the CSV file	
+			with open('search_result.json', 'w', encoding='utf-8') as jsonfile:
+					json.dump([], jsonfile)
+			with open('search_result2.json', 'w', encoding='utf-8') as jsonfile:
+					json.dump([], jsonfile)
+			with open('search_result3.json', 'w', encoding='utf-8') as jsonfile:
+					json.dump([], jsonfile)
+			
+			for item_text in items:
+					product_name = str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal'))
+					data_name.append(product_name)
+					product_price = clean_html(str(item_text.find('span', class_='a-price-whole')))
+					data_price.append(product_price)
+					product_ratings = clean_html(str(item_text.find("span", class_ = 'a-size-base a-color-base')))
+					data_ratings.append(product_ratings)
+					#
+					product_link = str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text a-text-normal'))
+					data_link.append(product_link)
 
-    for item_text in items:
-        product_name = clean_html(str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal')))
-        product_price = clean_html(str(item_text.find('span', class_='a-price-whole')))
-        product_ratings = clean_html(str(item_text.find('span', class_='a-row a-size-small')))
-        product_link = clean_html(str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text-color a-text-normal')))
-
-        # Calculate product_asin using urlcleaner (if needed)
-        # product_asin = urlcleaner(product_link)
-
-        # Create a dictionary for each product
-        product_data = {
-            "product": product_name,
-            "price": product_price,
-            "rating": product_ratings,
-            "URL": product_link,
-            # "ASIN": product_asin
-        }
-
-        data.append(product_data)
-    # Clear the CSV file
-    with open('search_result_recent_test.csv', 'w', newline='', encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['Product Name', 'ASIN', 'Price', 'Ratings', 'Ratings Num', 'Link'])  # Write header row
-
-    # Clear the JSON file
-    with open('search_result_recent_test.json', 'w', encoding='utf-8') as jsonfile:
-        json.dump([], jsonfile)
-    print(data)
-
-    # Write data to CSV
-    with open('search_result_recent_test.csv', 'a', newline='', encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerows(data)
-
-    # Write data to JSON
-    with open('search_result_recent_test.json', 'a', encoding='utf-8') as jsonfile:
-        json.dump(data, jsonfile, indent=4)
-
-#yup get review stuff
-
-
-#problem in saving data it appear that it append one of column in one chunk of data need urgent fix
-def save_data_csv(product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link):
-
-	data = []
-	data.append([product_name, product_asin, product_price, product_ratings, product_ratings_num, product_link])
-	# Save data to CSV file
-
-	with open('search_result_recent.csv', 'w', newline='',encoding="utf-8") as csvfile:
-			writer = csv.writer(csvfile)
-			writer.writerow(['Product Name', 'ASIN', 'Price', 'Ratings', 'Ratings Num', 'Link'])  # Write header row
-			writer.writerows(data)
-
-	# save data to json file
-    # Save data to JSON file
-	with open('search_result_recent.json', 'a', encoding='utf-8') as jsonfile:
-		json.dump(data, jsonfile, indent=4)
-
-def save_data_csv_product(product_name, product_asin, product_price, product_ratings):
-
-	data = []
-	data.append([product_name, product_asin, product_price, product_ratings])
-	# Save data to CSV file
-	with open('search_result_product.csv', 'w', newline='',encoding="utf-8") as csvfile:
-			writer = csv.writer(csvfile)
-			writer.writerow(['Title', 'ASIN', 'Price', 'Product_Ratings', 'Ratings Score', 'Link'])  # Write header row
-			writer.writerows(data)
-	# to check data scraped
+					# Calculate product_asin using urlcleaner (if needed)
+					# product_asin = urlcleaner(product_link)
+					
+					# Create a dictionary for each product
+					product_data = {
+							"product": product_name,
+							"price": product_price,
+							"rating": product_ratings,
+							"URL": product_link,
+							# "ASIN": product_asin
+					}
+					data.append(product_data)
+					data_test.append(product_name)
+			data_test2.append(product_data)
+					# if(product_data['product'] is not None):
+					#     data.append(product_data)
+			print(data)
+			
+			
+			# Write data to JSON
+			with open('search_result.json', 'a', encoding='utf-8') as jsonfile:
+					json.dump(data, jsonfile, indent=4)
+			with open('search_result2.json', 'a', encoding='utf-8') as jsonfile:
+					json.dump(data_test, jsonfile, indent=4)
+			with open('search_result3.json', 'a', encoding='utf-8') as jsonfile:
+					json.dump(data_test2, jsonfile, indent=4)
 
 def get_asin():
 
@@ -257,12 +225,6 @@ def urlcleaner(input_file):
                 result.append(asin)
     return result
 # #----------------review scraping---------------------
-
-def printingstuff():
-    for i in range(6):
-        print("hello")
-        i +=1
-		
 
 def scrape_amazon_product(asin):
 	options = webdriver.ChromeOptions()
@@ -418,23 +380,11 @@ def clean_html(input):
 
     # If input contains link in the format:  then convert it to &lt; http:// &gt;
     # This is because otherwise the library recognizes it as a tag and breaks the link.
-    input = re.sub("\&lt;(http\S+?)\&gt;", r'&lt; \1 &gt;', input)
+    # input = re.sub("\&lt;(http\S+?)\&gt;", r'&lt; \1 &gt;', input)
     cleaner = bleach.Cleaner(
             # attributes=ok_attributes,
             # tags=ok_tags,
-            strip=True)
+            strip=True
+						)
     output = cleaner.clean(input)
     return output
-
-
-# def test():
-
-# 	# Replace 'raw_result.csv' with the actual name of your CSV file
-# 	input_file = "search_result_recent.txt"
-# 	#convert txt to csv
-# 	output_file = "test.csv"
-# 	convert_to_html = BeautifulSoup(input_file, "html.parser")
-# 	sorting_result = item_sorting(convert_to_html)
-# 	print(sorting_result)
-
-# test()

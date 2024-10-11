@@ -68,8 +68,9 @@ def scrape():
     #(inputsearch,inputpeople)
     print("======doing task=====")
     result = scrape_amazon(inputsearch,inputpeople)
-    print("======sending result=====")
+    print("\t ======sending result=====")
     print(type(result))
+    print(result)
 
     return jsonify(result)
 

@@ -44,7 +44,7 @@ def test_scrape_product():
     product_url = ""
 
 def test_scrape_review():
-
+    return
 
 # Run the test
 if __name__ == "__main__":

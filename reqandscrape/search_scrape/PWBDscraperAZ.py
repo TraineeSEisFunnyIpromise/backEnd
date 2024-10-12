@@ -128,11 +128,11 @@ def scrape_amazon(inputkeyword,search_group):
 				#setting up ASIN
 			print("setting up asin")
 			asin_set = get_asin()
-				#begin product scraping
+			#begin product scraping
 			print("check asin for product scraping")
 			if asin_set is list and asin_set is not None:
 				print("scraping")
-				scrape_amazon_product(asin_set)
+				# scrape_amazon_product(asin_set)
 			else:
 				print("Product scraping failed")
 				# end process quit driver
@@ -147,12 +147,12 @@ def scrape_amazon(inputkeyword,search_group):
 		driver.quit()
 
 	with open('search_result3.json', 'w', encoding='utf-8') as json_file:
-		
 		json.dump(result, json_file, ensure_ascii=False, indent=4)
 	print("\t end amazon")
 	if result == None:
 		print("result bad")
 		result = "bad"
+	
 	return result
 
 def item_sorting(items):
@@ -161,6 +161,7 @@ def item_sorting(items):
 			data_price = []
 			data_ratings = []
 			data_link = []
+			data_asin = []
 
 				# Clear the CSV file	
 			with open('search_result2.json', 'w', encoding='utf-8') as jsonfile:
@@ -178,6 +179,8 @@ def item_sorting(items):
 					product_link = str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal'))
 					product_link = urlcleaner(product_link)
 					data_link.append(product_link)
+					product_asin = urlcleaner(product_link)
+					data_asin.append(urlcleaner(product_link))
 
 					# Calculate product_asin using urlcleaner (if needed)
 					# product_asin = urlcleaner(product_link)
@@ -189,7 +192,7 @@ def item_sorting(items):
 								"price": product_price,
 								"rating": product_ratings,
 								"URL": product_link,
-								# "ASIN": product_asin
+								"ASIN": product_asin
 						}
 						data.append(product_data)
 						# if(product_data['product'] is not None):
@@ -203,8 +206,13 @@ def item_sorting(items):
 			
 
 def get_asin():
-
-	return None
+	data=[]
+	with open('search_result3.json', 'a', encoding='utf-8') as jsonfile:
+				if jsonfile['ASIN']== None:
+					print("bad")
+				else:	
+					json.dump(data, jsonfile, indent=4)
+	return data
 
 
 # #--------------------------URL cleaner---------------------------------------
@@ -358,11 +366,14 @@ def json_data_mock():
 	return parsed_json
 
 def csv_json_mock():
-	input_file= pd.read_csv("search_result_recent.csv")
-	print(input_file)
-	input_file.dropna(axis=1,how="any")
-	print(input_file)
-	print(input_file.head(2 ))
+	with open('search_result3.json', 'w', encoding='utf-8') as json_file:
+		json.dump(result, json_file, ensure_ascii=False, indent=4)
+	print("\t end amazon")
+	if result == None:
+		print("result bad")
+		result = "bad"
+	
+	return result
 	# with open(input_file, encoding="utf-8") as json_file:
 	# 	print(json_file)
 	# 	parsed_json = json.load(json_file)
@@ -376,13 +387,3 @@ def clean_html(input):
 						)
     output = cleaner.clean(input)
     return output
-
-
-# def test_is_asin():
-#     # Open the JSON file and inspect the results
-#     with open('search_result3.json', 'r') as jsonfile:
-#         data = json.load(jsonfile)
-#         for product in data:
-#             print(urlcleaner(product['URL']))
-
-# test_is_asin()

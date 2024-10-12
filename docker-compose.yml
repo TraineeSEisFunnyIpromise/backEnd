@@ -8,6 +8,6 @@ services:
         environment:
             MONGO_INITDB_DATABASE: db1
         ports:
-            - 6000
+            - 27017:27017
         volumes:
             - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro

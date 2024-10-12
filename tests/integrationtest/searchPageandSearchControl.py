@@ -1,51 +1,52 @@
-#this test is created in order to test the scraping function which it will test 
-import asyncio
-from unittest.mock import patch
+# Import necessary libraries
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException 
 
-from Reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon, clean_html
+import time
 
-# Mock data for the search results
-MOCK_SEARCH_RESULTS = [
-    {
-        "product_name": "Test Product 1",
-        "price": "$19.99",
-        "link": "https://www.amazon.com/product1"
-    },
-    {
-        "product_name": "Test Product 2",
-        "price": "$24.95",
-        "link": "https://www.amazon.com/product2"
-    },
-]
+# Define browser driver (replace with your preferred driver)
+driver = webdriver.Chrome()  # Replace with your browser driver path
 
-# Mock the clean_html function to avoid external dependencies
-@patch('your_script.clean_html')
+# Define base URL for your application
+base_url = "http://localhost:4000"  # Replace with your application URL
 
-def test_scrape_amazon(mock_clean_html):
-    # Set the mock return value for clean_html
-    mock_clean_html.return_value = "Cleaned HTML content"
+# Define search data and target
+search_data = "laptop"
+target_data = "student"
 
-    # Define the search term
-    search_term = "test"
 
-    # Run the scraper function in an async loop (if using asyncio)
-    loop = asyncio.get_event_loop()
-    results = loop.run_until_complete(scrape_amazon(search_term, ""))
+def test_search_and_scrape_response():
 
-    # Assert the results (modify based on your expected output)
-    assert len(results) == 2  # Expect two products
+    driver.get(f"{base_url}")  # Navigate to your application
 
-    for product in results:
-        assert product.get("product_name")  # Check for product name
-        assert product.get("price")  # Check for price
-        assert product.get("link")  # Check for link
+    # Find search input elements and enter data
+    search_input = driver.find_element(By.ID, "searchData")
+    search_input.send_keys(search_data)
 
-def test_scrape_product():
-    product_url = ""
+    target_input = driver.find_element(By.ID, "usertargetData")
+    target_input.send_keys(target_data)
 
-def test_scrape_review():
-    return
+    # Find submit button and click
+    submit_button = driver.find_element(By.XPATH, "//button[@type='submit']")
+    submit_button.click()
 
-# Run the test
+    # Wait for loading indicator or some element that signifies response received
+    try:
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "loader_criteria"))  # Replace with the ID of an element displayed after response
+        )
+    except TimeoutException:
+        assert False, "Timed out waiting for response"
+
+    # Check if result section appears (optional)
+    result_section = driver.find_element(By.CSS_SELECTOR, ".colored-box-display")
+    assert result_section.is_displayed(), "Result section not displayed"
+
+    # Close the browser after the test
+    driver.quit()
+
 if __name__ == "__main__":
-    asyncio.run(test_scrape_amazon())
+    test_search_and_scrape_response()

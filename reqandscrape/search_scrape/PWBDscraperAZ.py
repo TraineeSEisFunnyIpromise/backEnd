@@ -73,75 +73,79 @@ def scrape_amazon(inputkeyword,search_group):
 	print("start process")
 	if(api_endpoint != ''):
 		try:
-			print("\t\t processing")
-			# Replace with your proxy server URL
-			options.add_argument(f'--proxy-server={api_endpoint}')
-			# Create a Selenium Wire driver
-			driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
-			driver.get("https://www.amazon.com")
+				print("\t\t processing")
+				# Replace with your proxy server URL
+				# options.add_argument(f'--proxy-server={api_endpoint}')
+				# Create a Selenium Wire driver
+				driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
+				driver.get("https://www.amazon.com")
 
-			driver.implicitly_wait(5)
-			#merge word
-			inputkeyword = inputkeyword + " " + search_group
-			keyword = str(inputkeyword)
-			#finding search box
-			search = driver.find_element(By.ID, 'twotabsearchtextbox')
-			#set condition if detected abandon task
-			search.send_keys(keyword)
-				# click search button
-			driver.implicitly_wait(2)
-			search_button = driver.find_element(By.ID, 'nav-search-submit-button')
-				
-			search_button.click()
-			wait_count = 0
-			driver.implicitly_wait(8) 
-			print("before looping")
-			while True:
-				print("looping")
-				driver.implicitly_wait(8)
-				try:
-								#class="s-pagination-item s-pagination-button"
-								driver.implicitly_wait(8)
-								next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
-								next_button.click()
-								wait_count = 0
-				except (NoSuchElementException, TimeoutException):
-					wait_count += 1
-					if wait_count >= 50 // 2:  # Check after half of max wait time
-						print("Error: Encountered delays for too long")
-						break  # Exit the loop if exceeded maximum wait attempts
-			print("end of loop")
+				driver.implicitly_wait(5)
+				#merge word
+				inputkeyword = inputkeyword + " " + search_group
+				keyword = str(inputkeyword)
+				#finding search box
+				search = driver.find_element(By.ID, 'twotabsearchtextbox')
+				#set condition if detected abandon task
+				search.send_keys(keyword)
+					# click search button
+				driver.implicitly_wait(2)
+				search_button = driver.find_element(By.ID, 'nav-search-submit-button')
+					
+				search_button.click()
+				wait_count = 0
+				driver.implicitly_wait(800) 
+				print("before looping")
+				while True:
+					print("looping")
+					driver.implicitly_wait(500)
+					try:
+									#class="s-pagination-item s-pagination-button"
+									driver.implicitly_wait(8)
+									next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
+									next_button.click()
+									wait_count = 0
+					except (NoSuchElementException, TimeoutException):
+						wait_count += 1
+						if wait_count >= 50 // 2:  # Check after half of max wait time
+							print(wait_count)
+							print("Error: Encountered delays for too long")
+							break  # Exit the loop if exceeded maximum wait attempts
+				print("end of loop")
 
-			content = driver.page_source
-			soup = BeautifulSoup(content, 'html.parser')
-			items = soup.findAll('div', 'sg-col-inner')
-			print("setting up data")
-			#print(type(items))
-			with open("raw_result.txt", "w+",encoding="utf-8") as f:
-					print("enter loop raw result")
-					for item in items:
-							text_content = str(item)
-							json_data = json.dumps(text_content, indent=4)
-							f.write(json_data + "\n")
-			print("item sorting")
-			item_sorting(items)
-				#setting up ASIN
-			print("setting up asin")
-			asin_set = get_asin()
-			#begin product scraping
-			print("check asin for product scraping")
-			if asin_set is list and asin_set is not None:
-				print("scraping")
-				# scrape_amazon_product(asin_set)
-			else:
-				print("Product scraping failed")
-				# end process quit driver
-			print("end of product scraping")
-			driver.quit()
-			print("\t\t end process")
+				content = driver.page_source
+				soup = BeautifulSoup(content, 'html.parser')
+				items = soup.findAll('div', 'sg-col-inner')
+				print("setting up data")
+				#print(type(items))
+				with open("raw_result.txt", "w+",encoding="utf-8") as f:
+						print("enter loop raw result")
+						for item in items:
+								text_content = str(item)
+								json_data = json.dumps(text_content, indent=4)
+								f.write(json_data + "\n")
+				print("item sorting")
+				item_sorting(items)
+					#setting up ASIN
+				print("setting up asin")
+				asin_set = get_asin()
+				#begin product scraping
+				print("check asin for product scraping")
+				if asin_set is list and asin_set is not None:
+					print("scraping")
+					for asin in asin_set:
+						print("scraping product")
+						scrape_amazon_product(asin)
+					# scrape_amazon_product(asin_set)
+				else:
+					print("Product scraping failed")
+					# end process quit driver
+				print("end of product scraping")
+				driver.quit()
+				print("\t\t end process")
 		except(ConnectionRefusedError,ConnectionAbortedError):
-			driver.quit()
-			print("\t\t end process")
+				driver.quit()
+				print("\t\t end process")
 	else:
 		print("no proxy")
 		driver.quit()
@@ -366,12 +370,14 @@ def json_data_mock():
 	return parsed_json
 
 def csv_json_mock():
+	result = []
 	with open('search_result3.json', 'w', encoding='utf-8') as json_file:
-		json.dump(result, json_file, ensure_ascii=False, indent=4)
+		if json_file == None:
+			print("result bad")
+		else:
+			json.dump(result, json_file, ensure_ascii=False, indent=4)
 	print("\t end amazon")
-	if result == None:
-		print("result bad")
-		result = "bad"
+
 	
 	return result
 	# with open(input_file, encoding="utf-8") as json_file:
@@ -387,3 +393,9 @@ def clean_html(input):
 						)
     output = cleaner.clean(input)
     return output
+
+
+def test_prod():
+	result = scrape_amazon_product()
+	print(result)
+	return result

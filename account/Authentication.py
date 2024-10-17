@@ -11,7 +11,7 @@ import uuid
 # instantiate the app
 app = Flask(__name__)
 
-client = MongoClient('mongodb://localhost:59930:6000')
+client = MongoClient('mongodb://localhost:27017')
 db = client['Database1']
 usercollection = db['db1']
 # enable CORS

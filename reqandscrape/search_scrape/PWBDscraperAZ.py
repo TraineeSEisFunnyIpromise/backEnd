@@ -246,42 +246,43 @@ def scrape_amazon_product(asin):
 	options.add_argument('disable-infobars')  # Disable infobars
 	options.add_argument('--blink-settings=imagesEnabled=false')
 	# options.add_argument("--headless")
+	if(api_endpoint is not None or api_endpoint != ''):
+			#seleniumwire option 
+		seleniumwire_options_setting = {
+		"proxy": {
+			"http": api_endpoint,
+			"https": api_endpoint
+			},
+		}
+		#end of seleniumwire option
 
-	#seleniumwire option 
-	seleniumwire_options_setting = {
-    "proxy": {
-        "http": api_endpoint,
-        "https": api_endpoint
-    	},
-	}
-	#end of seleniumwire option
-
-	# Replace with your proxy server URL
-	options.add_argument(f'--proxy-server={api_endpoint}')
-	# Create a Selenium Wire driver
-	driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
+		# Replace with your proxy server URL
+		options.add_argument(f'--proxy-server={api_endpoint}')
+		# Create a Selenium Wire driver
+		driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
 
 
-	for i in asin:
-		driver.get("https://www.amazon.com/dp/" + asin[i])
-		content = driver.page_source
-		soup = BeautifulSoup(content, 'html.parser')
-		items = soup.findAll('div', 'sg-col-inner')
-		get_product_detail(soup)
-		get_reviews(soup)
-		with open("raw_result_product.txt", "w",encoding="utf-8") as f:
-			for item in items:
-					text_content = str(item)
-					json_data = json.dumps(text_content, indent=4)
-					f.write(json_data + "\n")
-		
-	# Log network requests after navigation
-	for request in driver.requests:
-			print(f"Request: {request.method} {request.url}")  # Inspect requests
+		for i in asin:
+			driver.get("https://www.amazon.com/dp/" + asin[i])
+			content = driver.page_source
+			soup = BeautifulSoup(content, 'html.parser')
+			items = soup.findAll('div', 'sg-col-inner')
+			get_product_detail(soup)
+			get_reviews(soup)
+			with open("raw_result_product.txt", "w",encoding="utf-8") as f:
+				for item in items:
+						text_content = str(item)
+						json_data = json.dumps(text_content, indent=4)
+						f.write(json_data + "\n")
+			
+		# Log network requests after navigation
+		for request in driver.requests:
+				print(f"Request: {request.method} {request.url}")  # Inspect requests
 
-	driver.implicitly_wait(4)
-	# end process quit driver
-	driver.quit()
+		driver.implicitly_wait(4)
+		# end process quit driver
+		driver.quit()
+
 
 def get_reviews(soup):
     review_elements = soup.select("div.review")
@@ -399,3 +400,5 @@ def test_prod():
 	result = scrape_amazon_product()
 	print(result)
 	return result
+
+test_prod()

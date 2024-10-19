@@ -80,7 +80,14 @@ def scrape_amazon(inputkeyword,search_group):
 				driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
 				driver.get("https://www.amazon.com")
 
-				driver.implicitly_wait(5)
+				#wait for 5 second
+				driver.implicitly_wait(500)
+				#<input autocomplete="off" spellcheck="false" placeholder="Type characters" 
+				# id="captchacharacters" name="field-keywords" class="a-span12" 
+				# autocapitalize="off" autocorrect="off" type="text">
+				if(driver.find_element(By.ID,'captchacharacters')):
+					driver.quit()
+					return "detected capcha abandon task"
 				#merge word
 				inputkeyword = inputkeyword + " " + search_group
 				keyword = str(inputkeyword)
@@ -101,13 +108,13 @@ def scrape_amazon(inputkeyword,search_group):
 					driver.implicitly_wait(500)
 					try:
 									#class="s-pagination-item s-pagination-button"
-									driver.implicitly_wait(8)
+									driver.implicitly_wait(400)
 									next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
 									next_button.click()
 									wait_count = 0
 					except (NoSuchElementException, TimeoutException):
 						wait_count += 1
-						if wait_count >= 50 // 2:  # Check after half of max wait time
+						if wait_count >= 20 // 2:  # Check after half of max wait time
 							print(wait_count)
 							print("Error: Encountered delays for too long")
 							break  # Exit the loop if exceeded maximum wait attempts
@@ -150,6 +157,7 @@ def scrape_amazon(inputkeyword,search_group):
 		print("no proxy")
 		driver.quit()
 
+#
 	with open('search_result3.json', 'w', encoding='utf-8') as json_file:
 		json.dump(result, json_file, ensure_ascii=False, indent=4)
 	print("\t end amazon")
@@ -215,7 +223,7 @@ def get_asin():
 				if jsonfile['ASIN']== None:
 					print("bad")
 				else:	
-					json.dump(data, jsonfile, indent=4)
+					json.load(data["ASIN"], jsonfile, indent=4)
 	return data
 
 
@@ -237,7 +245,7 @@ def urlcleaner(url):
     return result
 # #----------------review scraping---------------------
 
-def scrape_amazon_product(asin):
+def scrape_amazon_product(asin,json_file = open('search_result3.json','w',encoding='utf-8')):
 	options = webdriver.ChromeOptions()
 	options.add_argument('--incognito')  # Open in incognito mode
 	options.add_argument('--disable-extensions')  # Disable extensions
@@ -262,18 +270,23 @@ def scrape_amazon_product(asin):
 		driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
 
 
+		
 		for i in asin:
 			driver.get("https://www.amazon.com/dp/" + asin[i])
 			content = driver.page_source
 			soup = BeautifulSoup(content, 'html.parser')
 			items = soup.findAll('div', 'sg-col-inner')
-			get_product_detail(soup)
-			get_reviews(soup)
 			with open("raw_result_product.txt", "w",encoding="utf-8") as f:
-				for item in items:
+				
+				with open(json_file,'r+') as file:
+					file_data = json.load(file)
+					for item in items:
 						text_content = str(item)
-						json_data = json.dumps(text_content, indent=4)
-						f.write(json_data + "\n")
+						file_data["ASIN"].append(get_product_detail(soup))
+						file_data["ASIN"].append(get_reviews(soup))
+					json.dump(file_data, file, indent = 4)
+			f.write(text_content + "\n")
+						
 			
 		# Log network requests after navigation
 		for request in driver.requests:
@@ -365,8 +378,10 @@ def get_product_detail(soup):
 	
 
 def json_data_mock():
-	input_file= "search_result3.json"
-	with open(input_file, encoding="utf-8") as json_file:
+	json_file = open('sample.json')
+	if json_file == None or json_file == []:
+			print("result bad")
+	else:
 		parsed_json = json.load(json_file)
 	return parsed_json
 
@@ -376,7 +391,7 @@ def csv_json_mock():
 		if json_file == None:
 			print("result bad")
 		else:
-			json.dump(result, json_file, ensure_ascii=False, indent=4)
+			json.load(result, json_file, ensure_ascii=False, indent=4)
 	print("\t end amazon")
 
 	
@@ -397,8 +412,12 @@ def clean_html(input):
 
 
 def test_prod():
-	result = scrape_amazon_product()
-	print(result)
-	return result
-
-test_prod()
+	result = []
+	json_file = open('sample.json')
+	if json_file == None or json_file == []:
+			print("result bad")
+	else:
+			result = json.load(json_file)
+			print(result)
+	print("\t end amazon")
+	json_file.close()

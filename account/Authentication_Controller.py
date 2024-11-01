@@ -22,6 +22,8 @@ app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (
 app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
 app.config['PERMANENT_SESSION_LIFETIME'] = 300
 
+__encrypted_username = '' #literally exist for use in userinfo HALP
+auth_bp = Blueprint('auth', __name__)
 
 #-------------------------------------import and setpu stuff ---------------------------------------
 
@@ -29,7 +31,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 300
 
 #--------------------------------------------Login Part--------------------------------------------
 
-
+@auth_bp.route('/login', methods=['POST'])
 def login():
 	login_details = request.get_json() # store the json body request
 	usernameA = login_details['username']
@@ -56,11 +58,11 @@ def login():
 		return jsonify({'msg':'Server is not avaliable'}),400
 
 
-
+@auth_bp.route('/logout', methods=['POST'])
 def logout():
     session.clear()
 #---------------------------------------- Session status-------------------------------------------
-
+@auth_bp.route('/sessioncheck',methods=['POST'])
 def something():
 			username = session.get('user')
 				# Calculate time left until session expires (server-side)
@@ -73,12 +75,15 @@ def something():
 
 #----------------------------------------register part--------------------------------------------
 
+@auth_bp.route('/register', methods=['POST'])
 def register():
     new_user = request.get_json() # store the json body request
     user_id = str(uuid.uuid4())
-    #find user
+    #below code literally check for juse username but who will check different password? aren't that leak already?
+		# bro who on earth check password of the similar name person? and if so isn't that we leak the info of account
+		# that have the same name???
     doc = usercollection.find_one({"username": new_user["username"]}) # check if user exist like
-    #after checking no same username detected
+    #after checking logic
     if not doc:#pass
         new_user['user_id'] = user_id
         usercollection.insert_one(new_user)
@@ -87,37 +92,26 @@ def register():
     else:#error given
         return jsonify({'msg': 'Username already exists'}), 409
 
-def access_database():
-  
-  return
 
 #---------------------------------- pure function around here--------------------------------
 #check all data
-
-def authenticate(self, username, password):
-	#check database status
-
-	#access account data according to name
-
-	#check password
-
-	#return session?
-	
-			return jsonify({'msg': 'The database is down!!!'}),504
-
-
-def account_access_data_by_username(username):
-  result = ''
-  if is_mongodb_available != False :
-    user_from_db = usercollection.find_one({"username": username}) 
-    if user_from_db != None or user_from_db != '':
-      result = user_from_db
-      return result
+def check_database():
+  # Find all documents in the collection
+  documents = list(usercollection.find())
+  # Check if any documents were found
+  if documents:
+    message = "Database contains documents!"
+    return jsonify({'message': message})
   else:
-      return None
+    message = "Database is empty."
+    data = None
+  return jsonify({'message': message})
 
+def receiveusername(username):
+      __encrypted_username = username
 
-
+def yeetusername():
+      return __encrypted_username
 
 def is_mongodb_available():
   result = False

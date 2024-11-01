@@ -3,6 +3,8 @@ from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
 from account.Authentication import yeetusername
+# import userinfo function
+
 
 from functools import wraps
 #time stuff
@@ -23,10 +25,11 @@ app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (
 app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
 app.config['PERMANENT_SESSION_LIFETIME'] = 300
 
+userinformation_bp = Blueprint('userinfo', __name__)
 #-------------------------------------import and setpu stuff ---------------------------------------
 
 #                                        Session status
-
+@userinformation_bp.route('/Sessioncheck',methods=['POST'])
 def sessioncheck():
 			username = session.get('user')
 				# Calculate time left until session expires (server-side)
@@ -37,7 +40,7 @@ def sessioncheck():
 			return jsonify(response)
 
 #----------------------------------------User info part--------------------------------------------
-
+@userinformation_bp.route('/Update', methods=['POST'])
 def update():
 		data = request.json
 		user = yeetusername
@@ -51,7 +54,7 @@ def update():
 		else:
 				return jsonify({'error': 'Please provide username and password'})
 
-
+@userinformation_bp.route('/Information', methods=['POST'])
 def userinfo():
 	    # Check if the user is logged in by verifying the session
     if 'username' in session:
@@ -69,6 +72,8 @@ def userinfo():
         # User is not logged in or session has expired
         return jsonify({'error': 'Unauthorized'}), 401
 	
+
+@userinformation_bp.route('/Information_test', methods=['POST'])
 def userinfo_test():
 	# user_id = usercollection.find_one({"user_id": encrypted_username}) 
 	user = {  "username": "admin",
@@ -88,6 +93,8 @@ def userinfo_test():
 	else:
 		return jsonify({'error': 'Unauthorized'}), 401
 
+     
+@userinformation_bp.route('/Delete', methods=['POST'])
 def Delete():
 	data = request.json
 	username = data['username']
@@ -100,19 +107,6 @@ def Delete():
 		return jsonify({'msg': 'Profile not found'}), 404
 	
 
-
-#methods
-def check_username():
-	return
-
-def get_user():
-	return
-
-def update_to_database():
-	return
-
-def remove_user():
-	return
 #start app down here _main_
 
 

@@ -19,15 +19,15 @@ class LoginTest(unittest.TestCase):
 
         # Create a test user in the database
         test_user = {
-            "username": "test_user",
-            "password": "test_password"
+            "username": "admin",
+            "password": "1234"
         }
         self.usercollection.insert_one(test_user)
 
         # Login data
         login_data = {
-            "username": "test_user",
-            "password": "test_password"
+            "username": "admin",
+            "password": "1234"
         }
 
         # Send a POST request to the login endpoint
@@ -50,15 +50,15 @@ class LoginTest(unittest.TestCase):
 
         # Create a test user in the database
         test_user = {
-            "username": "test_user",
-            "password": "correct_password"
+            "username": "admin",
+            "password": "1234"
         }
         self.usercollection.insert_one(test_user)
 
         # Login data with incorrect password
         login_data = {
-            "username": "test_user",
-            "password": "wrong_password"
+            "username": "admin",
+            "password": "1234ba"
         }
 
         # Send a POST request to the login endpoint
@@ -81,8 +81,8 @@ class LoginTest(unittest.TestCase):
 
         # Login data
         login_data = {
-            "username": "test_user",
-            "password": "test_password"
+            "username": "admin",
+            "password": "1234"
         }
 
         # Send a POST request to the login endpoint
@@ -100,12 +100,12 @@ class LoginTest(unittest.TestCase):
     def test_session_creation_on_successful_login(self, mock_mongodb_available):
             # Sample data for testing
         sample_user = {
-            "username": "test_user",
-            "password": "test_password"
+            "username": "admin1234",
+            "password": "123456"
         }
         sample_login_data = {
-            "username": sample_user["username"],
-            "password": sample_user["password"]
+            "username": sample_user["admin1234"],
+            "password": sample_user["123456"]
         }
         # Mock the is_mongodb_available function to return True
         mock_mongodb_available.return_value = True

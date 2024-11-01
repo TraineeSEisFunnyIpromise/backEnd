@@ -85,9 +85,7 @@ def scrape_amazon(inputkeyword,search_group):
 				#<input autocomplete="off" spellcheck="false" placeholder="Type characters" 
 				# id="captchacharacters" name="field-keywords" class="a-span12" 
 				# autocapitalize="off" autocorrect="off" type="text">
-				if(driver.find_element(By.ID,'captchacharacters')):
-					driver.quit()
-					return "detected capcha abandon task"
+
 				#merge word
 				inputkeyword = inputkeyword + " " + search_group
 				keyword = str(inputkeyword)
@@ -98,7 +96,11 @@ def scrape_amazon(inputkeyword,search_group):
 					# click search button
 				driver.implicitly_wait(2)
 				search_button = driver.find_element(By.ID, 'nav-search-submit-button')
-					
+
+				# if(driver.find_element(By.ID,'captchacharacters') == True):
+				# 	driver.quit()
+				# 	return "detected capcha abandon task"
+				
 				search_button.click()
 				wait_count = 0
 				driver.implicitly_wait(800) 
@@ -393,15 +395,7 @@ def csv_json_mock():
 		else:
 			json.load(result, json_file, ensure_ascii=False, indent=4)
 	print("\t end amazon")
-
-	
 	return result
-	# with open(input_file, encoding="utf-8") as json_file:
-	# 	print(json_file)
-	# 	parsed_json = json.load(json_file)
-	# jsoned_file = json.dumps(parsed_json,indent=4)
-	# return jsoned_file
-	
 
 def clean_html(input):
     cleaner = bleach.Cleaner(

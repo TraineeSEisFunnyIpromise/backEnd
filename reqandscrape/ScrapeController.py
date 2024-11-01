@@ -1,9 +1,9 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
 from pymongo import MongoClient
-from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
+from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
-from Reqandscrape.search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
+from Reqandscrape.Search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
 #time stuff
 #nested asyncio nice
 import nest_asyncio,pandas
@@ -82,8 +82,12 @@ def search_criteria_sender():
 	inputpeople = response[0]
 	print(inputpeople,inputsearch)
 	response = receiveinput(inputsearch,inputpeople)
+	with open("request_criteria.txt", "w+",encoding="utf-8") as f:
+		print("enter loop raw result")
+		f.write(response + "\n")
 	print("======yeeting data=====")
 	if session==True:
+		print("save data")
 		target_user = usercollection.find(session['username'])
 		usercollection[target_user].insert({"criteria":response})
 	return jsonify(response)
@@ -138,6 +142,10 @@ def zeroshotstuff_test():
 	print(result)
 	return jsonify(result)
 
+
+def write_to_database_by_user(username):
+	
+	return
 # Load the JSON data
 #test section
 

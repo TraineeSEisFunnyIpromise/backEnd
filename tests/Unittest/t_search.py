@@ -20,6 +20,12 @@ class TestSearchReview(unittest.TestCase):
 
     def test_scrape_product():
         product_url = ""
+    
+    def url_cleaner():
+        print()
+    
+    def get_asin():
+        print()
 
 
 if __name__ == '__main__':

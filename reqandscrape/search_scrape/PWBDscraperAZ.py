@@ -318,16 +318,12 @@ def get_reviews(soup):
         r_date_element = review.select_one("span.review-date")
         r_date = r_date_element.text if r_date_element else None
 
-        r_verified_element = review.select_one("span.a-size-mini")
-        r_verified = r_verified_element.text if r_verified_element else None
-
 
         r = {
             "rating": r_rating,
             "title": r_title,
             "content": r_content,
             "date": r_date,
-            "verified": r_verified,
         }
 
         scraped_reviews.append(r)

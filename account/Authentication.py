@@ -87,40 +87,45 @@ def register():
     else:#error given
         return jsonify({'msg': 'Username already exists'}), 409
 
-def access_database():
-  
-  return
+
+def access_database(username):
+  usertarget_data = usercollection.find_one({"username": username})
+  return usertarget_data
 
 #---------------------------------- pure function around here--------------------------------
 #check all data
 
 def authenticate(self, username, password):
 	#check database status
-
-	#access account data according to name
-
-	#check password
-
-	#return session?
+      if is_mongodb_available != False :
+          #access account data according to name
+          if check_username(username) != None or check_username(username) != '':
+            user_from_db = access_database(username)
+            if user_from_db != None or user_from_db != '':
+              result = user_from_db
+              return result
+      else:
+            return jsonify({'msg': 'The database is down!!!'}),504
 	
-			return jsonify({'msg': 'The database is down!!!'}),504
 
+def check_username(username):
+      user_from_db = access_database(username)
+      if user_from_db != None or user_from_db != '':
+        return True
+      else:
+        return False
 
-def account_access_data_by_username(username):
+def account_access(username):
   result = ''
   if is_mongodb_available != False :
-    user_from_db = usercollection.find_one({"username": username}) 
+    user_from_db = access_database(username)
     if user_from_db != None or user_from_db != '':
       result = user_from_db
       return result
   else:
       return None
 
-
-
-
 def is_mongodb_available():
-  result = False
   try:
     # Attempt to connect to MongoDB
     client = MongoClient("mongodb://localhost:27017/")

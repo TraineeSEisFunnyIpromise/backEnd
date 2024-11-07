@@ -2,7 +2,7 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_session import Session
 from flask_cors import CORS
-from pymongo import MongoClient
+from database.databasemanager import check_username,access_database
 from functools import wraps
 #time stuff
 from datetime import datetime, timedelta
@@ -10,9 +10,6 @@ import uuid
 # instantiate the app
 app = Flask(__name__)
 
-client = MongoClient('mongodb://localhost:27017')
-db = client['Database1']
-usercollection = db['db1']
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 #JWT import
@@ -35,7 +32,7 @@ def login():
 	usernameA = login_details['username']
 	passA = login_details['password']
 	# print(login_details)
-	user_from_db = usercollection.find_one({"username": login_details["username"]}) 
+	user_from_db = 
 # man i hate how it look down here
 	if user_from_db:
   #process to check mongodb server with boolean didn't know python could just pull that move

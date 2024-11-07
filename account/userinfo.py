@@ -3,6 +3,7 @@ from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
 from account.Authentication import yeetusername
+from database.databasemanager import update_user,check_database_status,access_database,delete_user
 
 from functools import wraps
 #time stuff
@@ -10,9 +11,6 @@ from datetime import datetime, timedelta
 # instantiate the app
 app = Flask(__name__)
 
-client = MongoClient('mongodb://localhost:6000')
-db = client['Database2']
-usercollection = db['db1']
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 
@@ -58,9 +56,9 @@ def userinfo():
         username = session['username']
         
         # Find the user in the database using the username from the session
-        user = usercollection.find_one({"username": username})
+        user = access_database(username)
         
-        if user:
+        if user == True:
             # Return user data (excluding sensitive information)
             return jsonify({'username': user['username'], 'about': user.get('about', 'No information available')}), 200
         else:
@@ -92,9 +90,9 @@ def Delete():
 	data = request.json
 	username = data['username']
 	passA = data['password']
-	user_from_db = usercollection.find_one({'username' : username})
+	user_from_db = access_database(username)
 	if passA == user_from_db['password']:
-		usercollection.remove(username)
+		delete_user(username)
 		return jsonify({'msg' : 'remove succesful' }), 200
 	else:
 		return jsonify({'msg': 'Profile not found'}), 404

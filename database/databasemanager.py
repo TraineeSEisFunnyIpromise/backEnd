@@ -1,4 +1,8 @@
 
+from pymongo import MongoClient
+client = MongoClient('mongodb://localhost:27017')
+db = client['Database1']
+usercollection = db['db1']
 
 
 def access_database(username):
@@ -28,7 +32,7 @@ def check_username(username):
 def check_database_status():
   try:
     # Try to connect to the MongoDB server
-    client = MongoClient(MONGO_URI)
+    client = MongoClient(client)
     client.server_info()
     return True
   except Exception as e:

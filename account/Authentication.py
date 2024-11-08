@@ -2,7 +2,7 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_session import Session
 from flask_cors import CORS
-from database.databasemanager import check_username,access_database
+from database.databasemanager import check_username,access_database,add_new_user,check_database_status
 from functools import wraps
 #time stuff
 from datetime import datetime, timedelta
@@ -24,34 +24,19 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 300
 
 
 
-#--------------------------------------------Login Part--------------------------------------------
+#--------------------------------------------Login Part-------------------------------------------
 
-
-def login():
-	login_details = request.get_json() # store the json body request
-	usernameA = login_details['username']
-	passA = login_details['password']
-	# print(login_details)
-	user_from_db = 
-# man i hate how it look down here
-	if user_from_db:
-  #process to check mongodb server with boolean didn't know python could just pull that move
-		if bool(is_mongodb_available()) != False:
-                  
-			if (passA == user_from_db['password']):
-				session['username'] = usernameA  # Store the username in the session
-				print(f"Session after login: {session}")
-				encrypted_username = usernameA
-				user_from_db['user_id']= session  # Store user ID in session
-				print(session)
-				return jsonify({'message': 'login successful'}), 202
-			else: #return login not suckcess
-				return jsonify({'msg': 'The username or password is incorrect'}),401
-		else: #return database bad
-			return jsonify({'msg': 'The database is down!!!'}),504
-	else: #return server is fxck
-		return jsonify({'msg':'Server is not avaliable'}),400
-
+def login(self, username, password):
+	#check database status
+      if check_database_status != False :
+          #access account data according to name
+          if check_username(username) != None or check_username(username) != '':
+            user_from_db = access_database(username)
+            if user_from_db != None or user_from_db != '':
+              result = user_from_db
+              return result
+      else:
+            return jsonify({'msg': 'The database is down!!!'}),504
 
 
 def logout():
@@ -74,64 +59,17 @@ def register():
     new_user = request.get_json() # store the json body request
     user_id = str(uuid.uuid4())
     #find user
-    doc = usercollection.find_one({"username": new_user["username"]}) # check if user exist like
+    doc = check_username(new_user["username"]) # check if user exist like
     #after checking no same username detected
     if not doc:#pass
         new_user['user_id'] = user_id
-        usercollection.insert_one(new_user)
+        add_new_user(new_user)
         return jsonify({'msg': 'User created successfully'}), 201
 		
     else:#error given
         return jsonify({'msg': 'Username already exists'}), 409
 
 
-def access_database(username):
-  usertarget_data = usercollection.find_one({"username": username})
-  return usertarget_data
-
-#---------------------------------- pure function around here--------------------------------
-#check all data
-
-def authenticate(self, username, password):
-	#check database status
-      if is_mongodb_available != False :
-          #access account data according to name
-          if check_username(username) != None or check_username(username) != '':
-            user_from_db = access_database(username)
-            if user_from_db != None or user_from_db != '':
-              result = user_from_db
-              return result
-      else:
-            return jsonify({'msg': 'The database is down!!!'}),504
-	
-
-def check_username(username):
-      user_from_db = access_database(username)
-      if user_from_db != None or user_from_db != '':
-        return True
-      else:
-        return False
-
-def account_access(username):
-  result = ''
-  if is_mongodb_available != False :
-    user_from_db = access_database(username)
-    if user_from_db != None or user_from_db != '':
-      result = user_from_db
-      return result
-  else:
-      return None
-
-def is_mongodb_available():
-  try:
-    # Attempt to connect to MongoDB
-    client = MongoClient("mongodb://localhost:27017/")
-    client.server_info()  # Perform a basic server info call
-    message = "MongoDB is available!"
-  except Exception as e:
-    message = f"MongoDB connection error: {str(e)}"
-
-  return jsonify({'message': message})
 #-------------------------------------------------------------------------------------
 #-----------------------------end of Login & Registration-------------------------------------
 Session(app)

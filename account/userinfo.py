@@ -37,17 +37,16 @@ def sessioncheck():
 #----------------------------------------User info part--------------------------------------------
 
 def update():
-		data = request.json
-		user = yeetusername
-		collection = db['DB1']
-		if data["send" != '']:
-				data = {
-        "userinfo"         : data.get('userinfo')
-        }
-				collection.insert_one(data)
-				return jsonify({'message': 'Registration successful'})
-		else:
-				return jsonify({'error': 'Please provide username and password'})
+  data = request.json
+  username = session.get('user')
+  if data["send" != '']:
+    if check_database_status() == True:
+      update_user(data,username)
+    else:
+      return
+    return jsonify({'message': 'Registration successful'})
+  else:
+    return jsonify({'error': 'Please provide username and password'})
 
 
 def userinfo():
@@ -56,7 +55,8 @@ def userinfo():
         username = session['username']
         
         # Find the user in the database using the username from the session
-        user = access_database(username)
+        if check_database_status == True:
+          user = access_database(username)
         
         if user == True:
             # Return user data (excluding sensitive information)

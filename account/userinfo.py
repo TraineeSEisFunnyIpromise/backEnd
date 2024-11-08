@@ -2,8 +2,7 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
-from account.Authentication import yeetusername
-from database.databasemanager import update_user,check_database_status,access_database,delete_user
+from database.databasemanager import update_user,check_database_status,access_database,delete_user,update_password
 
 from functools import wraps
 #time stuff
@@ -36,8 +35,7 @@ def sessioncheck():
 
 #----------------------------------------User info part--------------------------------------------
 
-def update():
-  data = request.json
+def update_userinfo(data,username):
   username = session.get('user')
   if data["send" != '']:
     if check_database_status() == True:
@@ -48,6 +46,14 @@ def update():
   else:
     return jsonify({'error': 'Please provide username and password'})
 
+def update_oldpassword(username,get_resetanswer,get_resetpassword):
+  userdata = access_database(username)
+  answer_for_resetpassword = userdata["answer for resetpassword"]
+  if (get_resetanswer ==  answer_for_resetpassword) == True:
+        update_password(username,get_resetpassword)
+  else:
+    return jsonify({'error': 'Please provide username and password'})
+  return jsonify({'message': 'Reset password successful'})
 
 def userinfo():
 	    # Check if the user is logged in by verifying the session
@@ -99,19 +105,6 @@ def Delete():
 	
 
 
-#methods
-def check_username():
-	return
-
-def get_user():
-	return
-
-def update_to_database():
-	return
-
-def remove_user():
-	return
-#start app down here _main_
 
 
 if __name__ == '__main__':

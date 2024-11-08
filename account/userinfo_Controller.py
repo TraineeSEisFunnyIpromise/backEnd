@@ -2,7 +2,8 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
-from account.Authentication import yeetusername
+from account.userinfo import update_userinfo,userinfo,access_database,remove_username,reset_password
+from database.databasemanager import check_database_status,update_password
 # import userinfo function
 
 
@@ -12,9 +13,6 @@ from datetime import datetime, timedelta
 # instantiate the app
 app = Flask(__name__)
 
-client = MongoClient('mongodb://localhost:6000')
-db = client['Database2']
-usercollection = db['db1']
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 
@@ -43,29 +41,21 @@ def sessioncheck():
 @userinformation_bp.route('/Update', methods=['POST'])
 def update():
 		data = request.json
-		user = yeetusername
-		collection = db['DB1']
-		if data["send" != '']:
-				data = {
-        "userinfo"         : data.get('userinfo')
-        }
-				collection.insert_one(data)
-				return jsonify({'message': 'Registration successful'})
-		else:
-				return jsonify({'error': 'Please provide username and password'})
+		update_userinfo(data)
+		return jsonify({'message': 'Registration successful'})
 
 @userinformation_bp.route('/Information', methods=['POST'])
-def userinfo():
+def get_userinfo():
 	    # Check if the user is logged in by verifying the session
     if 'username' in session:
         username = session['username']
         
         # Find the user in the database using the username from the session
-        user = usercollection.find_one({"username": username})
+        user = access_database(username)
         
-        if user:
+        if user is not None:
             # Return user data (excluding sensitive information)
-            return jsonify({'username': user['username'], 'about': user.get('about', 'No information available')}), 200
+            return jsonify(user), 200
         else:
             return jsonify({'error': 'User not found'}), 404
     else:
@@ -97,15 +87,21 @@ def userinfo_test():
 @userinformation_bp.route('/Delete', methods=['POST'])
 def Delete():
 	data = request.json
-	username = data['username']
-	passA = data['password']
-	user_from_db = usercollection.find_one({'username' : username})
-	if passA == user_from_db['password']:
-		usercollection.remove(username)
+	if data["username"] != '':
+		remove_username(data)
 		return jsonify({'msg' : 'remove succesful' }), 200
 	else:
-		return jsonify({'msg': 'Profile not found'}), 404
+		return jsonify({'msg': 'profile not found'}), 404
+
+@userinformation_bp.route('/Delete', methods=['POST'])
+def reset_password():
+	data = request.json
 	
+	if check_database_status == True:
+		reset_password(username=data["username"],get_resetanswer=data["reset_answer"],get_resetpassword=data["reset_password"])
+		return jsonify({'msg' : 'remove succesful' }), 200
+	else:
+		return jsonify({'msg': 'database is down'}), 404
 
 #start app down here _main_
 

@@ -3,7 +3,6 @@ from flask import Flask, Blueprint, request, jsonify, session
 from flask_session import Session
 from flask_cors import CORS
 from database.databasemanager import check_username,access_database,add_new_user,check_database_status
-from functools import wraps
 #time stuff
 from datetime import datetime, timedelta
 import uuid

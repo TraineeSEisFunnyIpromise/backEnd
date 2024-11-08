@@ -103,9 +103,10 @@ def scrape_amazon(inputkeyword,search_group):
 				
 				search_button.click()
 				wait_count = 0
+				page_limit = 0
 				driver.implicitly_wait(800) 
 				print("before looping")
-				while True:
+				while True and page_limit <= 5:
 					print("looping")
 					driver.implicitly_wait(500)
 					try:
@@ -114,6 +115,7 @@ def scrape_amazon(inputkeyword,search_group):
 									next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
 									next_button.click()
 									wait_count = 0
+									page_limit += 1
 					except (NoSuchElementException, TimeoutException):
 						wait_count += 1
 						if wait_count >= 20 // 2:  # Check after half of max wait time
@@ -137,11 +139,14 @@ def scrape_amazon(inputkeyword,search_group):
 				item_sorting(items)
 					#setting up ASIN
 				print("setting up asin")
+				print("quit old driver")
+				driver.quit()
 				asin_set = get_asin()
 				#begin product scraping
 				print("check asin for product scraping")
 				if asin_set is list and asin_set is not None:
 					print("scraping")
+					print("setting up new driver")
 					for asin in asin_set:
 						print("scraping product")
 						scrape_amazon_product(asin)
@@ -150,7 +155,6 @@ def scrape_amazon(inputkeyword,search_group):
 					print("Product scraping failed")
 					# end process quit driver
 				print("end of product scraping")
-				driver.quit()
 				print("\t\t end process")
 		except(ConnectionRefusedError,ConnectionAbortedError):
 				driver.quit()
@@ -177,9 +181,6 @@ def item_sorting(items):
 			data_link = []
 			data_asin = []
 
-				# Clear the CSV file	
-			with open('search_result2.json', 'w', encoding='utf-8') as jsonfile:
-					json.dump([], jsonfile)
 			with open('search_result3.json', 'w', encoding='utf-8') as jsonfile:
 					json.dump([], jsonfile)
 

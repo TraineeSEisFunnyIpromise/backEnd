@@ -2,7 +2,7 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
-from account.userinfo import update_userinfo,userinfo,access_database,remove_username,reset_password
+from account.userinfo import update_userinfo,userinfo,access_database,delete_user,update_password
 from database.databasemanager import check_database_status,update_password
 # import userinfo function
 
@@ -88,7 +88,7 @@ def userinfo_test():
 def Delete():
 	data = request.json
 	if data["username"] != '':
-		remove_username(data)
+		delete_user(data["username"],data["password"])
 		return jsonify({'msg' : 'remove succesful' }), 200
 	else:
 		return jsonify({'msg': 'profile not found'}), 404

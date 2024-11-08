@@ -46,14 +46,15 @@ def update_userinfo(data,username):
   else:
     return jsonify({'error': 'Please provide username and password'})
 
-def update_oldpassword(username,get_resetanswer,get_resetpassword):
-  userdata = access_database(username)
-  answer_for_resetpassword = userdata["answer for resetpassword"]
-  if (get_resetanswer ==  answer_for_resetpassword) == True:
+
+def update_oldpassword(username,get_resetpassword):
+
+  if get_resetpassword != '':
         update_password(username,get_resetpassword)
   else:
-    return jsonify({'error': 'Please provide username and password'})
+    return jsonify({'error': 'Please providepassword'})
   return jsonify({'message': 'Reset password successful'})
+
 
 def userinfo():
 	    # Check if the user is logged in by verifying the session
@@ -63,45 +64,23 @@ def userinfo():
         # Find the user in the database using the username from the session
         if check_database_status == True:
           user = access_database(username)
-        
         if user == True:
             # Return user data (excluding sensitive information)
-            return jsonify({'username': user['username'], 'about': user.get('about', 'No information available')}), 200
+            return jsonify({'username': user['username'], 'about me': user.get('about me', 'No information available')}), 200
         else:
             return jsonify({'error': 'User not found'}), 404
     else:
         # User is not logged in or session has expired
         return jsonify({'error': 'Unauthorized'}), 401
-	
-def userinfo_test():
-	# user_id = usercollection.find_one({"user_id": encrypted_username}) 
-	user = {  "username": "admin",
-					"password:":"1234",
-            "about":"something",
-            "question_r":"do you like banana",
-            "answer_r":"Yes",
-            "roles": "Administrator",} 
-	print(user)
-	if user:
-		 #this should be session check ut meh
-		if user:
-		# Return user data (excluding sensitive information)
-			return jsonify({'username': user['username'], 'about': user['about']})  # Example
-		else:
-			return jsonify({'error': 'User not found'}), 404
-	else:
-		return jsonify({'error': 'Unauthorized'}), 401
 
-def Delete():
-	data = request.json
-	username = data['username']
-	passA = data['password']
+
+def delete_account(username,password):
 	user_from_db = access_database(username)
-	if passA == user_from_db['password']:
+	if password == user_from_db['password']:
 		delete_user(username)
 		return jsonify({'msg' : 'remove succesful' }), 200
 	else:
-		return jsonify({'msg': 'Profile not found'}), 404
+		return jsonify({'msg': 'incorrect password'}), 400
 	
 
 

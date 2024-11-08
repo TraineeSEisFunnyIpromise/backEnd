@@ -13,12 +13,22 @@ def delete_user(username):
   usercollection.delete_one({"username": username})
   return True
 
-def update_user(username, data):
-  usercollection.update_one({"username": username}, {"$set": data})
-  return True
+def update_user(username, new_aboutme):
+    usercollection.update_one(
+        {"username": username},
+        {"$set": {"about me": new_aboutme}}
+    )
+    return True
+
+def update_password(username, new_password):
+    usercollection.update_one(
+        {"username": username},
+        {"$set": {"password": new_password}}
+    )
+    return True
 
 def add_new_user(username, data):
-  if check_username!= True:
+  if check_username(username) == True:
     usercollection.insert_one(data)
   return True
 

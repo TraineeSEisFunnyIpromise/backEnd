@@ -5,20 +5,6 @@ from pymongo import MongoClient  # For mocking (optional)
 
 class TestUserInfo(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        # Optional: Mock the MongoClient to isolate endpoint logic
-        cls.mock_client = unittest.mock.Mock(MongoClient)
-        cls.mock_db = cls.mock_client.return_value.Database1
-        cls.mock_collection = cls.mock_db.return_value.DB1
-
-        # Patch MongoClient in the app (optional)
-        with unittest.mock.patch('app.MongoClient', return_value=cls.mock_client):
-            app.config['TESTING'] = True  # Enable testing mode
-
-    @classmethod
-    def tearDownClass(cls):
-        app.config['TESTING'] = False  # Disable testing mode
 
     def setUp(self):
         self.app = app.test_client()
@@ -38,6 +24,25 @@ class TestUserInfo(unittest.TestCase):
         response = self.app.post('/userinfo/Sessioncheck')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'test_user', response.data)  # Assert username is present
+
+    def test_success_update_oldpassword():
+        return
+    
+    def test_unsuccess_update_oldpassword():
+        return
+
+    def test_success_update_aboutme():
+        return
+    
+    def test_unsuccess_update_aboutme():
+        return
+    
+    def test_success_delete_account():
+        return
+    
+    def test_unsuccess_delete_account():
+        return
+
 
     def test_information_success(self):
         response = self.app.post('/userinfo/Information')

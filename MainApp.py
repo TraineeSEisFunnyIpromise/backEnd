@@ -1,5 +1,5 @@
 from flask import Flask
-from account.Authentication import auth_bp  # Import the blueprint
+from account.Authentication_Controller import auth_bp  # Import the blueprint
 from account.userinfo_Controller import userinformation_bp
 from Reqandscrape.ScrapeController import search_bp
 from flask_session import Session

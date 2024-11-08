@@ -10,22 +10,32 @@ class TestLoginEndpoint(unittest.TestCase):
         self.user_data = {'name': 'test1','password': '1234', 'About me':'ye', 'Question for reset password':'slurpy', 
 'Answer for reset password':'slurp'}
 
-    def test_login_successful(self):
-        # Define the test data (replace with valid credentials)
-        test_data = {'username': 'test1', 'password': '1234'}
 
-        # Make a POST request to the login endpoint
-        response = self.app.post('/login', json=test_data)
-        print(response)
 
-    def test_login_invalid_credentials(self):
-        # Define the test data (replace with invalid credentials)
-        test_data = {'username': 'Dark', 'password': 'vanholmes69'}
+  
+    def test_successful_authentication(self, mock_access_database, mock_check_username, mock_check_database_status):
+        result = authentication('testuser', 'testpassword')
+        self.assertIsNotNone(result)
+        self.assertEqual(result['username'], 'testuser')
 
-        # Make a POST request to the login endpoint
-        response = self.app.post('/login', json=test_data)
+ 
+    def test_failed_authentication(self, mock_access_database, mock_check_username, mock_check_database_status):
+        result = authentication('testuser', 'wrongpassword')
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(result[1], 400)
 
-        print(response)
+    def test_successful_reset_password():
+        result = ""
+        
+    def test_fail_reset_password():
+        result = ""
+
+    def test_successful_register_newuser():
+        result = ""
+
+    def test_fail_register_newuser():
+        result = ""
+
 
 if __name__ == '__main__':
     unittest.main()

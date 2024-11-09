@@ -342,12 +342,12 @@ def get_product_detail(soup):
 		else:
 			product_name = 'Not available'
 
-		# Price
-		price = card.find('span', {'class': 'a-price-whole'})
-		if price:
-			price = price.text.strip()
+		# description
+		description = card.find('span', {'class': ''})
+		if description:
+			description = description.text.strip()
 		else:
-			price = 'Not available'
+			description = 'Not available'
 
 		# Rating
 		rating = card.find('span', {'class': 'a-icon-alt'})
@@ -364,15 +364,6 @@ def get_product_detail(soup):
 				num_ratings = 'Not available'
 		else:
 			num_ratings = 'Not available'
-
-		# Past Month Bought
-		past_month_bought = card.find('span', {'class': 'a-size-base a-color-secondary'})
-		if past_month_bought:
-			past_month_bought = past_month_bought.text.strip()
-			if past_month_bought == "M.R.P:":
-				past_month_bought = 'Not available'
-		else:
-			past_month_bought = 'Not available'
 
 	
 

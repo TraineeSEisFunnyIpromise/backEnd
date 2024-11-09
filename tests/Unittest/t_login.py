@@ -11,9 +11,6 @@ class TestLoginEndpoint(unittest.TestCase):
         self.user_data = {'name': 'test1','password': '1234', 'About me':'ye', 'Question for reset password':'slurpy', 
 'Answer for reset password':'slurp'}
 
-
-
-  
     def test_successful_authentication(self):
         result = authentication('testuser', 'testpassword')
         self.assertIsNotNone(result)

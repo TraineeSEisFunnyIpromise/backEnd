@@ -1,7 +1,6 @@
 import unittest
 from MainApp import app
-from account.userinfo import userinformation_bp
-from pymongo import MongoClient  # For mocking (optional)
+from account.userinfo import update_oldpassword,update_aboutme,delete_account
 
 class TestUserInfo(unittest.TestCase):
 
@@ -11,13 +10,9 @@ class TestUserInfo(unittest.TestCase):
         self.username = 'test1'
         self.user_data = {'name': 'Test1','password': '1234', 'About me':'ye', 'Question for reset password':'slurpy', 
 'Answer for reset password':'slurp'}
-
-        # Simulate a session with the username (optional)
-        with self.app.session_transaction() as session:
-            session['username'] = self.username
-
-        # Mock the database collection behavior (optional)
-        self.mock_collection.find_one.return_value = self.user_data.copy()
+        self.testaboutme = "yes"
+        self.newpassword = "1234567"
+        self.password="1234"
 
     def test_sessioncheck_success(self):
         # Refer to the previous test for explanation
@@ -25,32 +20,35 @@ class TestUserInfo(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'test_user', response.data)  # Assert username is present
 
-    def test_success_update_oldpassword():
-        return
-    
-    def test_unsuccess_update_oldpassword():
-        return
+    def test_success_update_oldpassword(self,username,newpassword):
+        result = update_oldpassword(username,newpassword)
+        self.assertIsNotNone(result)
 
-    def test_success_update_aboutme():
-        return
+    def test_unsuccess_update_oldpassword(self,username,newpassword):
+        result = update_oldpassword(username,newpassword)
+        self.assertIsNone(result)
+
+    def test_success_update_aboutme(self,username,testaboutme):
+        result = update_oldpassword(username,testaboutme)
+        self.assertIsNotNone(result)
     
-    def test_unsuccess_update_aboutme():
-        return
+    def test_unsuccess_update_aboutme(self,username,testaboutme):
+        result = update_oldpassword(username,testaboutme)
+        self.assertIsNone(result)
     
-    def test_success_delete_account():
-        return
+    def test_success_delete_account(self,username,password):
+        result = delete_account(username,password)
+        self.assertIsNotNone(result)
     
-    def test_unsuccess_delete_account():
-        return
+    def test_unsuccess_delete_account(self,username,password):
+        result = delete_account(username,password)
+        self.assertIsNone(result)
 
 
     def test_information_success(self):
         response = self.app.post('/userinfo/Information')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['profile'], self.user_data)
-
-        # Additional assertions (optional)
-        # You can assert specific keys or values in the returned profile data
 
     def test_information_no_session(self):
         # Simulate no username in session

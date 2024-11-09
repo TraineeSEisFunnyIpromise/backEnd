@@ -3,35 +3,59 @@ from unittest.mock import patch, AsyncMock
 import asyncio
 
 # Import your functions
-from Reqandscrape.search_scrape.PWBDscraperAZ import search_review
+from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon,get_product_detail,get_reviews,scrape_amazon_product,get_asin
+
+
 
 class TestSearchReview(unittest.TestCase):
-
-    def test_search_review_test(self):
-        # Arrange (set up test data)
-        input_a = "electric fan"
-        input_b = "student"
-
-        # Act (call the function)
-        result = search_review(input_a, input_b)
-
-        # Assert (verify the expected outcome)
-        self.assertEqual(result, True)  # Expected to return the defined string
-
-    def test_success_scrape_product():
-        product_url = ""
     
-    def test_unsuccess_scrape_product():
-        product_url = ""
+    asin = ["DP023543","DP546503","DP003156"]
+    url = ["","",""]
+    soup = open("raw_result_test.txt", "w+",encoding="utf-8")
     
-    def url_cleaner():
+    def test_success_search_product(self):
+        result = scrape_amazon("electric spoon","")
+        self.assertIsNotNone(result)
+    
+    def test_unsuccess_search_product(self):
+        result = scrape_amazon("electric spoon","")
+        self.assertIsNone(result)
+        
+    def test_success_scrape_product(self,asin):
+        result = scrape_amazon_product(asin)
+        self.assertIsNotNone(result)
+    
+    def test_unsuccess_scrape_product(self):
+        result = scrape_amazon_product([])
+        self.assertIsNone(result)
+
+    def test_success_scrape_review(self,soup):
+        result = get_reviews(soup)
+        self.assertIsNotNone(result)
+
+    def test_unsuccess_scrape_review(self):
+        result = get_reviews([])
+        self.assertIsNone(result)
+
+    def test_success_scrape_product_detail(self,soup):
+        result = get_product_detail(soup)
+        self.assertIsNotNone(result)
+
+    def test_unsuccess_scrape_product_detail(self):
+        result = get_product_detail([])
+        self.assertIsNone(result)
+
+    def url_cleaner(self):
         print()
     
-    def test_success_get_asin():
-        print()
+    def test_success_get_asin(self,url):
+        result = get_asin(url)
+        self.assertIsNotNone(result)
 
-    def test_unsuccess_get_asin():
-        print()
+
+    def test_unsuccess_get_asin(self):
+        result = get_asin([])
+        self.assertIsNone(result)
 
 if __name__ == '__main__':
     unittest.main()

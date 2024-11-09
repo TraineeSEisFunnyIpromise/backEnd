@@ -248,7 +248,7 @@ def urlcleaner(url):
     return result
 # #----------------review scraping---------------------
 
-def scrape_amazon_product(asin,json_file = open('search_result3.json','w',encoding='utf-8')):
+def scrape_amazon_product(asin,json_file = open('search_result2.json','w',encoding='utf-8')):
 	options = webdriver.ChromeOptions()
 	options.add_argument('--incognito')  # Open in incognito mode
 	options.add_argument('--disable-extensions')  # Disable extensions

@@ -98,18 +98,21 @@ def check_input_word(input,group_target):
 
 def extract_criteria(text):
     # Split the text by lines
-    lines = text.strip().split('\n')
-    
-    # Initialize arrays to store headings and details
-    headings = []
+	if text != None:
+		lines = text.strip().split('\n')
+		
+		# Initialize arrays to store headings and details
+		headings = []
 
-    for line in lines:
-        # Split the line at the first ":"
-        parts = line.split(":", 1)
-        if len(parts) == 2:
-            heading = parts[0].strip()
-            headings.append(heading)
-    return headings
+		for line in lines:
+			# Split the line at the first ":"
+			parts = line.split(":", 1)
+			if len(parts) == 2:
+				heading = parts[0].strip()
+				headings.append(heading)
+		return headings
+	else:
+		return None
 
 def pick_numbered_headlines(input_list):
     # Initialize an empty list to store the filtered headlines

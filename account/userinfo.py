@@ -35,7 +35,7 @@ def sessioncheck():
 
 #----------------------------------------User info part--------------------------------------------
 
-def update_userinfo(data,username):
+def update_aboutme(data,username):
   username = session.get('user')
   if data["send" != '']:
     if check_database_status() == True:

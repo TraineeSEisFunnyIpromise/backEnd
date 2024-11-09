@@ -18,15 +18,20 @@ class TestSearchReview(unittest.TestCase):
         # Assert (verify the expected outcome)
         self.assertEqual(result, True)  # Expected to return the defined string
 
-    def test_scrape_product():
+    def test_success_scrape_product():
+        product_url = ""
+    
+    def test_unsuccess_scrape_product():
         product_url = ""
     
     def url_cleaner():
         print()
     
-    def get_asin():
+    def test_success_get_asin():
         print()
 
+    def test_unsuccess_get_asin():
+        print()
 
 if __name__ == '__main__':
     unittest.main()

@@ -40,7 +40,7 @@ def login():
     if check_database_status != False:
       authentication(usernameA,passA)
 
-    else: #return server is fxck
+    else: 
       return jsonify({'msg':'Server is not avaliable'}),400
 
 

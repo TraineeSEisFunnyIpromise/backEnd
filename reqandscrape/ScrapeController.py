@@ -1,26 +1,21 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
-from pymongo import MongoClient
-from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
+from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
-from Reqandscrape.Search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
+from Reqandscrape.search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
 #time stuff
 #nested asyncio nice
 import nest_asyncio,pandas
 # asyncio and werkzeug
 from werkzeug.wrappers import Request, Response
 from werkzeug.middleware.proxy_fix import ProxyFix
-import asyncio,csv
+import csv
 #
 from flask_cors import CORS
-from datetime import datetime, timedelta
 import json
 # instantiate the app
 app = Flask(__name__)
 
-client = MongoClient('mongodb://localhost:27017')
-db = client['Database1']
-usercollection = db['DB1']
 # enable CORS
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 #JWT import
@@ -87,9 +82,9 @@ def search_criteria_sender():
 		f.write(response + "\n")
 	print("======yeeting data=====")
 	if session==True:
+		#add data if the session exist
 		print("save data")
-		target_user = usercollection.find(session['username'])
-		usercollection[target_user].insert({"criteria":response})
+
 	return jsonify(response)
 
 #--------------------------------------------search criteria sender Part--------------------------------------------
@@ -103,8 +98,7 @@ def zeroshotstuff():
 	inputcriteria = response[0]
 	result = calculate_the_zeroshot(inputdata,inputcriteria)
 	if session==True:
-		target_user = usercollection.find(session['username'])
-		usercollection[target_user].insert({"zeroshoted":result})
+		print("save data")
 	return jsonify(result)
 
 #--------------------------------------------search test  Part--------------------------------------------
@@ -142,10 +136,6 @@ def zeroshotstuff_test():
 	print(result)
 	return jsonify(result)
 
-
-def write_to_database_by_user(username):
-	
-	return
 # Load the JSON data
 #test section
 

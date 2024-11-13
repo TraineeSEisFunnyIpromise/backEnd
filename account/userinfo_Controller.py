@@ -2,8 +2,7 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
 from pymongo import MongoClient
-from account.userinfo import update_userinfo,userinfo,access_database,delete_user,update_password
-from database.databasemanager import check_database_status,update_password
+from account.userinfo import access_database,delete_user,update_aboutme
 # import userinfo function
 
 
@@ -41,7 +40,7 @@ def sessioncheck():
 @userinformation_bp.route('/Update', methods=['POST'])
 def update():
 		data = request.json
-		update_userinfo(data)
+		update_aboutme(data,data["username"])
 		return jsonify({'message': 'Registration successful'})
 
 @userinformation_bp.route('/Information', methods=['POST'])

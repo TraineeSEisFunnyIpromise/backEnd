@@ -1,4 +1,3 @@
-
 from pymongo import MongoClient
 client = MongoClient('mongodb://localhost:27017')
 db = client['Database1']
@@ -28,7 +27,7 @@ def update_password(username, new_password):
     return True
 
 def add_new_user(username, data):
-  if check_username(username) == True:
+  if check_username(username) != True:
     usercollection.insert_one(data)
   return True
 
@@ -49,3 +48,10 @@ def check_database_status():
     print(f"Error connecting to MongoDB: {e}")
     return False
   
+def write_to_database_by_name(username, data):
+  usercollection.update_one(
+        {"username": username},
+        #this is not gonna work data in data? nah it gonna replaced
+        {"$set": {"data": data}}
+    )
+  return True

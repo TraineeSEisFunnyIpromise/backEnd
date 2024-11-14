@@ -27,9 +27,11 @@ def update_password(username, new_password):
     return True
 
 def add_new_user(username, data):
-  if check_username(username) != True:
-    usercollection.insert_one(data)
-  return True
+    if check_username(username) != True:
+      usercollection.insert_one(data)
+      return True
+    else:
+      return False
 
 def check_username(username):
   user_from_db = access_database(username)

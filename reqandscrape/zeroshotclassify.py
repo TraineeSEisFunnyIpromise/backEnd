@@ -34,7 +34,6 @@ def classify_and_sum_scores(input_texts, input_labels):
         result = classifier(text, input_labels)
         for label, score in zip(result['labels'], result['scores']):
             total_scores[label] += score
-    
     return total_scores
 
 def calculate_the_zeroshot(input_texts, dynamic_labels):

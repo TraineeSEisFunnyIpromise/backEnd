@@ -1,9 +1,6 @@
 import transformers  
 from pymongo import MongoClient
 #-------------------------import library Above-----------------------------
-client = MongoClient('mongodb://localhost:27017')
-db = client['Database1']
-usercollection = db['DB1']
 #-------------------------set up mongoDB for testing Above-----------------------------
 
 
@@ -56,20 +53,3 @@ def calculate_the_zeroshot(input_texts, dynamic_labels):
         "columns": headers,
         "data": data
         }
-
-
-
-#--------------------------- test input--------------------------
-
-# Reading data from CSV file and extracting the 'review_body' column
-input_texts = []
-with open("Reqandscrape\_amazon_product_reviews15.csv", 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        input_texts.append(row["review_body"])
-
-# Define dynamic labels (this could be set based on user input or other criteria)
-dynamic_labels = ['Technology', 'Fashion', 'Health', 'Education']
-
-def calculate_the_zeroshot_test():
-    return calculate_the_zeroshot(input_texts,dynamic_labels)

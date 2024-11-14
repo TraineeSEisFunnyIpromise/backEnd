@@ -121,6 +121,7 @@ def scrape_amazon(inputkeyword,search_group):
 						if wait_count >= 20 // 2:  # Check after half of max wait time
 							print(wait_count)
 							print("Error: Encountered delays for too long")
+							driver.quit()
 							break  # Exit the loop if exceeded maximum wait attempts
 				print("end of loop")
 
@@ -156,7 +157,7 @@ def scrape_amazon(inputkeyword,search_group):
 					# end process quit driver
 				print("end of product scraping")
 				print("\t\t end process")
-		except(ConnectionRefusedError,ConnectionAbortedError):
+		except(ConnectionRefusedError,ConnectionAbortedError,TimeoutException):
 				driver.quit()
 				print("\t\t end process")
 	else:
@@ -164,7 +165,7 @@ def scrape_amazon(inputkeyword,search_group):
 		driver.quit()
 
 #
-	with open('search_result3.json', 'w', encoding='utf-8') as json_file:
+	with open('temporary_search_result.json', 'w', encoding='utf-8') as json_file:
 		json.dump(result, json_file, ensure_ascii=False, indent=4)
 	print("\t end amazon")
 	if result == None:
@@ -181,7 +182,7 @@ def item_sorting(items):
 			data_link = []
 			data_asin = []
 
-			with open('search_result3.json', 'w', encoding='utf-8') as jsonfile:
+			with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
 					json.dump([], jsonfile)
 
 			for item_text in items:
@@ -213,7 +214,7 @@ def item_sorting(items):
 						# if(product_data['product'] is not None):
 						#     data.append(product_data)
 			# Write data to JSON
-			with open('search_result3.json', 'a', encoding='utf-8') as jsonfile:
+			with open('temporary_search_result.json', 'a', encoding='utf-8') as jsonfile:
 					if jsonfile['product_name']:
 						print("bad")
 					else:	
@@ -222,9 +223,10 @@ def item_sorting(items):
 
 def get_asin():
 	data=[]
-	with open('search_result3.json', 'a', encoding='utf-8') as jsonfile:
+	with open('temporary_search_result.json', 'a', encoding='utf-8') as jsonfile:
 				if jsonfile['ASIN']== None:
-					print("bad")
+					print("empty")
+					return None
 				else:	
 					json.load(data["ASIN"], jsonfile, indent=4)
 	return data
@@ -232,23 +234,18 @@ def get_asin():
 
 # #--------------------------URL cleaner---------------------------------------
 
-def is_asin(text):
-    # ASINs are typically 10-character alphanumeric strings..nice
-    return bool(re.fullmatch(r'[A-Z0-9]{10}', text, flags=re.IGNORECASE))
-
 def urlcleaner(url):
-    result = ''
+    clean_url = ''
         #culling the URL
     asin_match = re.search(r'/[dg]p/([^/?]+)', url, flags=re.IGNORECASE)
     if asin_match:
             asin = asin_match.group(1)
             # # check is it a valid ASIN
-            if is_asin(asin):
-                result = asin
-    return result
+            clean_url = re.fullmatch(r'[A-Z0-9]{10}', asin, flags=re.IGNORECASE)
+    return clean_url
 # #----------------review scraping---------------------
 
-def scrape_amazon_product(asin,json_file = open('search_result2.json','w',encoding='utf-8')):
+def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','w',encoding='utf-8')):
 	options = webdriver.ChromeOptions()
 	options.add_argument('--incognito')  # Open in incognito mode
 	options.add_argument('--disable-extensions')  # Disable extensions

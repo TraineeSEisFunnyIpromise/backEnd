@@ -128,13 +128,6 @@ async def scrape_test():
 	# Process scraped results (e.g., convert to JSON, store in database)
 	return jsonify(results)
 
-@search_bp.route('/critandprod_test', methods=['POST'])
-def zeroshotstuff_test():
-	response = request.get_json() # store the json body request
-	print(response)
-	result = calculate_the_zeroshot_test()
-	print(result)
-	return jsonify(result)
 
 # Load the JSON data
 #test section

@@ -27,6 +27,10 @@ def test_search(page):
     chart_container = page.query_selector('.chart-container')
     assert chart_container.is_visible()
 
+
+
+
+
 with pw.chromium() as browser:
     page = browser.new_page()
     test_search(page)

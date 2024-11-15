@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch
 from MainApp import app  # Assuming your Flask app is in main.py
-from Reqandscrape.requestsender.chatgptreqsender import change_data
-from Reqandscrape.requestsender.chatgptreqsender import extract_criteria as convert_input
+from Reqandscrape.Requestsender.chatgptreqsender import change_data,check_input_word
+from Reqandscrape.Requestsender.chatgptreqsender import extract_criteria as convert_input
 
 class TestChangeData(unittest.TestCase):
 
@@ -15,14 +15,14 @@ class TestChangeData(unittest.TestCase):
         self.assertIn(True, response['choices'][0])
 
     def test_unsuccess_response(self):
-        response = change_data("someinput")
+        response = check_input_word("someinput")
         # Assert the response structure and content
         self.assertIsInstance(response, dict)
         self.assertIn('choices', response)
         self.assertIn(False, response['choices'][0])
     
     def test_success_response_boolean(self):
-        response = change_data("student")
+        response = check_input_word("student")
         # Assert the response structure and content
         self.assertIsInstance(response, dict)
         self.assertIn('choices', response)

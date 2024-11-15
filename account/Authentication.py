@@ -21,7 +21,6 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 300
 #-------------------------------------import and setpu stuff ---------------------------------------
 
 
-
 #--------------------------------------------Login Part-------------------------------------------
 
 def authentication(username, password):

@@ -1,12 +1,8 @@
 # app.py
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
-from pymongo import MongoClient
-from account.userinfo import access_database,delete_user,update_aboutme
+from account.userinfo import access_database,delete_user,update_aboutme,check_database_status
 # import userinfo function
-
-
-from functools import wraps
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app

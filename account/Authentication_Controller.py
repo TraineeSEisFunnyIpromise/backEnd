@@ -2,13 +2,10 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_session import Session
 from flask_cors import CORS
-from pymongo import MongoClient
 from account.Authentication import authentication,register_newuser
 from database.databasemanager import check_database_status
 from account.userinfo import sessioncheck
 #time stuff
-from datetime import datetime, timedelta
-import uuid
 # instantiate the app
 app = Flask(__name__)
 
@@ -38,8 +35,8 @@ def login():
   # this is the most confused stuff that i ever done it look simple but tracking it
   #is the real challenge
     if check_database_status != False:
-      authentication(usernameA,passA)
-
+      result = authentication(usernameA,passA)
+      return result
     else: 
       return jsonify({'msg':'Server is not avaliable'}),400
 

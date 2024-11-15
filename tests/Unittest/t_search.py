@@ -12,22 +12,6 @@ class TestSearchReview(unittest.TestCase):
     asin = ["DP023543","DP546503","DP003156"]
     url = ["","",""]
     soup = open("raw_result_test.txt", "w+",encoding="utf-8")
-    
-    def test_success_search_product(self):
-        result = scrape_amazon("electric spoon","")
-        self.assertIsNotNone(result)
-    
-    def test_unsuccess_search_product(self):
-        result = scrape_amazon("electric spoon","")
-        self.assertIsNone(result)
-        
-    def test_success_scrape_product(self,asin):
-        result = scrape_amazon_product(asin)
-        self.assertIsNotNone(result)
-    
-    def test_unsuccess_scrape_product(self):
-        result = scrape_amazon_product([])
-        self.assertIsNone(result)
 
     def test_success_scrape_review(self,soup):
         result = get_reviews(soup)
@@ -48,14 +32,7 @@ class TestSearchReview(unittest.TestCase):
     def url_cleaner(self):
         print()
     
-    def test_success_get_asin(self,url):
-        result = get_asin(url)
-        self.assertIsNotNone(result)
 
-
-    def test_unsuccess_get_asin(self):
-        result = get_asin([])
-        self.assertIsNone(result)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,5 +1,4 @@
-import transformers  
-from pymongo import MongoClient
+
 #-------------------------import library Above-----------------------------
 #-------------------------set up mongoDB for testing Above-----------------------------
 
@@ -21,7 +20,6 @@ from pymongo import MongoClient
 # 	print(prediction['scores'])
 
 from transformers import pipeline
-import csv
 
 # Initialize the zero-shot classification pipeline
 classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")

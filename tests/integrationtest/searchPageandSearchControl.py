@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import patch, AsyncMock
 
 # Import your functions
-from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon,get_product_detail,get_reviews,scrape_amazon_product,get_asin
-
+from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon,scrape_amazon_product
+from Reqandscrape.Requestsender.chatgptreqsender import change_data as reqsender
 
 
 class TestSearchReview(unittest.TestCase):
@@ -11,6 +11,7 @@ class TestSearchReview(unittest.TestCase):
     asin = ["DP023543","DP546503","DP003156"]
     url = ["","",""]
     soup = open("raw_result_test.txt", "w+",encoding="utf-8")
+    word = "electric car"
     
     def test_success_search_product(self):
         result = scrape_amazon("electric spoon","")
@@ -26,6 +27,14 @@ class TestSearchReview(unittest.TestCase):
     
     def test_unsuccess_scrape_product(self):
         result = scrape_amazon_product([])
+        self.assertIsNone(result)
+
+    def test_success_scrape_product(self,word):
+        result = reqsender(word)
+        self.assertIsNotNone(result)
+    
+    def test_unsuccess_scrape_product(self):
+        result = reqsender([])
         self.assertIsNone(result)
 
 if __name__ == '__main__':

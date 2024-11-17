@@ -14,6 +14,10 @@ import csv,random,json
 from selenium import webdriver
 from seleniumwire import webdriver as webdriver_wire
 from bs4 import BeautifulSoup
+from selenium.webdriver import Remote, ChromeOptions
+from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
+from selenium.webdriver.common.by import By
+
 
 #inport file for cors
 from flask import Flask
@@ -23,9 +27,10 @@ app = Flask(__name__)
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
 #----------------------finding prod--------------------------------
-URL = "http://www.amazon.com"
-api_endpoint = ""
 
+api_endpoint = ""
+AUTH = ''
+SBR_WEBDRIVER = f'https://{AUTH}@'
 
 import asyncio
 # from Review_scraper.PWRAZscrape import search_review
@@ -61,14 +66,8 @@ def scrape_amazon(inputkeyword,search_group):
 	options.add_argument('--blink-settings=imagesEnabled=false')
 	# options.add_argument("--headless")
 
-	#seleniumwire option 
-	seleniumwire_options_setting = {
-    "proxy": {
-        "http": api_endpoint,
-        "https": api_endpoint
-    },
-}
-
+	#selenium option 
+	sbr_connection = ChromiumRemoteConnection(SBR_WEBDRIVER, 'goog', 'chrome')
 	#end of seleniumwire option
 	print("start process")
 	if(api_endpoint != ''):
@@ -77,8 +76,13 @@ def scrape_amazon(inputkeyword,search_group):
 				# Replace with your proxy server URL
 				# options.add_argument(f'--proxy-server={api_endpoint}')
 				# Create a Selenium Wire driver
-				driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
-				driver.get("https://www.amazon.com")
+				inputkeyword = inputkeyword + " " + search_group
+				keyword = str(inputkeyword)
+				
+    	 
+				driver = Remote(sbr_connection, options=options) 
+				
+				driver.get("https://amazon.com")
 
 				#wait for 5 second
 				driver.implicitly_wait(500)
@@ -87,9 +91,9 @@ def scrape_amazon(inputkeyword,search_group):
 				# autocapitalize="off" autocorrect="off" type="text">
 
 				#merge word
-				inputkeyword = inputkeyword + " " + search_group
-				keyword = str(inputkeyword)
+				
 				#finding search box
+				driver.set_page_load_timeout(30)
 				search = driver.find_element(By.ID, 'twotabsearchtextbox')
 				#set condition if detected abandon task
 				search.send_keys(keyword)
@@ -127,7 +131,7 @@ def scrape_amazon(inputkeyword,search_group):
 
 				content = driver.page_source
 				soup = BeautifulSoup(content, 'html.parser')
-				items = soup.findAll('div', 'sg-col-inner')
+				items = soup.findAll('div', class_='sg-col-inner')
 				print("setting up data")
 				#print(type(items))
 				with open("raw_result.txt", "w+",encoding="utf-8") as f:
@@ -186,14 +190,13 @@ def item_sorting(items):
 					json.dump([], jsonfile)
 
 			for item_text in items:
-					product_name = clean_html(str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal')))
+					product_name = str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal'))
 					data_name.append(product_name)
-					product_price = clean_html(str(item_text.find('span', class_='a-price-whole')))
+					product_price = str(item_text.find('span', class_='a-price-whole'))
 					data_price.append(product_price)
-					product_ratings = clean_html(str(item_text.find('span', class_ = 'a-size-base a-color-base')))
+					product_ratings = str(item_text.find('span', class_ = 'a-size-base a-color-base'))
 					data_ratings.append(product_ratings)
 					product_link = str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal'))
-					product_link = urlcleaner(product_link)
 					data_link.append(product_link)
 					product_asin = urlcleaner(product_link)
 					data_asin.append(urlcleaner(product_link))
@@ -202,34 +205,63 @@ def item_sorting(items):
 					# product_asin = urlcleaner(product_link)
 					
 					# Create a dictionary for each product
-					if product_name != None:
-						product_data = {
+
+					product_data = {
 								"product": product_name,
 								"price": product_price,
 								"rating": product_ratings,
-								"URL": product_link,
-								"ASIN": product_asin
+								"url": product_link,
+								"asin": product_asin
 						}
-						data.append(product_data)
+					data.append(product_data)
 						# if(product_data['product'] is not None):
 						#     data.append(product_data)
 			# Write data to JSON
-			with open('temporary_search_result.json', 'a', encoding='utf-8') as jsonfile:
-					if jsonfile['product_name']:
-						print("bad")
-					else:	
+			with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
 					  json.dump(data, jsonfile, indent=4)
+			# for item_text in items:
+			# 		product_name = clean_html(str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal')))
+			# 		data_name.append(product_name)
+			# 		product_price = clean_html(str(item_text.find('span', class_='a-price-whole')))
+			# 		data_price.append(product_price)
+			# 		product_ratings = clean_html(str(item_text.find('span', class_ = 'a-size-base a-color-base')))
+			# 		data_ratings.append(product_ratings)
+			# 		product_link = str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal'))
+			# 		data_link.append(product_link)
+			# 		product_asin = urlcleaner(product_link)
+			# 		data_asin.append(urlcleaner(product_link))
+
+			# 		# Calculate product_asin using urlcleaner (if needed)
+			# 		# product_asin = urlcleaner(product_link)
+					
+			# 		# Create a dictionary for each product
+			# 		if product_name != None:
+			# 			product_data = {
+			# 					"product": product_name,
+			# 					"price": product_price,
+			# 					"rating": product_ratings,
+			# 					"URL": product_link,
+			# 					"ASIN": product_asin
+			# 			}
+			# 			data.append(product_data)
+			# 			# if(product_data['product'] is not None):
+			# 			#     data.append(product_data)
+			# # Write data to JSON
+			# with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
+			# 		  json.dump(data, jsonfile, indent=4)
 			
 
 def get_asin():
-	data=[]
-	with open('temporary_search_result.json', 'a', encoding='utf-8') as jsonfile:
-				if jsonfile['ASIN']== None:
-					print("empty")
-					return None
-				else:	
-					json.load(data["ASIN"], jsonfile, indent=4)
-	return data
+    data = []
+    with open('temporary_search_result.json', 'r+') as jsonfile:
+        if jsonfile:
+            json_data = json.load(jsonfile)
+            for asin in json_data:
+                if asin['asin']!=None:
+                    data.append(asin)
+                else:
+                    print("Empty ASIN found.")
+    return data
 
 
 # #--------------------------URL cleaner---------------------------------------

@@ -34,3 +34,66 @@ def test_check_database_status_success(mock_client):
 def test_check_database_status_failure(mock_client):
     mock_client.side_effect = Exception('Connection error')
     assert check_database_status() == False
+
+@patch('database.databasemanager.MongoClient')
+def test_check_username_success(mock_client):
+
+    assert check_username() == True
+
+@patch('database.databasemanager.MongoClient')
+def test_check_username_failure(mock_client):
+    
+    assert check_username() == False
+
+@patch('database.databasemanager.MongoClient')
+def test_check_database_status_success(mock_client):
+
+    assert write_to_database_by_name() == True
+
+@patch('database.databasemanager.MongoClient')
+def test_check_database_status_failure(mock_client):
+
+    assert write_to_database_by_name() == False
+
+@patch('database.databasemanager.MongoClient')
+def test_update_user_aboutme_success(mock_client):
+
+    assert update_user_aboutme() == True
+
+@patch('database.databasemanager.MongoClient')
+def test_update_user_aboutme_failure(mock_client):
+
+    assert update_user_aboutme() == False
+
+@patch('database.databasemanager.MongoClient')
+def test_update_password_success(mock_client):
+
+    assert update_password() == True
+
+@patch('database.databasemanager.MongoClient')
+def test_update_password_failure(mock_client):
+
+    assert update_password() == False
+
+
+@patch('database.databasemanager.MongoClient')
+def test_add_new_user_success(mock_client):
+
+    assert add_new_user() == True
+
+@patch('database.databasemanager.MongoClient')
+def test_add_new_user_failure(mock_client):
+
+    assert add_new_user() == False
+
+
+@patch('database.databasemanager.MongoClient')
+def test_delete_user_success(mock_client):
+
+    assert delete_user() == True
+
+@patch('database.databasemanager.MongoClient')
+def test_delete_user_failure(mock_client):
+
+    assert delete_user() == False
+

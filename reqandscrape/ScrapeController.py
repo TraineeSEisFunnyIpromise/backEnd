@@ -1,8 +1,8 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
-from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
-from Reqandscrape.zeroshotclassify import calculate_the_zeroshot
-from Reqandscrape.search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
+from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
+from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
+from Reqandscrape.Search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
 #time stuff
 #nested asyncio nice
 import nest_asyncio,pandas
@@ -99,7 +99,7 @@ def zeroshotstuff():
 	result = calculate_the_zeroshot(inputdata,inputcriteria)
 	if session==True:
 		print("save data")
-	return jsonify(result)
+	return result
 
 #--------------------------------------------search test  Part--------------------------------------------
 @search_bp.route('/search_criteria_test', methods=['POST'])
@@ -110,16 +110,6 @@ def search_criteria_test_sender():
 	print(response)
 	return jsonify(a)
 
-@search_bp.route('/search_prod_test', methods=['POST'])
-def search_prod_sender_test():
-	response = request.get_json() # store the json body request
-	print(response)
-	with open('Reqandscrape\search_scrape\search_result_recent.csv', mode ='r')as file:
-		csvFile = csv.reader(file)
-		result = csvFile
-	response = result
-	return jsonify(response)
-
 @search_bp.route('/scrape_test', methods=['POST'])
 async def scrape_test():
 	response = request.get_json() # store the json body request
@@ -128,6 +118,15 @@ async def scrape_test():
 	# Process scraped results (e.g., convert to JSON, store in database)
 	return jsonify(results)
 
+
+@search_bp.route('/critandprod_test', methods=['POST'])
+def zeroshotstuff_test():
+
+	result = calculate_the_zeroshot_test()
+
+	if session==True:
+		print("save data")
+	return result
 
 # Load the JSON data
 #test section

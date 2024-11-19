@@ -169,7 +169,7 @@ def scrape_amazon(inputkeyword,search_group):
 		driver.quit()
 
 #
-	with open('temporary_search_result.json', 'w', encoding='utf-8') as json_file:
+	with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
 		json.dump(result, json_file, ensure_ascii=False, indent=4)
 	print("\t end amazon")
 	if result == None:
@@ -406,11 +406,11 @@ def json_data_mock():
 
 def csv_json_mock():
 	result = []
-	with open('sample.json', 'w', encoding='utf-8') as json_file:
+	with open('sample.json', 'r', encoding='utf-8') as json_file:
 		if json_file == None:
 			print("result bad")
 		else:
-			json.load(result, json_file, ensure_ascii=False, indent=4)
+			result = json.load(json_file)
 	print("\t end amazon")
 	return result
 

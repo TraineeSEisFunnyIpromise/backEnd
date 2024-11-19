@@ -35,7 +35,7 @@ def change_data(input,group_target):
 		},
 		{
 		"role": "user",
-		"content": "could you provide a criteria list according to the product? "
+		"content": "could you provide a criteria list according to the product with number?"
 		+"the product"+input + "and for this group of people "+"group target : " + group_target
 		}
 	]
@@ -170,13 +170,11 @@ def receiveinput(input_text,group_target):
 
 #run test
 def receiveinputtest():
-   set_text = extract_criteria((sentence))
+   set_text = extract_criteria(sentence)
    storea = []
    counta = 0
-
    for i in range(len(set_text)):
       storea.append((set_text[i]))
-
    lenj = len(storea) +1
 
    for i in range(len(storea)):
@@ -191,17 +189,7 @@ def receiveinputtest():
            counta += 1
    for i in range(counta):
        storea.pop(0)
-
-#save in csv for individual testing 
-   filename = 'test1_search_criteria.csv'
-   print("Jsoning data")
-   data_json = json.dumps(storea)
-   with open(filename, "w") as outfile:
-      outfile.write(data_json)
-
    print("------")
    print(storea)
+
    return storea
-
-
-# receiveinput("electric fan","student")

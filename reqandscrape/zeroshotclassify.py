@@ -5,8 +5,7 @@
 
 # classifier = transformers.pipeline("zero-shot-classification", model="facebook/bart-large-mnli")  
 # #sample text and label
-# text = "I enjoy playing cricket, specializing as a left-arm leg spinner while showcasing my skills as a right-handed one-down batsman." 
-# labels = ['Politics', 'Automobile', 'Sports', 'Business', 'World']  
+
 
 # def compare_prod(criteria_lists, inputa):
 # 	prediction = classifier(inputa, criteria_lists)
@@ -47,6 +46,25 @@ def calculate_the_zeroshot(input_texts, dynamic_labels):
     # Create a list of data rows
     data = [[label, total_scores[label]] for label in total_scores]
     return {
-        "columns": headers,
-        "data": data
+        "Label": headers,
+        "Score": data
+        }
+
+def calculate_the_zeroshot_test():
+    # Calculate the sum of scores for the dynamic labels
+    text = "I enjoy playing cricket, specializing as a left-arm leg spinner while showcasing my skills as a right-handed one-down batsman." 
+    labels = ['Politics', 'Automobile', 'Sports', 'Business', 'World']  
+    total_scores = classify_and_sum_scores(text, labels)
+    for label in total_scores:
+        total_scores[label] = total_scores[label] / len(text)
+        print(f"Total score for {label}: {total_scores[label]}")
+
+    # Create a list of column headers
+    headers = ["Label", "Score"]
+
+    # Create a list of data rows
+    data = [[label, total_scores[label]] for label in total_scores]
+    return {
+        "Label": headers,
+        "Score": data
         }

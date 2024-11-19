@@ -19,6 +19,6 @@ Style: While not the most important factor, some toasters come in a variety of s
     def test_unsuccess_convert_input(self):
         result = convert_input(None)
         self.assertIsNone(result)
-    
+
 if __name__ == '__main__':
     unittest.main()

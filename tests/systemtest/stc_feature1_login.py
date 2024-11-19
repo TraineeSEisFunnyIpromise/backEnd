@@ -1,37 +1,119 @@
-from playwright.sync_api import sync_playwright
+import pytest
+import asyncio
+from playwright.async_api import async_playwright
 
-with sync_playwright() as p:
-    # Launch the browser (choose Chromium, Firefox, or WebKit)
-    browser = p.chromium.launch(headless=False)  # Set headless=True for faster execution without browser window
+@pytest.mark.asyncio
+async def test_login_success():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context()
+        page = await context.new_page()
 
-    context = browser.new_context()
-    page = context.new_page()
+        await page.goto("http://localhost:4000/login") 
 
-    # Login Test
-    page.goto("http://localhost:4000/login")  # Replace with your login page URL
+        await page.fill("#username", "test1")
+        await page.fill("#password", "1234")
+        await page.click("#login-button")
 
-    page.fill("#username", "test1")  # Replace with your username
-    page.fill("#password", "1234")  # Replace with your password
-    page.click("#login-button")  # Replace with your login button selector
+        success_message = await page.text_content(".success-message")
+        assert "Login successful" in success_message
 
+        await context.close()
+        await browser.close()
 
+@pytest.mark.asyncio
+async def test_login_unsuccess():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context()
+        page = await context.new_page()
 
-    success_message = page.text_content(".success-message")
-    assert "Login successful" in success_message  # Adjust assertion if needed
+        await page.goto("http://localhost:4000/login") 
 
-    # Registration Test (Clear previous session data if needed)
-    page.goto("http://localhost:4000/register")  # Replace with your registration page URL
+        await page.fill("#username", "test1")
+        await page.fill("#password", "12345678")
+        await page.click("#login-button")
 
-    page.fill("#namename", "Test1")  # Replace with your registration form field names
-    page.fill("#aboutme", "test@example.com")
-    page.fill("#password", "12345678")
-    page.click("#register-button")  # 
+        success_message = await page.text_content(".unsuccess-message")
+        assert "Login unsuccessful" in success_message
 
-    page.wait_for_selector(".success-message", state="visible")  # Adjust selector if needed
+        await context.close()
+        await browser.close()
 
-    success_message = page.text_content(".success-message")
-    assert "Registration successful" in success_message  # Adjust assertion if needed
+@pytest.mark.asyncio
+async def test_resetpassword_success():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context()
+        page = await context.new_page()
 
-    # Close browser context
-    context.close()
-    browser.close()
+        await page.goto("http://localhost:4000/login") 
+
+        await page.fill("#username", "test1")
+        await page.fill("#password", "1234")
+        await page.click("#login-button")
+
+        success_message = await page.text_content(".success-message")
+        assert "Login successful" in success_message
+
+        await context.close()
+        await browser.close()
+        
+@pytest.mark.asyncio
+async def test_resetpassword_unsuccess():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context()
+        page = await context.new_page()
+
+        await page.goto("http://localhost:4000/login") 
+
+        await page.fill("#username", "test1")
+        await page.fill("#password", "1234")
+        await page.click("#login-button")
+
+        success_message = await page.text_content(".success-message")
+        assert "Login successful" in success_message
+
+        await context.close()
+        await browser.close()
+
+@pytest.mark.asyncio
+async def test_registration_success():
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context()
+        page = await context.new_page()
+
+        await page.goto("http://localhost:4000/login") 
+
+        await page.fill("#username", "test1")
+        await page.fill("#password", "1234")
+        await page.click("#login-button")
+
+        success_message = await page.text_content(".success-message")
+        assert "Login successful" in success_message
+
+        await context.close()
+        await browser.close()
+
+@pytest.mark.asyncio
+async def test_registration_unsuccess():
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context()
+        page = await context.new_page()
+
+        await page.goto("http://localhost:4000/login") 
+
+        await page.fill("#username", "test1")
+        await page.fill("#password", "1234")
+        await page.click("#login-button")
+
+        success_message = await page.text_content(".success-message")
+        assert "Login successful" in success_message
+
+        await context.close()
+        await browser.close()

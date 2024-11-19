@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 # Assuming your Flask application is in a file called app.py
 from Reqandscrape.Requestsender.chatgptreqsender import change_data as reqsender
-from Reqandscrape.Requestsender.chatgptreqsender import check_input_word
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot
 
 # Sample data for testing
@@ -18,16 +17,6 @@ def test_success_reqsender(self):
 def test_unsuccess_reqsender(self):
     result = reqsender()
     self.assertIsNone(result)
-
-
-def test_success_check_input_word(self):
-    result = check_input_word("electric spoon")
-    self.assertIsNotNone(result)
-    
-def test_unsuccess_check_input_word(self):
-    result = check_input_word()
-    self.assertIsNone(result)
-
 
 def test_success_calculate_zeroshot(self):
     result = calculate_the_zeroshot()

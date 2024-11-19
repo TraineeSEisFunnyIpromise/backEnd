@@ -3,7 +3,7 @@ from unittest.mock import patch, AsyncMock
 import asyncio
 
 # Import your functions
-from Reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon,get_product_detail,get_reviews,scrape_amazon_product,get_asin,urlcleaner
+from Reqandscrape.search_scrape.PWBDscraperAZ import urlcleaner
 
 
 

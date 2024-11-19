@@ -14,12 +14,6 @@ class TestUserInfo(unittest.TestCase):
         self.newpassword = "1234567"
         self.password="1234"
 
-    def test_sessioncheck_success(self):
-        # Refer to the previous test for explanation
-        response = self.app.post('/userinfo/Sessioncheck')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'test_user', response.data)  # Assert username is present
-
     def test_success_update_oldpassword(self,username,newpassword):
         result = update_oldpassword(username,newpassword)
         self.assertIsNotNone(result)

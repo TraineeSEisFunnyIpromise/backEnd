@@ -406,7 +406,7 @@ def json_data_mock():
 
 def csv_json_mock():
 	result = []
-	with open('search_result3.json', 'w', encoding='utf-8') as json_file:
+	with open('sample.json', 'w', encoding='utf-8') as json_file:
 		if json_file == None:
 			print("result bad")
 		else:
@@ -433,6 +433,3 @@ def test_prod():
 	print("\t end amazon")
 	json_file.close()
 
-	def mock_search_product():
-
-		return

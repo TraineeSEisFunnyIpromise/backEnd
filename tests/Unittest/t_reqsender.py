@@ -1,8 +1,5 @@
 import unittest
-from unittest.mock import patch
-from MainApp import app  # Assuming your Flask app is in main.py
-from Reqandscrape.Requestsender.chatgptreqsender import change_data,check_input_word
-from Reqandscrape.Requestsender.chatgptreqsender import extract_criteria as convert_input
+from Reqandscrape.requestsender.chatgptreqsender import extract_criteria as convert_input
 
 class TestChangeData(unittest.TestCase):
 

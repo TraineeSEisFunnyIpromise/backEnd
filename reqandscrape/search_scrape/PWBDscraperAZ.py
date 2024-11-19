@@ -432,3 +432,7 @@ def test_prod():
 			print(result)
 	print("\t end amazon")
 	json_file.close()
+
+	def mock_search_product():
+
+		return

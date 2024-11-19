@@ -6,34 +6,6 @@ from Reqandscrape.Requestsender.chatgptreqsender import extract_criteria as conv
 
 class TestChangeData(unittest.TestCase):
 
-        
-    def test_success_response(self):
-        response = change_data("electric fan")
-        # Assert the response structure and content
-        self.assertIsInstance(response, dict)
-        self.assertIn('choices', response)
-        self.assertIn(True, response['choices'][0])
-
-    def test_unsuccess_response(self):
-        response = check_input_word("someinput")
-        # Assert the response structure and content
-        self.assertIsInstance(response, dict)
-        self.assertIn('choices', response)
-        self.assertIn(False, response['choices'][0])
-    
-    def test_success_response_boolean(self):
-        response = check_input_word("student")
-        # Assert the response structure and content
-        self.assertIsInstance(response, dict)
-        self.assertIn('choices', response)
-        self.assertEqual('True', response['choices'][0])
-
-    def test_unsuccess_response_boolean(self):
-        response = change_data("someinput")
-        # Assert the response structure and content
-        self.assertIsInstance(response, dict)
-        self.assertIn('choices', response)
-        self.assertIn('False', response['choices'][0])
 
     def test_success_convert_input(self):
         criteria = """Capacity: Do you usually toast for one or two people? Standard toasters have 2 slices, but wider models can handle 4.

@@ -46,7 +46,7 @@ def resetpassword(username,get_resetanswer,get_resetpassword):
   if (get_resetanswer ==  answer_for_resetpassword) == True:
         update_password(username,get_resetpassword)
   else:
-    return jsonify({'error': 'Please provide correct username and password'})
+    return jsonify({'error': 'Please provide correct username and answer'})
   return jsonify({'message': 'Reset password successful'})
 
 #----------------------------------------register part--------------------------------------------

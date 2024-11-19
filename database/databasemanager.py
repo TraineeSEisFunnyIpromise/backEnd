@@ -12,7 +12,7 @@ def delete_user(username):
   usercollection.delete_one({"username": username})
   return True
 
-def update_user(username, new_aboutme):
+def update_user_aboutme(username, new_aboutme):
     usercollection.update_one(
         {"username": username},
         {"$set": {"about me": new_aboutme}}

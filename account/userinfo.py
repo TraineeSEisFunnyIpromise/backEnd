@@ -1,7 +1,7 @@
 # app.py
 from flask import Flask, jsonify, session
 from flask_cors import CORS
-from database.databasemanager import update_user,check_database_status,access_database,delete_user,update_password
+from database.databasemanager import update_user_aboutme,check_database_status,access_database,delete_user,update_password
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app
@@ -36,7 +36,7 @@ def update_aboutme(data,username):
   username = session.get('user')
   if data["send" != '']:
     if check_database_status() == True:
-      update_user(data,username)
+      update_user_aboutme(data,username)
     else:
       return
     return jsonify({'message': 'Registration successful'})

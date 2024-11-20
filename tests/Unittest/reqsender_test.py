@@ -1,5 +1,5 @@
 import unittest
-from Reqandscrape.requestsender.chatgptreqsender import extract_criteria as convert_input
+from Reqandscrape.Requestsender.chatgptreqsender import extract_criteria as convert_input
 
 class TestChangeData(unittest.TestCase):
 

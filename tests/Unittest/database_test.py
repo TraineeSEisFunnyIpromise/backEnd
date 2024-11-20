@@ -36,14 +36,14 @@ def test_check_database_status_failure(mock_client):
     assert check_database_status() == False
 
 @patch('database.databasemanager.MongoClient')
-def test_check_username_success(mock_client):
+def test_check_username_success():
 
-    assert check_username() == True
+    assert check_username('testuser') == True
 
 @patch('database.databasemanager.MongoClient')
-def test_check_username_failure(mock_client):
+def test_check_username_failure():
     
-    assert check_username() == False
+    assert check_username('someuitaoiui') == False
 
 @patch('database.databasemanager.MongoClient')
 def test_check_database_status_success(mock_client):

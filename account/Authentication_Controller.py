@@ -54,7 +54,9 @@ def something():
 @auth_bp.route('/register', methods=['POST'])
 def register():
     new_user = request.get_json() # store the json body request
+    print(new_user)
     register_newuser(new_user)
+    return jsonify({'msg': 'User registered successfully'}),200
 
 #---------------------------------- pure function around here--------------------------------
 #check all data

@@ -42,15 +42,16 @@ def update():
 @userinformation_bp.route('/Information', methods=['POST'])
 def get_userinfo():
 	    # Check if the user is logged in by verifying the session
-    if 'username' in session:
-        username = session['username']
-        
+    data = request.get_json()
+    user = data['username']
+    if user is not None:
+
         # Find the user in the database using the username from the session
-        user = access_database(username)
+        user = access_database(user)
         
         if user is not None:
             # Return user data (excluding sensitive information)
-            return jsonify(user), 200
+            return user, 200
         else:
             return jsonify({'error': 'User not found'}), 404
     else:

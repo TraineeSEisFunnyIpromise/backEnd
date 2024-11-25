@@ -27,22 +27,27 @@ def authentication(username, password):
 	#check database status
       if check_database_status != False :
           #access account data according to name
-          if check_username(username) != None or check_username(username) != '':
+          print(username)
+          if check_username(username) != '':
             user_from_db = access_database(username)
             #straight up check empty and password kek
-            if ((user_from_db != None or user_from_db != '') and (password == user_from_db['password']) == True):
+            print(user_from_db)
+            if ((user_from_db != None) and (password == user_from_db['password']) == True):
               result = user_from_db
               session['username'] = username
+              result["_id"] = str(result["_id"])
               return result
             else:
               return jsonify({'msg': 'Incorrect passwords'}),400
+          else:
+              return jsonify({'msg': 'no user exist'}),400
       else:
             return jsonify({'msg': 'The database is down!!!'}),504
 
 #---------------------------------------- reset password section -------------------------------------------
 def resetpassword(username,get_resetanswer,get_resetpassword):
   userdata = access_database(username)
-  answer_for_resetpassword = userdata["answer for password recovery"]
+  answer_for_resetpassword = userdata["answer_for_reset"]
   if (get_resetanswer ==  answer_for_resetpassword) == True:
         update_password(username,get_resetpassword)
   else:
@@ -54,11 +59,14 @@ def register_newuser(data):
     new_user = data # store the json body request
     user_id = str(uuid.uuid4())
     #find user
+    print("register")
     doc = check_username(new_user["username"]) # check if user exist like
     #after checking no same username detected
-    if not doc:#pass
+    print(doc)
+    if doc == True:#pass
         new_user['user_id'] = user_id
-        add_new_user(new_user)
+        print(new_user)
+        add_new_user(new_user["username"],new_user)
         return jsonify({'msg': 'User created successfully'}), 201
 		
     else:#error given

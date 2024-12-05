@@ -32,7 +32,7 @@ def sessioncheck():
 
 #----------------------------------------User info part--------------------------------------------
 
-def update_aboutme(data,username):
+def update_aboutme(data):
   username = session.get('user')
   if data["send" != '']:
     if check_database_status() == True:
@@ -45,7 +45,6 @@ def update_aboutme(data,username):
 
 
 def update_oldpassword(username,get_resetpassword):
-
   if get_resetpassword != '':
         update_password(username,get_resetpassword)
   else:

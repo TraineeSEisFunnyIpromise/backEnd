@@ -1,7 +1,7 @@
 # app.py
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_cors import CORS
-from account.userinfo import access_database,delete_user,update_aboutme,check_database_status
+from account.userinfo import access_database,delete_user,update_aboutme,check_database_status,update_oldpassword
 # import userinfo function
 #time stuff
 from datetime import datetime, timedelta
@@ -42,46 +42,23 @@ def update():
 @userinformation_bp.route('/Information', methods=['POST'])
 def get_userinfo():
 	    # Check if the user is logged in by verifying the session
-    data = request.get_json()
-    user = data['username']
+    user = session.get('user')
     if user is not None:
 
         # Find the user in the database using the username from the session
-        user = access_database(user)
+        data = access_database(user)
         
         if user is not None:
             # Return user data (excluding sensitive information)
-            return user, 200
+            return data, 200
         else:
             return jsonify({'error': 'User not found'}), 404
     else:
         # User is not logged in or session has expired
         return jsonify({'error': 'Unauthorized'}), 401
-	
-
-@userinformation_bp.route('/Information_test', methods=['POST'])
-def userinfo_test():
-	# user_id = usercollection.find_one({"user_id": encrypted_username}) 
-	user = {  "username": "admin",
-					"password:":"1234",
-            "about":"something",
-            "question_r":"do you like banana",
-            "answer_r":"Yes",
-            "roles": "Administrator",} 
-	print(user)
-	if user:
-		 #this should be session check ut meh
-		if user:
-		# Return user data (excluding sensitive information)
-			return jsonify({'username': user['username'], 'about': user['about']})  # Example
-		else:
-			return jsonify({'error': 'User not found'}), 404
-	else:
-		return jsonify({'error': 'Unauthorized'}), 401
-
      
 @userinformation_bp.route('/Delete', methods=['POST'])
-def Delete():
+def delete_account():
 	data = request.json
 	if data["username"] != '':
 		delete_user(data["username"],data["password"])
@@ -89,12 +66,12 @@ def Delete():
 	else:
 		return jsonify({'msg': 'profile not found'}), 404
 
-@userinformation_bp.route('/Delete', methods=['POST'])
+@userinformation_bp.route('/Resetpassword', methods=['POST'])
 def reset_password():
 	data = request.json
-	
+	username = session.get('user')
 	if check_database_status == True:
-		reset_password(username=data["username"],get_resetanswer=data["reset_answer"],get_resetpassword=data["reset_password"])
+		update_oldpassword(username,get_resetpassword=data["reset_password"])
 		return jsonify({'msg' : 'remove succesful' }), 200
 	else:
 		return jsonify({'msg': 'database is down'}), 404

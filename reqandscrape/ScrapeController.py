@@ -97,6 +97,7 @@ def zeroshotstuff():
 	inputdata = response[1] 
 	inputcriteria = response[0]
 	result = calculate_the_zeroshot(inputdata,inputcriteria)
+	result = json.dumps(result, indent=4)
 	if session==True:
 		print("save data")
 	return result
@@ -122,17 +123,15 @@ async def scrape_test():
 @search_bp.route('/critandprod_test', methods=['POST'])
 def zeroshotstuff_test():
 
-	result = [['Politics', 0.07649134406967768], ['Automobile', 0.32627149304700276], ['Sports', 0.12833939120173454], ['Business', 0.2105391121927708], ['World', 0.25835864565202166]]
-
+	result = [{'Label': 'Politics', 'Score': 0.07649134406967768}, {'Label': 'Automobile', 'Score': 0.32627149304700276}, {'Label': 'Sports', 'Score': 0.12833939120173454}, {'Label': 'Business', 'Score': 0.2105391121927708}, {'Label': 'World', 'Score': 0.25835864565202166}]
+	result = json.dumps(result, indent=4)
 	if session==True:
 		print("save data")
-	return result
+	return jsonify(result)
 
 # Load the JSON data
 #test section
 
-
-#dumb solution 
 
 
 # when want to use it independently

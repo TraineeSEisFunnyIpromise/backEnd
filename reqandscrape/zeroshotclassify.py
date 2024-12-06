@@ -40,15 +40,13 @@ def calculate_the_zeroshot(input_texts, dynamic_labels):
         total_scores[label] = total_scores[label] / len(input_texts)
         print(f"Total score for {label}: {total_scores[label]}")
 
-    # Create a list of column headers
-    headers = ["Label", "Score"]
 
     # Create a list of data rows
-    data = [[label, total_scores[label]] for label in total_scores]
-    return {
-        "Label": headers,
-        "Score": data
-        }
+    data= [{'Label': label, 'Score': score} for label, score in total_scores.items()]
+
+
+    return data
+
 
 def calculate_the_zeroshot_test():
     # Calculate the sum of scores for the dynamic labels
@@ -57,14 +55,11 @@ def calculate_the_zeroshot_test():
     total_scores = classify_and_sum_scores(text, labels)
     for label in total_scores:
         total_scores[label] = total_scores[label] / len(text)
-        print(f"Total score for {label}: {total_scores[label]}")
+        
 
-    # Create a list of column headers
-    headers = ["Label", "Score"]
 
     # Create a list of data rows
-    data = [[label, total_scores[label]] for label in total_scores]
-    return {
-        "Label": headers,
-        "Score": data
-        }
+    data= [{'Label': label, 'Score': score} for label, score in total_scores.items()]
+    print(data)
+    return data
+    

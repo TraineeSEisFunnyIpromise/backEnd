@@ -16,42 +16,53 @@ import os
 
 openai_api_key = ""
 openai_api_key2 = ""
-def change_data(input,group_target):
-	if openai_api_key is None:
-		raise ValueError("OpenAI API key is not set in environment variables.")
 
-	url = "https://api.openai.com/v1/chat/completions"
+def change_data(input, group_target):
+    if openai_api_key is None:
+        raise ValueError("OpenAI API key is not set in environment variables.")
 
-	headers = {
-	"Content-Type": "application/json",
-	"Authorization": f"Bearer {openai_api_key}"
-	}
-	data = {
-	"model": "gpt-4o-mini",
-	"messages": [
-		{
-		"role": "system", 
-		"content": "You are a helpful assistant."
-		},
-		{
-		"role": "user",
-		"content": "could you provide a criteria list according to the product with number?"
-		+"the product"+input + "and for this group of people "+"group target : " + group_target
-		}
-	]
-	}
-    
+    url = "https://api.openai.com/v1/chat/completions"
 
-	response = requests.post(url, headers=headers, json=data)
-	# Check if the request was successful
-	if response.status_code == 200:
-		print("Response from OpenAI:", response.json())
-		print("------------------------------------------")
-		print('\n')
-		print(response.json()['choices'][0]['message']['content'])
-	else:
-		print("Error:", response.status_code, response.text)
-	return response.json()['choices'][0]['message']['content']
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {openai_api_key}"
+    }
+
+    data = {
+        "model": "gpt-4o-mini",
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant."
+            },
+            {
+                "role": "user",
+                "content": f"Could you provide a criteria list according to the product with number? The product: {input} and for this group of people: group target: {group_target}"
+            }
+        ]
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()  # Raise an exception for non-200 status codes
+
+        # Process successful response
+        criteria_list = response.json()['choices'][0]['message']['content']
+        print("Response from OpenAI:", response.json())
+        print("Criteria", criteria_list)
+        print("------------------------------------------")
+        print('\n')
+        return criteria_list
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        print("Failed to retrieve criteria list.")
+        return None  # Or return a specific error message/object
+
+    except KeyError as e:
+        print(f"Error: Missing key in response: {e}")
+        print("Failed to parse response.")
+        return None  # Or return a specific error message/object
 
 
 #check word by chatGPT 55555555555555+
@@ -84,15 +95,28 @@ def check_input_word(input,group_target):
 			}
 		]
 	}
-	response = requests.post(url, headers=headers, json=data)
-	# Check if the request was successful
-	if response.status_code == 200:
-		print("------------------------------------------")
-		print('\n')
-		print(response.json()['choices'][0]['message']['content'])
-	else:
-		print("Error:", response.status_code, response.text)
-	return response.json()['choices'][0]['message']['content']
+
+	try:
+			response = requests.post(url, headers=headers, json=data)
+			response.raise_for_status()  # Raise an exception for non-200 status codes
+
+			# Process successful response
+			criteria_list = response.json()['choices'][0]['message']['content']
+			print("Response from OpenAI:", response.json())
+			print("result check:", criteria_list)
+			print("------------------------------------------")
+			print('\n')
+			return criteria_list
+
+	except requests.exceptions.RequestException as e:
+			print(f"Error: {e}")
+			print("Failed to retrieve result.")
+			return None  # Or return a specific error message/object
+
+	except KeyError as e:
+			print(f"Error: Missing key in response: {e}")
+			print("Failed to parse response.")
+			return None  # Or return a specific error message/object
 
 
 
@@ -166,7 +190,7 @@ def receiveinput(input_text,group_target):
 		print(storea)
 		return storea
 	else:
-		return "Invalid input"
+		return "Invalid"
 
 #run test
 def receiveinputtest():

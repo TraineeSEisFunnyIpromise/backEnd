@@ -30,7 +30,7 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 
 api_endpoint = ""
 AUTH = ''
-SBR_WEBDRIVER = f''
+SBR_WEBDRIVER = f'https://{AUTH}@'
 
 import asyncio
 # from Review_scraper.PWRAZscrape import search_review
@@ -169,8 +169,16 @@ def scrape_amazon(inputkeyword,search_group):
 		driver.quit()
 
 #
+
+	with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
+		data = json.load(json_file)
+
+	for i, item in enumerate(data, start=1):
+		item['id'] = i
+
 	with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
 		json.dump(result, json_file, ensure_ascii=False, indent=4)
+
 	print("\t end amazon")
 	if result == None:
 		print("result bad")
@@ -190,11 +198,11 @@ def item_sorting(items):
 					json.dump([], jsonfile)
 
 			for item_text in items:
-					product_name = clean_html(str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal')))
+					product_name = str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal'))
 					data_name.append(product_name)
-					product_price = clean_html(str(item_text.find('span', class_='a-price-whole')))
+					product_price = str(item_text.find('span', class_='a-price-whole'))
 					data_price.append(product_price)
-					product_ratings = clean_html(str(item_text.find('span', class_ = 'a-size-base a-color-base')))
+					product_ratings = str(item_text.find('span', class_ = 'a-size-base a-color-base'))
 					data_ratings.append(product_ratings)
 					product_link = str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal'))
 					data_link.append(product_link)
@@ -203,9 +211,18 @@ def item_sorting(items):
 
 					# Calculate product_asin using urlcleaner (if needed)
 					# product_asin = urlcleaner(product_link)
-					
+					# product_name = clean_html(str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal')))
+					# data_name.append(product_name)
+					# product_price = clean_html(str(item_text.find('span', class_='a-price-whole')))
+					# data_price.append(product_price)
+					# product_ratings = clean_html(str(item_text.find('span', class_ = 'a-size-base a-color-base')))
+					# data_ratings.append(product_ratings)
+					# product_link = clean_html(str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal')))
+					# data_link.append(product_link)
+					# product_asin = urlcleaner(product_link)
+					# data_asin.append(urlcleaner(product_link))
 					# Create a dictionary for each product
-					if product_name != None:
+					if product_name:
 						product_data = {
 								"product": product_name,
 								"price": product_price,
@@ -218,7 +235,7 @@ def item_sorting(items):
 						#     data.append(product_data)
 			# Write data to JSON
 			with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
-					  json.dump(data, jsonfile, indent=4)
+				json.dump(data, jsonfile, indent=4)
 			
 
 def get_asin():
@@ -336,12 +353,6 @@ def get_product_detail(soup):
 	result = []
 
 	for card in product_cards:
-		# Product Name
-		product_name = card.find('span', {'class': 'a-size-medium a-color-base a-text-normal'})
-		if product_name:
-			product_name = product_name.text.strip()
-		else:
-			product_name = 'Not available'
 
 		# description
 		description = card.find('span', {'class': ''})
@@ -398,6 +409,7 @@ def clean_html(input):
             strip=True
 						)
     output = cleaner.clean(input)
+    output = str(output)
     return output
 
 

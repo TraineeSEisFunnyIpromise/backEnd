@@ -1,8 +1,8 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
-from Reqandscrape.Requestsender.chatgptreqsender import receiveinput,receiveinputtest
+from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
-from Reqandscrape.Search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
+from Reqandscrape.search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
 #time stuff
 #nested asyncio nice
 import nest_asyncio,pandas
@@ -81,11 +81,13 @@ def search_criteria_sender():
 		print("enter loop raw result")
 		f.write(response + "\n")
 	print("======yeeting data=====")
-	if session==True:
-		#add data if the session exist
-		print("save data")
 
-	return jsonify(response)
+	if isinstance(type(response),str):
+		response = json.loads(response)
+		return  response
+	else:
+		response = "invalid"
+		return jsonify(response)
 
 #--------------------------------------------search criteria sender Part--------------------------------------------
 
@@ -100,7 +102,7 @@ def zeroshotstuff():
 	result = json.dumps(result, indent=4)
 	if session==True:
 		print("save data")
-	return result
+	return jsonify(result)
 
 #--------------------------------------------search test  Part--------------------------------------------
 @search_bp.route('/search_criteria_test', methods=['POST'])

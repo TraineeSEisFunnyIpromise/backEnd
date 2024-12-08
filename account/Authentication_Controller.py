@@ -2,7 +2,7 @@
 from flask import Flask, Blueprint, request, jsonify, session
 from flask_session import Session
 from flask_cors import CORS
-from account.Authentication import authentication,register_newuser
+from account.Authentication import authentication,register_newuser,resetpassword_check
 from database.databasemanager import check_database_status
 from account.userinfo import sessioncheck
 #time stuff
@@ -36,7 +36,7 @@ def login():
   #is the real challenge
     if check_database_status != False:
       result = authentication(usernameA,passA)
-      return result
+      return result,202
     else: 
       return jsonify({'msg':'Server is not avaliable'}),400
 
@@ -58,6 +58,16 @@ def register():
     register_newuser(new_user)
     return jsonify({'msg': 'User registered successfully'}),200
 
+
+@auth_bp.route('/checkuser_reset', methods=['POST'])
+def check_user():
+    data = request.json
+    if check_database_status == True:
+      question = resetpassword_check(data['username'])
+      return jsonify(question), 200
+    else:
+      return jsonify({'msg': 'database is down'}), 404
+    
 #---------------------------------- pure function around here--------------------------------
 #check all data
 

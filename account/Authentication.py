@@ -72,7 +72,14 @@ def register_newuser(data):
     else:#error given
         return jsonify({'msg': 'Username already exists'}), 409
 
-
+def resetpassword_check(username):
+  if (check_username(username)) == True:
+        userdata = access_database(username)
+        question = userdata["question_for_reset"]
+        return question
+  else:
+    return jsonify({'error': 'target user is not exist'})
+  
 #-------------------------------------------------------------------------------------
 #-----------------------------end of Login & Registration-------------------------------------
 Session(app)

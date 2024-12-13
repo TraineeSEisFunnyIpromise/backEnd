@@ -25,24 +25,31 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 300
 
 def authentication(username, password):
 	#check database status
-      if check_database_status != False :
+      if check_database_status() != False :
           #access account data according to name
           print(username)
           if check_username(username) != '':
             user_from_db = access_database(username)
             #straight up check empty and password kek
             print(user_from_db)
-            if ((user_from_db != None) and (password == user_from_db['password']) == True):
-              result = user_from_db
-              session['username'] = username
-              result["_id"] = str(result["_id"])
-              return result
+            if(user_from_db != "Database connection timed out"):
+                if ((user_from_db != None) and (password == user_from_db['password']) == True):
+                  result = user_from_db
+                  session['username'] = username
+                  result['_id'] = str(result['_id'])
+                  return result
+                else:
+                  result = 'Incorrect passwords'
+                  return result 
             else:
-              return jsonify({'msg': 'Incorrect passwords'}),400
+                result = 'can not connect to database'
+                return result
           else:
-              return jsonify({'msg': 'no user exist'}),400
+              result = 'user not found'
+              return  result
       else:
-            return jsonify({'msg': 'The database is down!!!'}),504
+            result = 'The server is down'
+            return result
 
 #---------------------------------------- reset password section -------------------------------------------
 def resetpassword(username,get_resetanswer,get_resetpassword):
@@ -50,9 +57,10 @@ def resetpassword(username,get_resetanswer,get_resetpassword):
   answer_for_resetpassword = userdata["answer_for_reset"]
   if (get_resetanswer ==  answer_for_resetpassword) == True:
         update_password(username,get_resetpassword)
+        return 'Reset password successful'
   else:
-    return jsonify({'error': 'Please provide correct username and answer'})
-  return jsonify({'message': 'Reset password successful'})
+    return 'Reset password unsuccessful'
+  
 
 #----------------------------------------register part--------------------------------------------
 def register_newuser(data):

@@ -5,6 +5,7 @@ from flask_cors import CORS
 from account.Authentication import authentication,register_newuser,resetpassword_check
 from database.databasemanager import check_database_status
 from account.userinfo import sessioncheck
+import json
 #time stuff
 # instantiate the app
 app = Flask(__name__)
@@ -32,13 +33,23 @@ def login():
     usernameA = login_details['username']
     passA = login_details['password']
 
-  # this is the most confused stuff that i ever done it look simple but tracking it
-  #is the real challenge
     if check_database_status != False:
       result = authentication(usernameA,passA)
-      return result,202
+      print(type(result))
+      print(result)
+      if(type(result)!= str):
+         return jsonify(result)
+      
+      if(result == "user not found"):
+         return jsonify({'error':'user not found'})
+      
+      if(result == "incorrect password"):
+         return jsonify({'error':'incorrect password'})
+      
+      if(result == "can not connect to database"):
+         return jsonify({'error':'can not connect to database'})
     else: 
-      return jsonify({'msg':'Server is not avaliable'}),400
+      return jsonify({'error':'Server is not avaliable'})
 
 
 @auth_bp.route('/logout', methods=['POST'])
@@ -67,7 +78,9 @@ def check_user():
       return jsonify(question), 200
     else:
       return jsonify({'msg': 'database is down'}), 404
-    
+
+
+
 #---------------------------------- pure function around here--------------------------------
 #check all data
 

@@ -2,11 +2,17 @@ from pymongo import MongoClient
 client = MongoClient('mongodb://localhost:27017')
 db = client['Database1']
 usercollection = db['db1']
-
+from pymongo.errors import ServerSelectionTimeoutError
 
 def access_database(username):
-  usertarget_data = usercollection.find_one({"username": username})
-  return usertarget_data
+  try:
+    usertarget_data = usercollection.find_one({"username": username})
+    return usertarget_data
+
+  except ServerSelectionTimeoutError as e:
+        usertarget_data = 'Database connection timed out'
+        return usertarget_data
+  
 
 def delete_user(username):
   usercollection.delete_one({"username": username})
@@ -45,7 +51,6 @@ def check_username(username):
 def check_database_status():
   try:
     # Try to connect to the MongoDB server
-    client = MongoClient(client)
     client.server_info()
     return True
   except Exception as e:

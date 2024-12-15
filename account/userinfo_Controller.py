@@ -6,18 +6,8 @@ from account.userinfo import access_database,delete_user,update_aboutme,check_da
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app
+
 app = Flask(__name__)
-
-# enable CORS
-CORS(app, resources={r'/*': {'origins': '*'}})
-
-#for real thou no need to initialize the session it up in main...why i keep doing this?
-# Initialize Flask-Session
-app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (browser closed)
-app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
-app.config['PERMANENT_SESSION_LIFETIME'] = 300
-
 userinformation_bp = Blueprint('userinfo', __name__)
 #-------------------------------------import and setpu stuff ---------------------------------------
 
@@ -43,9 +33,11 @@ def update():
 def get_userinfo():
 	    # Check if the user is logged in by verifying the session
     user = session.get('user_id')
+    print("session information")
+    print(session)
     print(session.get('username'))
     print(user)
-    print(session)
+    
     if user is not None:
 
         # Find the user in the database using the username from the session

@@ -4,7 +4,8 @@ from database.databasemanager import update_user_aboutme,check_database_status,a
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app
-from account.Authentication_Controller import app
+
+app = Flask(__name__)
 
 #-------------------------------------import and setpu stuff ---------------------------------------
 
@@ -68,8 +69,6 @@ def delete_account(username,password):
 	else:
 		return jsonify({'msg': 'incorrect password'}), 400
 	
-
-
 
 
 if __name__ == '__main__':

@@ -1,12 +1,11 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
-from flask_cors import CORS
 from account.Authentication import authentication,register_newuser,resetpassword_check,resetpassword
 from database.databasemanager import check_database_status
 from account.userinfo import sessioncheck
 #time stuff
 # instantiate the app
-from account.Authentication import app
+app = Flask(__name__)
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -55,7 +54,7 @@ def register():
 
 
 @auth_bp.route('/getuser', methods=['POST'])
-def check_user():
+def getuser():
     data = request.json
     if check_database_status == True:
       question = resetpassword_check(data['username'])
@@ -78,5 +77,6 @@ def reset_password():
 
 #-------------------------------------------------------------------------------------
 #-----------------------------end of Login & Registration-------------------------------------
+
 if __name__ == '__main__':
     app.run()

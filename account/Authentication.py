@@ -1,12 +1,11 @@
 
 from flask import Flask, jsonify, session
 from flask_session import Session
-from flask_cors import CORS
 from database.databasemanager import check_username,access_database,add_new_user,check_database_status,update_password
 #time stuff
 import uuid
 # instantiate the app
-from MainApp import app
+app = Flask(__name__)
 
 #-------------------------------------import and setpu stuff ---------------------------------------
 
@@ -31,10 +30,8 @@ def authentication(username, password):
                   session['username'] = username
                   result['_id'] = str(result['_id'])
                   session['_id'] = user_from_db['_id']
-                  print("session info")
+                  print("login session info")
                   print(session)
-                  print("result info")
-                  print(result)
                   return result
                 else:
                   result = 'Incorrect passwords'
@@ -87,7 +84,6 @@ def resetpassword_check(username):
   
 #-------------------------------------------------------------------------------------
 #-----------------------------end of Login & Registration-------------------------------------
-Session(app)
 
 if __name__ == '__main__':
     app.run()

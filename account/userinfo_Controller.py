@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, Blueprint, request, jsonify, session
+from flask import Flask, Blueprint, request, jsonify, session,g
 from flask_cors import CORS
 from account.userinfo import access_database,delete_user,update_aboutme,check_database_status,update_oldpassword
 # import userinfo function
@@ -24,7 +24,7 @@ userinformation_bp = Blueprint('userinfo', __name__)
 #                                        Session status
 @userinformation_bp.route('/Sessioncheck',methods=['POST'])
 def sessioncheck():
-			username = session.get('user')
+			username = session.get('user_id')
 				# Calculate time left until session expires (server-side)
 			session_start_time = session.get('start_time')
 			now = datetime.utcnow
@@ -42,7 +42,10 @@ def update():
 @userinformation_bp.route('/Information', methods=['POST'])
 def get_userinfo():
 	    # Check if the user is logged in by verifying the session
-    user = session.get('user')
+    user = session.get('user_id')
+    print(session.get('username'))
+    print(user)
+    print(session)
     if user is not None:
 
         # Find the user in the database using the username from the session

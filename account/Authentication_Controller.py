@@ -1,23 +1,12 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
-from flask_session import Session
 from flask_cors import CORS
-from account.Authentication import authentication,register_newuser,resetpassword_check
+from account.Authentication import authentication,register_newuser,resetpassword_check,resetpassword
 from database.databasemanager import check_database_status
 from account.userinfo import sessioncheck
-import json
 #time stuff
 # instantiate the app
-app = Flask(__name__)
-
-# enable CORS
-CORS(app, resources={r'/*': {'origins': '*'}})
-#JWT import
-# Configure secret key for session signing (important for security)
-app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (browser closed)
-app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
-app.config['PERMANENT_SESSION_LIFETIME'] = 300
+from account.Authentication import app
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -32,22 +21,14 @@ def login():
     login_details = request.get_json() # store the json body request
     usernameA = login_details['username']
     passA = login_details['password']
-
     if check_database_status != False:
       result = authentication(usernameA,passA)
       print(type(result))
       print(result)
       if(type(result)!= str):
-         return jsonify(result)
-      
-      if(result == "user not found"):
-         return jsonify({'error':'user not found'})
-      
-      if(result == "incorrect password"):
-         return jsonify({'error':'incorrect password'})
-      
-      if(result == "can not connect to database"):
-         return jsonify({'error':'can not connect to database'})
+         return jsonify(result),202
+      else:
+         return jsonify({'message':result})
     else: 
       return jsonify({'error':'Server is not avaliable'})
 
@@ -66,27 +47,36 @@ def something():
 def register():
     new_user = request.get_json() # store the json body request
     print(new_user)
-    register_newuser(new_user)
-    return jsonify({'msg': 'User registered successfully'}),200
+    result = register_newuser(new_user)
+    if result == "User created successfully":
+      return jsonify({'message': 'User registered successfully'})
+    else:
+      return jsonify({'message': 'Username already exists'})
 
 
-@auth_bp.route('/checkuser_reset', methods=['POST'])
+@auth_bp.route('/getuser', methods=['POST'])
 def check_user():
     data = request.json
     if check_database_status == True:
       question = resetpassword_check(data['username'])
       return jsonify(question), 200
     else:
-      return jsonify({'msg': 'database is down'}), 404
+      return jsonify({'message': 'database is down'}), 404
 
 
+@auth_bp.route('/reset_password', methods=['POST'])
+def reset_password():
+    data = request.json
+    if check_database_status == True:
+      question = resetpassword(data['username'],data['answer'],data['password'])
+      return jsonify(question), 200
+    else:
+      return jsonify({'message': 'database is down'}), 404
 
 #---------------------------------- pure function around here--------------------------------
 #check all data
 
 #-------------------------------------------------------------------------------------
 #-----------------------------end of Login & Registration-------------------------------------
-Session(app)
-
 if __name__ == '__main__':
     app.run()

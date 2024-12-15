@@ -6,17 +6,7 @@ from database.databasemanager import check_username,access_database,add_new_user
 #time stuff
 import uuid
 # instantiate the app
-app = Flask(__name__)
-
-# enable CORS
-CORS(app, resources={r'/*': {'origins': '*'}})
-#JWT import
-# Configure secret key for session signing (important for security)
-app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (browser closed)
-app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
-app.config['PERMANENT_SESSION_LIFETIME'] = 300
-
+from MainApp import app
 
 #-------------------------------------import and setpu stuff ---------------------------------------
 
@@ -27,16 +17,24 @@ def authentication(username, password):
 	#check database status
       if check_database_status() != False :
           #access account data according to name
-          print(username)
-          if check_username(username) != '':
+          print("username" + username)
+          print("password" + password)
+          something = check_username(username)
+          print(something)
+          if check_username(username) != False:
             user_from_db = access_database(username)
             #straight up check empty and password kek
-            print(user_from_db)
+            print("detected user" )
             if(user_from_db != "Database connection timed out"):
                 if ((user_from_db != None) and (password == user_from_db['password']) == True):
                   result = user_from_db
                   session['username'] = username
                   result['_id'] = str(result['_id'])
+                  session['_id'] = user_from_db['_id']
+                  print("session info")
+                  print(session)
+                  print("result info")
+                  print(result)
                   return result
                 else:
                   result = 'Incorrect passwords'
@@ -57,9 +55,9 @@ def resetpassword(username,get_resetanswer,get_resetpassword):
   answer_for_resetpassword = userdata["answer_for_reset"]
   if (get_resetanswer ==  answer_for_resetpassword) == True:
         update_password(username,get_resetpassword)
-        return 'Reset password successful'
+        return 'success'
   else:
-    return 'Reset password unsuccessful'
+    return 'unsuccess'
   
 
 #----------------------------------------register part--------------------------------------------
@@ -67,18 +65,17 @@ def register_newuser(data):
     new_user = data # store the json body request
     user_id = str(uuid.uuid4())
     #find user
-    print("register")
     doc = check_username(new_user["username"]) # check if user exist like
     #after checking no same username detected
+    print("checkresult : ")
     print(doc)
-    if doc == True:#pass
+    if doc == False:#not detect user
         new_user['user_id'] = user_id
         print(new_user)
         add_new_user(new_user["username"],new_user)
-        return jsonify({'msg': 'User created successfully'}), 201
-		
-    else:#error given
-        return jsonify({'msg': 'Username already exists'}), 409
+        return  'User created successfully'
+    else:
+        return 'Username already exists'
 
 def resetpassword_check(username):
   if (check_username(username)) == True:

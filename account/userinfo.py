@@ -1,21 +1,10 @@
 # app.py
 from flask import Flask, jsonify, session
-from flask_cors import CORS
 from database.databasemanager import update_user_aboutme,check_database_status,access_database,delete_user,update_password
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app
-app = Flask(__name__)
-
-# enable CORS
-CORS(app, resources={r'/*': {'origins': '*'}})
-
-#for real thou no need to initialize the session it up in main...why i keep doing this?
-# Initialize Flask-Session
-app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (browser closed)
-app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
-app.config['PERMANENT_SESSION_LIFETIME'] = 300
+from account.Authentication_Controller import app
 
 #-------------------------------------import and setpu stuff ---------------------------------------
 
@@ -44,7 +33,7 @@ def update_aboutme(data):
     return jsonify({'error': 'Please provide username and password'})
 
 
-def update_oldpassword(username,get_resetpassword):
+def update_oldpassword(username,get_resetpassword): 
   if get_resetpassword != '':
         update_password(username,get_resetpassword)
   else:
@@ -54,6 +43,7 @@ def update_oldpassword(username,get_resetpassword):
 
 def userinfo():
 	    # Check if the user is logged in by verifying the session
+    print(session['username'])
     if 'username' in session:
         username = session['username']
         

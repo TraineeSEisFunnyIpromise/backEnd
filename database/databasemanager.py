@@ -43,7 +43,7 @@ def add_new_user(username, data):
 
 def check_username(username):
   user_from_db = access_database(username)
-  if user_from_db != None or user_from_db != '':
+  if user_from_db != None and user_from_db['username'] != '':
     return True
   else:
     return False

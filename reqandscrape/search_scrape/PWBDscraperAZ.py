@@ -167,23 +167,30 @@ def scrape_amazon(inputkeyword,search_group):
 	else:
 		print("no proxy")
 		driver.quit()
-
+	
+	print("\t end amazon")
 #
-
+	print("\t count and add the ID")
 	with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
 		data = json.load(json_file)
-
-	for i, item in enumerate(data, start=1):
-		item['id'] = i
-
+	id_count = 1
+	for item in data:
+		if 'id' not in item:
+			item['id'] = id_count
+			id_count += 1
+		json.dump(data, json_file, ensure_ascii=False, indent=4)
+	# for i, item in enumerate(data, start=1):
+	# 	item['id'] = i
+		print("\t finalized data")
 	with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
 		json.dump(result, json_file, ensure_ascii=False, indent=4)
 
-	print("\t end amazon")
+	print("\t sending")
 	if result == None:
 		print("result bad")
 		result = "bad"
-	
+		print("\t end amazon")
+	print("\t Success")
 	return result
 
 def item_sorting(items):

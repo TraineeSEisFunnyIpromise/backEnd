@@ -70,7 +70,10 @@ def register_newuser(data):
         new_user['user_id'] = user_id
         print(new_user)
         add_new_user(new_user["username"],new_user)
-        return  'User created successfully'
+        if check_username(new_user["username"]) == True:
+          return  'User created successfully'
+        else:
+          return 'bad database'
     else:
         return 'Username already exists'
 

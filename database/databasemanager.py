@@ -34,7 +34,7 @@ def update_password(username, new_password):
 
 def add_new_user(username, data):
     print(data)
-    if check_username(username) == True:
+    if check_username(username) == False:
 
       usercollection.insert_one(data)
       return True

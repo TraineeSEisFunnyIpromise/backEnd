@@ -1,26 +1,15 @@
 # app.py
-from flask import Flask, Blueprint, request, jsonify, session,g
-from flask_cors import CORS
-from account.userinfo import access_database,delete_user,update_aboutme,check_database_status,update_oldpassword
+from flask import  Blueprint, request, jsonify, session
+from account.userinfo import delete_user,update_aboutme,check_database_status,update_oldpassword
 # import userinfo function
 #time stuff
-from datetime import datetime, timedelta
+
 # instantiate the app
 
-app = Flask(__name__)
+
 userinformation_bp = Blueprint('userinfo', __name__)
 #-------------------------------------import and setpu stuff ---------------------------------------
 
-#                                        Session status
-@userinformation_bp.route('/Sessioncheck',methods=['POST'])
-def sessioncheck():
-			username = session.get('user_id')
-				# Calculate time left until session expires (server-side)
-			session_start_time = session.get('start_time')
-			now = datetime.utcnow
-			duration_left = session_start_time + timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME']) - now
-			response = username + "  " + duration_left
-			return jsonify(response)
 
 #----------------------------------------User info part--------------------------------------------
 @userinformation_bp.route('/Update', methods=['POST'])
@@ -29,28 +18,7 @@ def update():
 		update_aboutme(data,data["username"])
 		return jsonify({'message': 'Registration successful'})
 
-@userinformation_bp.route('/Information', methods=['POST'])
-def get_userinfo():
-	    # Check if the user is logged in by verifying the session
-    user = session.get('user_id')
-    print("session information")
-    print(session)
-    print(session.get('username'))
-    print(user)
-    
-    if user is not None:
 
-        # Find the user in the database using the username from the session
-        data = access_database(user)
-        
-        if user is not None:
-            # Return user data (excluding sensitive information)
-            return data, 200
-        else:
-            return jsonify({'error': 'User not found'}), 404
-    else:
-        # User is not logged in or session has expired
-        return jsonify({'error': 'Unauthorized'}), 401
      
 @userinformation_bp.route('/Delete', methods=['POST'])
 def delete_account():
@@ -74,5 +42,3 @@ def reset_password():
 #start app down here _main_
 
 
-if __name__ == '__main__':
-    app.run()

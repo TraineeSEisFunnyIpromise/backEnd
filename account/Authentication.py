@@ -1,11 +1,11 @@
 
-from flask import Flask, jsonify, session
-from flask_session import Session
+from flask import  session,jsonify
 from database.databasemanager import check_username,access_database,add_new_user,check_database_status,update_password
 #time stuff
 import uuid
+from datetime import datetime, timedelta
 # instantiate the app
-app = Flask(__name__)
+
 
 #-------------------------------------import and setpu stuff ---------------------------------------
 
@@ -85,8 +85,34 @@ def resetpassword_check(username):
   else:
     return 'user not found'
   
-#-------------------------------------------------------------------------------------
-#-----------------------------end of Login & Registration-------------------------------------
+#-----------------------------------tempt fix user info--------------------------------------------------
 
-if __name__ == '__main__':
-    app.run()
+def userinfo():
+	    # Check if the user is logged in by verifying the session
+    print("session username")
+    print(session['username'])
+    if 'username' in session:
+        username = session['username']
+        
+        # Find the user in the database using the username from the session
+        if check_database_status == True:
+          user = access_database(username)
+        if user == True:
+            # Return user data (excluding sensitive information)
+            return jsonify({'username': user['username'], 'about me': user.get('about me', 'No information available')}), 200
+        else:
+            return jsonify({'error': 'User not found'}), 404
+    else:
+        # User is not logged in or session has expired
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+def sessioncheck():
+			username = session.get('user')
+				# Calculate time left until session expires (server-side)
+			session_start_time = session.get('start_time')
+			now = datetime.utcnow
+			duration_left = session_start_time + timedelta() - now
+			response = username + "  " + duration_left
+			return jsonify(response)
+    
+#-----------------------------end of Login & Registration-------------------------------------

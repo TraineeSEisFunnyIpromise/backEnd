@@ -14,16 +14,10 @@ import csv
 from flask_cors import CORS
 import json
 # instantiate the app
-app = Flask(__name__)
 
-# enable CORS
-cors = CORS(app, resources={r"/*": {"origins": "*"}})
 #JWT import
 # Configure secret key for session signing (important for security)
-app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SESSION_PERMANENT'] = False  # Set to True for persistent sessions (browser closed)
-app.config['SESSION_TYPE'] = 'filesystem'  # Or use a database or Redis for storage
-app.config['PERMANENT_SESSION_LIFETIME'] = 300
+
 
 search_bp = Blueprint('search', __name__)
 nest_asyncio.apply()

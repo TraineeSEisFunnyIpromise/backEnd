@@ -1,11 +1,12 @@
 
-from flask import Flask, Blueprint, request, jsonify, session
-from account.Authentication import authentication,register_newuser,resetpassword_check,resetpassword
+from flask import Blueprint, request, jsonify, session
+from account.Authentication import authentication,register_newuser,resetpassword_check,resetpassword,sessioncheck
 from database.databasemanager import check_database_status
-from account.userinfo import sessioncheck
+from account.userinfo import access_database
+from datetime import datetime, timedelta
 #time stuff
 # instantiate the app
-app = Flask(__name__)
+
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -22,6 +23,9 @@ def login():
     passA = login_details['password']
     if check_database_status != False:
       result = authentication(usernameA,passA)
+      print("session info at login")
+      print(session)
+      print(result)
       print(type(result))
       print(result)
       if(type(result)!= str):
@@ -76,11 +80,40 @@ def reset_password():
       return jsonify({'message': 'database is down'})
 
 
-#---------------------------------- pure function around here--------------------------------
-#check all data
+#---------------------------------- temp userinfo fix around here--------------------------------
+#legit confused why from this function to different function it couldn't access possibly that
+#from authen to authen control it can cross from userinfo control to authen control
+@auth_bp.route('/Information', methods=['POST'])
+def get_userinfo():
+	    # Check if the user is logged in by verifying the session
+    user = session.get('user_id')
+    print("session information at userinfo")
+    print(session.get('username'))
+    print(user)
+    
+    if user is not None:
 
+        # Find the user in the database using the username from the session
+        data = access_database(user)
+        
+        if user is not None:
+            # Return user data (excluding sensitive information)
+            return data, 200
+        else:
+            return jsonify({'error': 'User not found'}), 404
+    else:
+        # User is not logged in or session has expired
+        return jsonify({'error': 'Unauthorized'}), 400
+    
+#                                        Session status
+@auth_bp.route('/Sessioncheck',methods=['POST'])
+def sessioncheck():
+			username = session.get('user_id')
+				# Calculate time left until session expires (server-side)
+			session_start_time = session.get('start_time')
+			now = datetime.utcnow
+			duration_left = session_start_time + timedelta() - now
+			response = username + "  " + duration_left
+			return jsonify(response)
 #-------------------------------------------------------------------------------------
 #-----------------------------end of Login & Registration-------------------------------------
-
-if __name__ == '__main__':
-    app.run()

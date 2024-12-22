@@ -4,6 +4,7 @@ from account.Authentication import authentication,register_newuser,resetpassword
 from database.databasemanager import check_database_status
 from account.userinfo import access_database
 from datetime import datetime, timedelta
+import pandas as pd
 #time stuff
 # instantiate the app
 
@@ -39,6 +40,8 @@ def login():
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
     session.clear()
+    result = 'log out success'
+    return jsonify(result)
 #---------------------------------------- Session status-------------------------------------------
 @auth_bp.route('/sessioncheck',methods=['POST'])
 def something():
@@ -60,7 +63,7 @@ def register():
 @auth_bp.route('/searchinguser', methods=['POST'])
 def getuser():
     data = request.json
-    if check_database_status == True:
+    if check_database_status() == True:
       question = resetpassword_check(data['username'])
       if question != 'user not found':
         return jsonify(question), 200
@@ -73,7 +76,7 @@ def getuser():
 @auth_bp.route('/reset_password', methods=['POST'])
 def reset_password():
     data = request.json
-    if check_database_status == True:
+    if check_database_status() == True:
       question = resetpassword(data['username'],data['answer'],data['password'])
       return jsonify(question), 200
     else:
@@ -86,7 +89,8 @@ def reset_password():
 @auth_bp.route('/Information', methods=['POST'])
 def get_userinfo():
 	    # Check if the user is logged in by verifying the session
-    user = session.get('user_id')
+    dataA = request.json
+    user = dataA["username"]
     print("session information at userinfo")
     print(session.get('username'))
     print(user)
@@ -98,7 +102,16 @@ def get_userinfo():
         
         if user is not None:
             # Return user data (excluding sensitive information)
-            return data, 200
+            print(data)
+            print(type(data))
+
+            return_data = []
+            return_data.append(data["username"])
+            return_data.append(data["userinfo"])
+            print("return data")
+            print(return_data)
+            
+            return jsonify(return_data), 200
         else:
             return jsonify({'error': 'User not found'}), 404
     else:

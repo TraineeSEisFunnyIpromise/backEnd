@@ -20,24 +20,21 @@ def sessioncheck():
 
 #----------------------------------------User info part--------------------------------------------
 
-def update_aboutme(data):
-  username = session.get('user')
-  if data["send" != '']:
-    if check_database_status() == True:
-      update_user_aboutme(data,username)
+def update_aboutme(username,data):
+  if data!= '':
+    if update_user_aboutme(username,data) == True:
+      
+      return 'update success'
     else:
-      return
-    return jsonify({'message': 'Registration successful'})
+      return 'update unsuccess'
   else:
-    return jsonify({'error': 'Please provide username and password'})
-
+    return 'data base is down'
 
 def update_oldpassword(username,get_resetpassword): 
-  if get_resetpassword != '':
-        update_password(username,get_resetpassword)
+  if update_password(username,get_resetpassword) ==True:
+      return 'Reset password successful'
   else:
-    return jsonify({'error': 'Please providepassword'})
-  return jsonify({'message': 'Reset password successful'})
+    return 'Reset password unsuccessful'
 
 
 
@@ -46,6 +43,7 @@ def delete_account(username,password):
 	user_from_db = access_database(username)
 	if password == user_from_db['password']:
 		delete_user(username)
+		session.clear()
 		return jsonify({'msg' : 'remove succesful' }), 200
 	else:
 		return jsonify({'msg': 'incorrect password'}), 400

@@ -15,29 +15,33 @@ userinformation_bp = Blueprint('userinfo', __name__)
 @userinformation_bp.route('/Update', methods=['POST'])
 def update():
 		data = request.json
-		update_aboutme(data,data["username"])
-		return jsonify({'message': 'Registration successful'})
+		print(data)
+		print(data["aboutme"])
+		result = update_aboutme(data['username'],data["aboutme"])
+		return jsonify({'message': result})
 
 
      
 @userinformation_bp.route('/Delete', methods=['POST'])
 def delete_account():
 	data = request.json
-	if data["username"] != '':
-		delete_user(data["username"],data["password"])
-		return jsonify({'msg' : 'remove succesful' }), 200
+	if delete_user(data["username"]) ==True:
+		
+		return jsonify({'msg' : 'remove successful' }), 200
 	else:
 		return jsonify({'msg': 'profile not found'}), 404
 
-@userinformation_bp.route('/Resetpassword', methods=['POST'])
-def reset_password():
+@userinformation_bp.route('/PasswordUpdate', methods=['POST'])
+def updatepass():
 	data = request.json
-	username = session.get('user')
-	if check_database_status == True:
-		update_oldpassword(username,get_resetpassword=data["reset_password"])
-		return jsonify({'msg' : 'remove succesful' }), 200
+	username = data['username']
+	if check_database_status() == True:
+		print("update pass method")
+		result = update_oldpassword(username,get_resetpassword=data["password"])
+		print(result)
+		return jsonify(result), 200
 	else:
-		return jsonify({'msg': 'database is down'}), 404
+		return jsonify({'msg': 'database is down'}),400
 
 #start app down here _main_
 

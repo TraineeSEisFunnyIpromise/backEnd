@@ -64,6 +64,7 @@ def scrape_amazon(inputkeyword,search_group):
 	options.add_argument('start-maximized')  # Start maximized
 	options.add_argument('disable-infobars')  # Disable infobars
 	options.add_argument('--blink-settings=imagesEnabled=false')
+	
 	# options.add_argument("--headless")
 
 	#selenium option 

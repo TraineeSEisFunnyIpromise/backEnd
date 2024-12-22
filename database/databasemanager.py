@@ -16,12 +16,13 @@ def access_database(username):
 
 def delete_user(username):
   usercollection.delete_one({"username": username})
+  
   return True
 
 def update_user_aboutme(username, new_aboutme):
     usercollection.update_one(
         {"username": username},
-        {"$set": {"about me": new_aboutme}}
+        {"$set": {"userinfo": new_aboutme}}
     )
     return True
 

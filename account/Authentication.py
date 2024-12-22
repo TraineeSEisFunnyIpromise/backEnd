@@ -83,7 +83,7 @@ def resetpassword_check(username):
         question = userdata["question_for_reset"]
         return question
   else:
-    return jsonify({'error': 'target user is not exist'})
+    return 'user not found'
   
 #-------------------------------------------------------------------------------------
 #-----------------------------end of Login & Registration-------------------------------------

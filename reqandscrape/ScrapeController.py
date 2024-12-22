@@ -7,8 +7,8 @@ from Reqandscrape.search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
 #nested asyncio nice
 import nest_asyncio,pandas
 # asyncio and werkzeug
-from werkzeug.wrappers import Request, Response
-from werkzeug.middleware.proxy_fix import ProxyFix
+# from werkzeug.wrappers import Request, Response
+# from werkzeug.middleware.proxy_fix import ProxyFix
 import csv
 #
 from flask_cors import CORS
@@ -28,29 +28,29 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 300
 search_bp = Blueprint('search', __name__)
 nest_asyncio.apply()
 #----------------------------------- Custom Middleware -----------------------------------
-def cors_middleware(app):
-    @Request.application
-    def middleware(request):
-        if request.method == "OPTIONS":
-            return Response("", status=204, headers={
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization"
-            })
+# def cors_middleware(app):
+#     @Request.application
+#     def middleware(request):
+#         if request.method == "OPTIONS":
+#             return Response("", status=204, headers={
+#                 "Access-Control-Allow-Origin": "*",
+#                 "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+#                 "Access-Control-Allow-Headers": "Content-Type, Authorization"
+#             })
 
-        # Forward the request to the Flask app
-        response = app.full_dispatch_request()
+#         # Forward the request to the Flask app
+#         response = app.full_dispatch_request()
 
-        # Modify the response headers to include CORS headers
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        return response
+#         # Modify the response headers to include CORS headers
+#         response.headers["Access-Control-Allow-Origin"] = "*"
+#         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+#         response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+#         return response
 
-    return middleware
+#     return middleware
 
-# Apply the custom middleware
-app.wsgi_app = ProxyFix(cors_middleware(app))
+## Apply the custom middleware
+# app.wsgi_app = ProxyFix(cors_middleware(app))
 #-------------------------------------import and setup stuff ---------------------------------------
 
 #--------------------------------------------search Prod sender Part--------------------------------------------

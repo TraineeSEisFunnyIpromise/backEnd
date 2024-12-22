@@ -53,14 +53,17 @@ def register():
       return jsonify({'message': 'Username already exists'})
 
 
-@auth_bp.route('/getuser', methods=['POST'])
+@auth_bp.route('/searchinguser', methods=['POST'])
 def getuser():
     data = request.json
     if check_database_status == True:
       question = resetpassword_check(data['username'])
-      return jsonify(question), 200
+      if question != 'user not found':
+        return jsonify(question), 200
+      else: 
+         return jsonify({'message': 'user not found'})
     else:
-      return jsonify({'message': 'database is down'}), 404
+      return jsonify({'message': 'database is down'})
 
 
 @auth_bp.route('/reset_password', methods=['POST'])
@@ -70,7 +73,8 @@ def reset_password():
       question = resetpassword(data['username'],data['answer'],data['password'])
       return jsonify(question), 200
     else:
-      return jsonify({'message': 'database is down'}), 404
+      return jsonify({'message': 'database is down'})
+
 
 #---------------------------------- pure function around here--------------------------------
 #check all data

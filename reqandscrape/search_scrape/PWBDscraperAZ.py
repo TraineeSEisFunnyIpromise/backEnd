@@ -131,7 +131,7 @@ def scrape_amazon(inputkeyword,search_group):
 				print("end of loop")
 
 				content = driver.page_source
-				soup = BeautifulSoup(content, 'html.parser', from_encoding='utf-8')
+				soup = BeautifulSoup(content, 'html.parser').decode("utf-8")
 				items = soup.findAll('div', class_='sg-col-inner')
 				print("setting up data")
 				#print(type(items))

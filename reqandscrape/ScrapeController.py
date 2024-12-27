@@ -3,6 +3,7 @@ from flask import Flask, Blueprint, request, jsonify, session
 from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
 from Reqandscrape.search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
+from Reqandscrape.NDcalculate import normal_dist
 #time stuff
 #nested asyncio nice
 import nest_asyncio,pandas
@@ -108,7 +109,7 @@ def search_criteria_test_sender():
 	return jsonify(a)
 
 @search_bp.route('/scrape_test', methods=['POST'])
-async def scrape_test():
+def scrape_test():
 	response = request.get_json() # store the json body request
 	print(response)
 	results = csv_json_mock()
@@ -121,6 +122,22 @@ def zeroshotstuff_test():
 
 	result = [{'Label': 'Politics', 'Score': 0.07649134406967768}, {'Label': 'Automobile', 'Score': 0.32627149304700276}, {'Label': 'Sports', 'Score': 0.12833939120173454}, {'Label': 'Business', 'Score': 0.2105391121927708}, {'Label': 'World', 'Score': 0.25835864565202166}]
 	result = json.dumps(result, indent=4)
+	if session==True:
+		print("save data")
+	return jsonify(result)
+
+@search_bp.route('/nd_test', methods=['POST'])
+def normaldistribution_test():
+
+	result = normal_dist()
+	if session==True:
+		print("save data")
+	return jsonify(result)
+
+
+@search_bp.route('/nd', methods=['POST'])
+def normaldistribution():
+	result = normal_dist()
 	if session==True:
 		print("save data")
 	return jsonify(result)

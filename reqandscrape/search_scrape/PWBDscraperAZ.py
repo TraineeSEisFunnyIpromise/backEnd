@@ -121,7 +121,7 @@ def scrape_amazon(inputkeyword,search_group):
 									next_button.click()
 									wait_count = 0
 									page_limit += 1
-					except (NoSuchElementException, TimeoutException):
+					except (NoSuchElementException, TimeoutException,RuntimeError,BrokenPipeError,ConnectionRefusedError):
 						wait_count += 1
 						if wait_count >= 20 // 2:  # Check after half of max wait time
 							print(wait_count)
@@ -159,6 +159,7 @@ def scrape_amazon(inputkeyword,search_group):
 					# scrape_amazon_product(asin_set)
 				else:
 					print("Product scraping failed")
+					print("Product search is scraped but detail is ignored")
 					# end process quit driver
 				print("end of product scraping")
 				print("\t\t end process")
@@ -256,6 +257,8 @@ def get_asin():
                     data.append(asin)
                 else:
                     print("Empty ASIN found.")
+    print("asin data")
+    print(data)
     return data
 
 
@@ -326,7 +329,7 @@ def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','
 
 def get_reviews(soup):
     review_elements = soup.select("div.review")
-
+    print("getting review")
     scraped_reviews = []
 
     for review in review_elements:
@@ -357,7 +360,7 @@ def get_reviews(soup):
 
 def get_product_detail(soup):
 	product_cards = soup.find_all('div', {'data-component-type': 's-search-result'})
-
+	print("getting detail")
 	result = []
 
 	for card in product_cards:

@@ -121,7 +121,7 @@ def scrape_amazon(inputkeyword,search_group):
 									next_button.click()
 									wait_count = 0
 									page_limit += 1
-					except (NoSuchElementException, TimeoutException,RuntimeError,BrokenPipeError,ConnectionRefusedError):
+					except Exception:
 						wait_count += 1
 						if wait_count >= 20 // 2:  # Check after half of max wait time
 							print(wait_count)
@@ -145,27 +145,34 @@ def scrape_amazon(inputkeyword,search_group):
 				item_sorting(items)
 					#setting up ASIN
 				print("setting up asin")
+
 				print("quit old driver")
 				driver.quit()
+
 				asin_set = get_asin()
-				#begin product scraping
+				# begin product scraping
 				print("check asin for product scraping")
-				if asin_set is list and asin_set is not None:
-					print("scraping")
-					print("setting up new driver")
-					for asin in asin_set:
-						print("scraping product")
-						scrape_amazon_product(asin)
-					# scrape_amazon_product(asin_set)
+				if isinstance(asin_set, list) and asin_set:
+						print("scraping")
+						print("setting up new driver")
+						for asin in asin_set:
+								print("scraping product")
+								try:
+									scrape_amazon_product(asin)
+								except Exception as e:
+									print(f"An error occurred while scraping product {asin}: {e}")
+						# scrape_amazon_product(asin_set)
 				else:
-					print("Product scraping failed")
-					print("Product search is scraped but detail is ignored")
+						print("Product scraping failed")
+						print("Product search is scraped but detail is ignored")
 					# end process quit driver
 				print("end of product scraping")
 				print("\t\t end process")
-		except(ConnectionRefusedError,ConnectionAbortedError,TimeoutException):
-				driver.quit()
+		except Exception as e:
+				print(f"An error occurred: {e}")
 				print("\t\t end process")
+		finally:
+				driver.quit()
 	else:
 		print("no proxy")
 		driver.quit()

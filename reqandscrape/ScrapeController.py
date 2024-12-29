@@ -129,15 +129,16 @@ def zeroshotstuff_test():
 @search_bp.route('/nd_test', methods=['POST'])
 def normaldistribution_test():
 
-	result = normal_dist()
+	result = [33, 88, 55, 267]
 	if session==True:
 		print("save data")
-	return jsonify(result)
+	return jsonify({'data':result})
 
 
 @search_bp.route('/nd', methods=['POST'])
 def normaldistribution():
 	result = normal_dist()
+	print(result)
 	if session==True:
 		print("save data")
 	return jsonify(result)

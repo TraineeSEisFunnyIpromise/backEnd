@@ -171,6 +171,7 @@ def scrape_amazon(inputkeyword,search_group):
 		except Exception as e:
 				print(f"An error occurred: {e}")
 				print("\t\t end process")
+				return None
 		finally:
 				driver.quit()
 	else:

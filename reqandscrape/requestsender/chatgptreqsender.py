@@ -63,6 +63,9 @@ def change_data(input, group_target):
         print(f"Error: Missing key in response: {e}")
         print("Failed to parse response.")
         return None  # Or return a specific error message/object
+		
+    except Exception as e:
+        return {"error": f"An unexpected error occurred: {e}"}
 
 
 #check word by chatGPT 55555555555555+
@@ -109,14 +112,17 @@ def check_input_word(input,group_target):
 			return criteria_list
 
 	except requests.exceptions.RequestException as e:
-			print(f"Error: {e}")
-			print("Failed to retrieve result.")
-			return None  # Or return a specific error message/object
+					print(f"Error: {e}")
+					print("Failed to retrieve criteria list.")
+					return None  # Or return a specific error message/object
 
 	except KeyError as e:
-			print(f"Error: Missing key in response: {e}")
-			print("Failed to parse response.")
-			return None  # Or return a specific error message/object
+					print(f"Error: Missing key in response: {e}")
+					print("Failed to parse response.")
+					return None  # Or return a specific error message/object
+			
+	except Exception as e:
+					return {"error": f"An unexpected error occurred: {e}"}
 
 
 

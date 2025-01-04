@@ -341,25 +341,26 @@ def get_reviews(soup):
     scraped_reviews = []
 
     for review in review_elements:
+				#review rating
         r_rating_element = review.select_one("i.review-rating")
         r_rating = r_rating_element.text.replace("out of 5 stars", "") if r_rating_element else None
-
+				#review title
         r_title_element = review.select_one("a.review-title")
         r_title_span_element = r_title_element.select_one("span:not([class])") if r_title_element else None
         r_title = r_title_span_element.text if r_title_span_element else None
-
+				#review content
         r_content_element = review.select_one("span.review-text")
         r_content = r_content_element.text if r_content_element else None
-
-        r_date_element = review.select_one("span.review-date")
-        r_date = r_date_element.text if r_date_element else None
+				# #review date
+        # r_date_element = review.select_one("span.review-date")
+        # r_date = r_date_element.text if r_date_element else None
 
 
         r = {
-            "rating": r_rating,
+            "review_rating": r_rating,
             "title": r_title,
             "content": r_content,
-            "date": r_date,
+            # "date": r_date,
         }
 
         scraped_reviews.append(r)
@@ -380,7 +381,7 @@ def get_product_detail(soup):
 		else:
 			description = 'Not available'
 
-		# Rating
+		# Product Rating
 		rating = card.find('span', {'class': 'a-icon-alt'})
 		if rating:
 			rating = rating.text.split()[0]
@@ -397,7 +398,7 @@ def get_product_detail(soup):
 			num_ratings = 'Not available'
 
 	r = {
-				"rating": rating,
+				"product_rating": rating,
 				"num_ratings": num_ratings,
 				"description": description,
 			}

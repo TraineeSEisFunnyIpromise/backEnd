@@ -171,37 +171,41 @@ def scrape_amazon(inputkeyword,search_group):
 		except Exception as e:
 				print(f"An error occurred: {e}")
 				print("\t\t end process")
-				return None
+
+		
 		finally:
 				driver.quit()
+				print("\t end amazon")
+			#
+				print("\t count and add the ID")
+				with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
+					data = json.load(json_file)
+				id_count = 1
+				for item in data:
+					if 'id' not in item:
+						item['id'] = id_count
+						id_count += 1
+					json.dump(data, json_file, ensure_ascii=False, indent=4)
+
+
+					print("\t finalized data")
+				with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
+					json.dump(result, json_file, ensure_ascii=False, indent=4)
+
+				print("\t sending")
+				if result != None:
+					print("\t Success")
+					return result
+				else:
+					print("result bad")
+					print("\t end amazon")
+					return None
 	else:
 		print("no proxy")
 		driver.quit()
+		return None
 	
-	print("\t end amazon")
-#
-	print("\t count and add the ID")
-	with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
-		data = json.load(json_file)
-	id_count = 1
-	for item in data:
-		if 'id' not in item:
-			item['id'] = id_count
-			id_count += 1
-		json.dump(data, json_file, ensure_ascii=False, indent=4)
-	# for i, item in enumerate(data, start=1):
-	# 	item['id'] = i
-		print("\t finalized data")
-	with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
-		json.dump(result, json_file, ensure_ascii=False, indent=4)
-
-	print("\t sending")
-	if result == None:
-		print("result bad")
-		result = "bad"
-		print("\t end amazon")
-	print("\t Success")
-	return result
+	
 
 def item_sorting(items):
 			data = []
@@ -226,19 +230,6 @@ def item_sorting(items):
 					product_asin = urlcleaner(product_link)
 					data_asin.append(urlcleaner(product_link))
 
-					# Calculate product_asin using urlcleaner (if needed)
-					# product_asin = urlcleaner(product_link)
-					# product_name = clean_html(str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal')))
-					# data_name.append(product_name)
-					# product_price = clean_html(str(item_text.find('span', class_='a-price-whole')))
-					# data_price.append(product_price)
-					# product_ratings = clean_html(str(item_text.find('span', class_ = 'a-size-base a-color-base')))
-					# data_ratings.append(product_ratings)
-					# product_link = clean_html(str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal')))
-					# data_link.append(product_link)
-					# product_asin = urlcleaner(product_link)
-					# data_asin.append(urlcleaner(product_link))
-					# Create a dictionary for each product
 					if product_name:
 						product_data = {
 								"product": product_name,

@@ -162,9 +162,16 @@ def receiveinput(input_text,group_target):
 	storea = []
 	counta = 0
 	print("---------------------raw input----------------------")
+	
 	print(input_text)
+	if (group_target  == None):
+		group_target = "not specific"
+
+
 	#check word 
-	if str.lower(check_input_word(input_text,group_target)) == "true":
+	
+		
+	if check_input_word(input_text,group_target) == "true":
 		print("---------------------setup input----------------------")
 		#what is goin on here is search -> extract criteria -> remove any headline that aren't 
 		#number included
@@ -196,7 +203,7 @@ def receiveinput(input_text,group_target):
 		print(storea)
 		return storea
 	else:
-		return "Invalid"
+		return None
 
 #run test
 def receiveinputtest():

@@ -74,14 +74,14 @@ def search_criteria_sender():
 	response = receiveinput(inputsearch,inputpeople)
 	with open("request_criteria.txt", "w+",encoding="utf-8") as f:
 		print("enter loop raw result")
-		f.write(response + "\n")
+		f.write(response)
 	print("======yeeting data=====")
 
 	if isinstance(type(response),str):
 		response = json.loads(response)
 		return  response
 	else:
-		response = "invalid"
+		response = None
 		return jsonify(response)
 
 #--------------------------------------------search criteria sender Part--------------------------------------------

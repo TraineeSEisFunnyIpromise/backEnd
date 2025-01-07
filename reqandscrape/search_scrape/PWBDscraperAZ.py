@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver import Remote, ChromeOptions
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
 from selenium.webdriver.common.by import By
-
+import time
 
 #inport file for cors
 from flask import Flask
@@ -116,11 +116,16 @@ def scrape_amazon(inputkeyword,search_group):
 					driver.implicitly_wait(500)
 					try:
 									#class="s-pagination-item s-pagination-button"
-									driver.implicitly_wait(400)
+									time.sleep(5000)
 									next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
 									next_button.click()
 									wait_count = 0
 									page_limit += 1
+									content = driver.page_source
+									soup = BeautifulSoup(content, 'html.parser')
+									items = soup.findAll('div', class_='puisg-row')
+									print("item sorting")
+									item_sorting(items)
 					except Exception:
 						wait_count += 1
 						if wait_count >= 20 // 2:  # Check after half of max wait time
@@ -130,19 +135,7 @@ def scrape_amazon(inputkeyword,search_group):
 							break  # Exit the loop if exceeded maximum wait attempts
 				print("end of loop")
 
-				content = driver.page_source
-				soup = BeautifulSoup(content, 'html.parser').decode("utf-8")
-				items = soup.findAll('div', class_='sg-col-inner')
-				print("setting up data")
-				#print(type(items))
-				with open("raw_result.txt", "w+",encoding="utf-8") as f:
-						print("enter loop raw result")
-						for item in items:
-								text_content = str(item)
-								json_data = json.dumps(text_content, indent=4)
-								f.write(json_data + "\n")
-				print("item sorting")
-				item_sorting(items)
+
 					#setting up ASIN
 				print("setting up asin")
 
@@ -212,30 +205,34 @@ def item_sorting(items):
 			data_name = []
 			data_price = []
 			data_ratings = []
-			data_link = []
 			data_asin = []
 
 			with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
 					json.dump([], jsonfile)
 
 			for item_text in items:
-					product_name = str(item_text.find('span', class_='a-size-medium a-color-base a-text-normal'))
+					#
+					product_name = str(item_text.find('h2',class_="a-size-medium a-spacing-none a-color-base a-text-normal"))
+					product_name = clean_html(product_name)
 					data_name.append(product_name)
 					product_price = str(item_text.find('span', class_='a-price-whole'))
+					product_price = clean_html(product_price)
 					data_price.append(product_price)
-					product_ratings = str(item_text.find('span', class_ = 'a-size-base a-color-base'))
+					product_ratings = str(item_text.find('span', class_='a-icon-alt'))
+					product_ratings = clean_html(product_ratings)
 					data_ratings.append(product_ratings)
-					product_link = str(item_text.find('a', class_='a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal'))
-					data_link.append(product_link)
+					product_link = str(item_text.find("a", class_='a-link-normal s-link-style s-underline-text s-underline-link-text'))
 					product_asin = urlcleaner(product_link)
-					data_asin.append(urlcleaner(product_link))
+					data_asin.append(product_link)
+					# items_price = soup.findAll('span', class_='a-price-whole')
+					# items_rating = soup.findAll('i', class_='a-icon a-icon-star-small a-star-small-4-5')
+					# items_link = soup.findAll('a', class_='a-link-normal s-line-clamp-2 s-link-style a-text-normal')
 
 					if product_name:
 						product_data = {
 								"product": product_name,
 								"price": product_price,
 								"rating": product_ratings,
-								"URL": product_link,
 								"ASIN": product_asin
 						}
 						data.append(product_data)
@@ -244,6 +241,8 @@ def item_sorting(items):
 			# Write data to JSON
 			with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
 				json.dump(data, jsonfile, indent=4)
+			
+			return product_data
 			
 
 def get_asin():
@@ -416,10 +415,7 @@ def csv_json_mock():
 	return result
 
 def clean_html(input):
-    cleaner = bleach.Cleaner(
-            strip=True
-						)
-    output = cleaner.clean(input)
+    output = bleach.clean(str(input), tags=[], strip=True)
     output = str(output)
     return output
 

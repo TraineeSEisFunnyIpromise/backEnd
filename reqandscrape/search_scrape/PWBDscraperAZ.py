@@ -18,6 +18,9 @@ from selenium.webdriver import Remote, ChromeOptions
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
 from selenium.webdriver.common.by import By
 import time
+import re
+import requests
+from parsel import Selector
 
 #inport file for cors
 from flask import Flask
@@ -221,16 +224,16 @@ def item_sorting(items):
 					product_ratings = str(item_text.find('span', class_='a-icon-alt'))
 					product_ratings = clean_html(product_ratings)
 					data_ratings.append(product_ratings)
-					product_link = str(item_text.find("a", class_='a-link-normal s-link-style s-underline-text s-underline-link-text'))
+					product_link = str(item_text.find("a", class_='a-link-normal s-no-outline'))
 					product_asin = urlcleaner(product_link)
 					data_asin.append(product_link)
 					# items_price = soup.findAll('span', class_='a-price-whole')
 					# items_rating = soup.findAll('i', class_='a-icon a-icon-star-small a-star-small-4-5')
 					# items_link = soup.findAll('a', class_='a-link-normal s-line-clamp-2 s-link-style a-text-normal')
 
-					if product_name:
+					if product_name != None:
 						product_data = {
-								"product": product_name,
+								"product name": product_name,
 								"price": product_price,
 								"rating": product_ratings,
 								"ASIN": product_asin
@@ -325,37 +328,32 @@ def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','
 		driver.quit()
 
 
-def get_reviews(soup):
-    review_elements = soup.select("div.review")
-    print("getting review")
-    scraped_reviews = []
+def get_reviews(product_urls):
+	product_data_list = []
+	for product_url in product_urls:
+		try:
+			response = requests.get(product_url)
+			
+		
+			if response.status_code == 200:
+				sel = Selector(text=response.text)
+				feature_bullets = [bullet.strip() for bullet in sel.css("#feature-bullets li ::text").getall()]
+				if not price:
+					price = sel.css('.a-price .a-offscreen ::text').get("")
+				product_data_list.append({
+					# "name": sel.css("#productTitle::text").get("").strip(),
+					# "price": price,
+					"stars": sel.css("i[data-hook=average-star-rating] ::text").get("").strip(),
+					"rating_count": sel.css("div[data-hook=total-review-count] ::text").get("").strip(),
+					"feature_bullets": feature_bullets,
+					# "images": image_data,
+					# "variant_data": variant_data,
+				})
 
-    for review in review_elements:
-				#review rating
-        r_rating_element = review.select_one("i.review-rating")
-        r_rating = r_rating_element.text.replace("out of 5 stars", "") if r_rating_element else None
-				#review title
-        r_title_element = review.select_one("a.review-title")
-        r_title_span_element = r_title_element.select_one("span:not([class])") if r_title_element else None
-        r_title = r_title_span_element.text if r_title_span_element else None
-				#review content
-        r_content_element = review.select_one("span.review-text")
-        r_content = r_content_element.text if r_content_element else None
-				# #review date
-        # r_date_element = review.select_one("span.review-date")
-        # r_date = r_date_element.text if r_date_element else None
+		except Exception as e:
+				print("Error", e)
 
-
-        r = {
-            "review_rating": r_rating,
-            "title": r_title,
-            "content": r_content,
-            # "date": r_date,
-        }
-
-        scraped_reviews.append(r)
-
-    return scraped_reviews
+	return product_data_list
 
 def get_product_detail(soup):
 	product_cards = soup.find_all('div', {'data-component-type': 's-search-result'})

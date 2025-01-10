@@ -227,10 +227,7 @@ def item_sorting(items):
 					product_link = str(item_text.find("a", class_='a-link-normal s-no-outline'))
 					product_asin = urlcleaner(product_link)
 					data_asin.append(product_link)
-					# items_price = soup.findAll('span', class_='a-price-whole')
-					# items_rating = soup.findAll('i', class_='a-icon a-icon-star-small a-star-small-4-5')
-					# items_link = soup.findAll('a', class_='a-link-normal s-line-clamp-2 s-link-style a-text-normal')
-
+				
 					if product_name != None:
 						product_data = {
 								"product name": product_name,
@@ -277,12 +274,10 @@ def urlcleaner(url):
 # #----------------review scraping---------------------
 
 def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','w',encoding='utf-8')):
-		
 		for i in asin:
 			try:
 				response = requests.get(i)
 				
-			
 				if response.status_code == 200:
 					#open text file
 					with open("raw_result_product.txt", "w",encoding="utf-8") as f:
@@ -303,69 +298,47 @@ def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','
 					f.write(text_content + "\n")
 			except Exception as e:
 				print("Error", e)
+	
+		with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
+			json.dump(file_data, jsonfile, indent=4)
 						
-			
-		# Log network requests after navigation
-		for request in driver.requests:
-				print(f"Request: {request.method} {request.url}")  # Inspect requests
-
-		driver.implicitly_wait(4)
-		# end process quit driver
-		driver.quit()
 
 
-def get_reviews(product_urls):
+
+def get_reviews(response):
+	#for store review
+
+	#set selector to response text
+	sel = Selector(text=response.text)
+	#find the feature bullets
+	reviews = []
+	for review_element in sel.css("div.review-container"):  # Adjust this selector based on your HTML
+					review = {
+						"review_title": review_element.css("a.review-title ::text").get(),
+						"review_text": review_element.css("span.review-text ::text").get(),
+						"review_rating": review_element.css("i.review-rating ::text").get(),
+							
+					}
+	reviews.append(review)
+
+	return reviews
+
+def get_product_detail(response):
+	#for store review
 	product_data_list = []
-	for product_url in product_urls:
-		try:
-			response = requests.get(product_url)
-			
-		
-			if response.status_code == 200:
-				sel = Selector(text=response.text)
-				feature_bullets = [bullet.strip() for bullet in sel.css("#feature-bullets li ::text").getall()]
-				if not price:
-					price = sel.css('.a-price .a-offscreen ::text').get("")
-				product_data_list.append({
-					# "name": sel.css("#productTitle::text").get("").strip(),
-					# "price": price,
-					"stars": sel.css("i[data-hook=average-star-rating] ::text").get("").strip(),
-					"rating_count": sel.css("div[data-hook=total-review-count] ::text").get("").strip(),
-					"feature_bullets": feature_bullets,
-					# "images": image_data,
-					# "variant_data": variant_data,
-				})
-
-		except Exception as e:
-				print("Error", e)
-
-	return product_data_list
-
-def get_product_detail(product_urls):
-	product_data_list = []
-	for product_url in product_urls:
-		try:
-			response = requests.get(product_url)
-			
-		
-			if response.status_code == 200:
-				sel = Selector(text=response.text)
-				feature_bullets = [bullet.strip() for bullet in sel.css("#feature-bullets li ::text").getall()]
-				if not price:
-					price = sel.css('.a-price .a-offscreen ::text').get("")
-				product_data_list.append({
-					# "name": sel.css("#productTitle::text").get("").strip(),
-					# "price": price,
-					"stars": sel.css("i[data-hook=average-star-rating] ::text").get("").strip(),
-					"rating_count": sel.css("div[data-hook=total-review-count] ::text").get("").strip(),
-					"feature_bullets": feature_bullets,
-					# "images": image_data,
-					# "variant_data": variant_data,
-				})
-
-		except Exception as e:
-				print("Error", e)
-
+	#set selector to response text
+	sel = Selector(text=response.text)
+	#find the feature bullets
+	feature_bullets = [bullet.strip() for bullet in sel.css("#feature-bullets li ::text").getall()]
+	#find price
+	if not price:
+		price = sel.css('.a-price .a-offscreen ::text').get("")
+		#add data column to product data list
+	product_data_list.append({
+		"stars": sel.css("i[data-hook=average-star-rating] ::text").get("").strip(),
+		"rating_count": sel.css("div[data-hook=total-review-count] ::text").get("").strip(),
+		"feature_bullets": feature_bullets,
+	})
 	return product_data_list
 
 def json_data_mock():

@@ -99,42 +99,6 @@ def zeroshotstuff():
 		print("save data")
 	return jsonify(result)
 
-#--------------------------------------------search test  Part--------------------------------------------
-@search_bp.route('/search_criteria_test', methods=['POST'])
-def search_criteria_test_sender():
-	response = request.get_json() # store the json body request
-	print(response)
-	a = receiveinputtest()
-	print(response)
-	return jsonify(a)
-
-@search_bp.route('/scrape_test', methods=['POST'])
-def scrape_test():
-	response = request.get_json() # store the json body request
-	print(response)
-	results = csv_json_mock()
-	# Process scraped results (e.g., convert to JSON, store in database)
-	return jsonify(results)
-
-
-@search_bp.route('/critandprod_test', methods=['POST'])
-def zeroshotstuff_test():
-
-	result = [{'Label': 'Politics', 'Score': 0.07649134406967768}, {'Label': 'Automobile', 'Score': 0.32627149304700276}, {'Label': 'Sports', 'Score': 0.12833939120173454}, {'Label': 'Business', 'Score': 0.2105391121927708}, {'Label': 'World', 'Score': 0.25835864565202166}]
-	result = json.dumps(result, indent=4)
-	if session==True:
-		print("save data")
-	return jsonify(result)
-
-@search_bp.route('/nd_test', methods=['POST'])
-def normaldistribution_test():
-
-	result = [33, 88, 55, 267]
-	if session==True:
-		print("save data")
-	return jsonify({'data':result})
-
-
 @search_bp.route('/nd', methods=['POST'])
 def normaldistribution():
 	result = normal_dist()
@@ -142,6 +106,45 @@ def normaldistribution():
 	if session==True:
 		print("save data")
 	return jsonify(result)
+
+#in case when not using scrape
+# #--------------------------------------------search test Part--------------------------------------------
+# @search_bp.route('/search_criteria_test', methods=['POST'])
+# def search_criteria_test_sender():
+# 	response = request.get_json() # store the json body request
+# 	print(response)
+# 	a = receiveinputtest()
+# 	print(response)
+# 	return jsonify(a)
+
+# @search_bp.route('/scrape_test', methods=['POST'])
+# def scrape_test():
+# 	response = request.get_json() # store the json body request
+# 	print(response)
+# 	results = csv_json_mock()
+# 	# Process scraped results (e.g., convert to JSON, store in database)
+# 	return jsonify(results)
+
+
+# @search_bp.route('/critandprod_test', methods=['POST'])
+# def zeroshotstuff_test():
+
+# 	result = [{'Label': 'Politics', 'Score': 0.07649134406967768}, {'Label': 'Automobile', 'Score': 0.32627149304700276}, {'Label': 'Sports', 'Score': 0.12833939120173454}, {'Label': 'Business', 'Score': 0.2105391121927708}, {'Label': 'World', 'Score': 0.25835864565202166}]
+# 	result = json.dumps(result, indent=4)
+# 	if session==True:
+# 		print("save data")
+# 	return jsonify(result)
+
+# @search_bp.route('/nd_test', methods=['POST'])
+# def normaldistribution_test():
+
+# 	result = [33, 88, 55, 267]
+# 	if session==True:
+# 		print("save data")
+# 	return jsonify({'data':result})
+
+
+
 
 # Load the JSON data
 #test section

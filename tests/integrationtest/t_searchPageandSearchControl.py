@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, AsyncMock
 
 # Import your functions
-from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon,scrape_amazon_product
+from Reqandscrape.Search_scrape.PWBDscraperAZ import scrape_amazon,scrape_amazon_product,get_reviews,get_product_detail
 from Reqandscrape.Requestsender.chatgptreqsender import change_data as reqsender
 
 

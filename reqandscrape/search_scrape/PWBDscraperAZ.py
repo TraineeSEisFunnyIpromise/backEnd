@@ -48,12 +48,7 @@ import bleach
 
 
 # Options for Chrome driver
-
-def clear_csv(csv_file):
-    with open(csv_file, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow([])
-# Navigate to the website
+#--------------------------Scrape Amazon---------------------------------------
 
 def scrape_amazon(inputkeyword,search_group):
 	print("\t start amazon")
@@ -342,23 +337,6 @@ def get_product_detail(response):
 	})
 	return product_data_list
 
-def json_data_mock():
-	json_file = open('sample.json')
-	if json_file == None or json_file == []:
-			print("result bad")
-	else:
-		parsed_json = json.load(json_file)
-	return parsed_json
-
-def csv_json_mock():
-	result = []
-	with open('sample.json', 'r', encoding='utf-8') as json_file:
-		if json_file == None:
-			print("result bad")
-		else:
-			result = json.load(json_file)
-	print("\t end amazon")
-	return result
 
 def clean_html(input):
     output = bleach.clean(str(input), tags=[], strip=True)
@@ -366,14 +344,33 @@ def clean_html(input):
     return output
 
 
-def test_prod():
-	result = []
-	json_file = open('sample.json')
-	if json_file == None or json_file == []:
-			print("result bad")
-	else:
-			result = json.load(json_file)
-			print(result)
-	print("\t end amazon")
-	json_file.close()
+# def json_data_mock():
+# 	json_file = open('sample.json')
+# 	if json_file == None or json_file == []:
+# 			print("result bad")
+# 	else:
+# 		parsed_json = json.load(json_file)
+# 	return parsed_json
+
+# def csv_json_mock():
+# 	result = []
+# 	with open('sample.json', 'r', encoding='utf-8') as json_file:
+# 		if json_file == None:
+# 			print("result bad")
+# 		else:
+# 			result = json.load(json_file)
+# 	print("\t end amazon")
+# 	return result
+
+
+# def test_prod():
+# 	result = []
+# 	json_file = open('sample.json')
+# 	if json_file == None or json_file == []:
+# 			print("result bad")
+# 	else:
+# 			result = json.load(json_file)
+# 			print(result)
+# 	print("\t end amazon")
+# 	json_file.close()
 

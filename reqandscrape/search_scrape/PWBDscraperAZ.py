@@ -277,46 +277,32 @@ def urlcleaner(url):
 # #----------------review scraping---------------------
 
 def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','w',encoding='utf-8')):
-	options = webdriver.ChromeOptions()
-	options.add_argument('--incognito')  # Open in incognito mode
-	options.add_argument('--disable-extensions')  # Disable extensions
-	options.add_argument('--disable-gpu')  # Disable GPU
-	options.add_argument('start-maximized')  # Start maximized
-	options.add_argument('disable-infobars')  # Disable infobars
-	options.add_argument('--blink-settings=imagesEnabled=false')
-	# options.add_argument("--headless")
-	if(api_endpoint is not None or api_endpoint != ''):
-			#seleniumwire option 
-		seleniumwire_options_setting = {
-		"proxy": {
-			"http": api_endpoint,
-			"https": api_endpoint
-			},
-		}
-		#end of seleniumwire option
-
-		# Replace with your proxy server URL
-		options.add_argument(f'--proxy-server={api_endpoint}')
-		# Create a Selenium Wire driver
-		driver = webdriver_wire.Chrome(options=options,seleniumwire_options=seleniumwire_options_setting)
-
-
 		
 		for i in asin:
-			driver.get("https://www.amazon.com/dp/" + asin[i])
-			content = driver.page_source
-			soup = BeautifulSoup(content, 'html.parser')
-			items = soup.findAll('div', 'sg-col-inner')
-
-			with open("raw_result_product.txt", "w",encoding="utf-8") as f:
-				with open(json_file,'r+') as file:
-					file_data = json.load(file)
-					for item in items:
-						text_content = str(item)
-						file_data["ASIN"].append(get_product_detail(soup))
-						file_data["ASIN"].append(get_reviews(soup))
-					json.dump(file_data, file, indent = 4)
-			f.write(text_content + "\n")
+			try:
+				response = requests.get(i)
+				
+			
+				if response.status_code == 200:
+					#open text file
+					with open("raw_result_product.txt", "w",encoding="utf-8") as f:
+						#open temporary search result.json file
+						with open(json_file,'r+') as file:
+							#load json file to file_data
+							file_data = json.load(file)
+							#for each item in file
+							for item in file:
+								#set text_content to set file
+								text_content = str(item)
+								#in file data find variable ["ASIN"] and add data to selected row with method get product detail
+								file_data["ASIN"].append(get_product_detail(response))
+								#in file data find variable ["ASIN"] and add data to selected row with method get product review
+								file_data["ASIN"].append(get_reviews(response))
+							json.dump(file_data, file, indent = 4)
+					#write result to text
+					f.write(text_content + "\n")
+			except Exception as e:
+				print("Error", e)
 						
 			
 		# Log network requests after navigation
@@ -355,44 +341,32 @@ def get_reviews(product_urls):
 
 	return product_data_list
 
-def get_product_detail(soup):
-	product_cards = soup.find_all('div', {'data-component-type': 's-search-result'})
-	print("getting detail")
-	result = []
+def get_product_detail(product_urls):
+	product_data_list = []
+	for product_url in product_urls:
+		try:
+			response = requests.get(product_url)
+			
+		
+			if response.status_code == 200:
+				sel = Selector(text=response.text)
+				feature_bullets = [bullet.strip() for bullet in sel.css("#feature-bullets li ::text").getall()]
+				if not price:
+					price = sel.css('.a-price .a-offscreen ::text').get("")
+				product_data_list.append({
+					# "name": sel.css("#productTitle::text").get("").strip(),
+					# "price": price,
+					"stars": sel.css("i[data-hook=average-star-rating] ::text").get("").strip(),
+					"rating_count": sel.css("div[data-hook=total-review-count] ::text").get("").strip(),
+					"feature_bullets": feature_bullets,
+					# "images": image_data,
+					# "variant_data": variant_data,
+				})
 
-	for card in product_cards:
+		except Exception as e:
+				print("Error", e)
 
-		# description
-		description = card.find('span', {'class': ''})
-		if description:
-			description = description.text.strip()
-		else:
-			description = 'Not available'
-
-		# Product Rating
-		rating = card.find('span', {'class': 'a-icon-alt'})
-		if rating:
-			rating = rating.text.split()[0]
-		else:
-			rating = 'Not available'
-
-		# Number of Ratings
-		num_ratings = card.find('span', {'class': 'a-size-base'})
-		if num_ratings:
-			num_ratings = num_ratings.text.split()[0]
-			if num_ratings == "M.R.P:":
-				num_ratings = 'Not available'
-		else:
-			num_ratings = 'Not available'
-
-	r = {
-				"product_rating": rating,
-				"num_ratings": num_ratings,
-				"description": description,
-			}
-	result.append(r)
-    
-	return result
+	return product_data_list
 
 def json_data_mock():
 	json_file = open('sample.json')

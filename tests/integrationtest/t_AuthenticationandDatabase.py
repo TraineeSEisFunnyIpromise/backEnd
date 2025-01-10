@@ -1,49 +1,66 @@
-from flask import Flask  # Optional, for clarity
 import unittest
-from MainApp import app  # Assuming your Flask app is in main.py
-from account.Authentication import authentication,register_newuser,resetpassword
+from unittest.mock import patch, MagicMock
+from account.Authentication import authentication, register_newuser, resetpassword
 
 class TestLoginEndpoint(unittest.TestCase):
 
     def setUp(self):
-        self.app = app.test_client()
         self.username = 'test1'
-        self.user_data = {'name': 'test1','password': '1234', 'About me':'ye', 'Question for reset password':'slurpy', 
-'Answer for reset password':'slurp'}
+        self.password = '1234'
+        self.user_data = {'name': 'test1',
+                          'password': '1234',
+                          'about me':'ye', 
+                          'question for reset password':'slurpy', 
+                          'answer for reset password':'slurp'}
 
-    def test_successful_authentication(self):
-        result = authentication('testuser', 'testpassword')
+    @patch('account.Authentication.check_database_status', return_value=True)
+    @patch('account.Authentication.check_username', return_value=True)
+    @patch('account.Authentication.access_database', return_value=None)
+    def test_successful_authentication(self, mock_check_db_status, mock_check_username, mock_access_db):
+        result = authentication(self.username, self.password)
         self.assertIsNotNone(result)
-        self.assertEqual(result['username'], 'testuser')
+        self.assertEqual(result['username'], self.username)
 
-    def test_failed_authentication(self):
-        result = authentication('testuser', 'wrongpassword')
-        self.assertIsInstance(result, tuple)
-        self.assertEqual(result[1], 400)
+    @patch('account.Authentication.check_database_status', return_value=True)
+    @patch('account.Authentication.check_username', return_value=False)
+    def test_user_not_found(self, mock_check_db_status, mock_check_username):
+        result = authentication(self.username, self.password)
+        self.assertEqual(result, 'user not found')
 
-    def test_successful_reset_password(self):
-        result = resetpassword('testuser','slurp' ,'testpassword')
-        self.assertIsNotNone(result)
-        self.assertEqual(result, 'Reset password successful')
-        
-    def test_fail_reset_password(self):
-        result = resetpassword('testuser','slurpy' ,'testpassword')
-        self.assertIsNotNone(result)
-        self.assertEqual(result, 'Please provide correct username and password')
+    @patch('account.Authentication.check_database_status', return_value=False)
+    def test_server_down(self, mock_check_db_status):
+        result = authentication(self.username, self.password)
+        self.assertEqual(result, 'The server is down')
 
-    def test_successful_register_newuser(self):
-        user_data = {'name': 'test2','password': '123487', 'About me':'yeasda', 'Question for reset password':'slurpy', 
-'Answer for reset password':'slurp'}
-        result = register_newuser(user_data)
-        self.assertIsNotNone(result)
+    @patch('account.Authentication.check_database_status', return_value=True)
+    @patch('account.Authentication.check_username', return_value=True)
+    @patch('account.Authentication.access_database', return_value={'password': 'wrongpassword'})
+    def test_incorrect_password(self, mock_check_db_status, mock_check_username, mock_access_db):
+        result = authentication(self.username, 'wrongpassword')
+        self.assertEqual(result, 'Incorrect passwords')
+
+    @patch('account.Authentication.access_database', return_value=None)
+    @patch('account.Authentication.update_password', return_value=None)
+    def test_successful_reset_password(self, mock_access_db, mock_update_password):
+        result = resetpassword(self.username, 'answer', 'newpassword')
+        self.assertEqual(result, 'success')
+
+    @patch('account.Authentication.access_database', return_value=None)
+    def test_unsuccessful_reset_password(self, mock_access_db):
+        result = resetpassword(self.username, 'wronganswer', 'newpassword')
+        self.assertEqual(result, 'unsuccess')
+
+    @patch('account.Authentication.check_username', return_value=False)
+    @patch('account.Authentication.add_new_user', return_value=None)
+    def test_successful_register_newuser(self, mock_check_username, mock_add_new_user):
+        result = register_newuser(self.user_data)
         self.assertEqual(result, 'User created successfully')
 
-    def test_fail_register_newuser(self):
-        user_data = {'name': 'test1','password': '1234', 'About me':'ye', 'Question for reset password':'slurpy', 
-'Answer for reset password':'slurp'}
-        result = register_newuser(user_data)
-        self.assertIsNotNone(result)
+    @patch('account.Authentication.check_username', return_value=True)
+    def test_username_already_exists(self, mock_check_username):
+        result = register_newuser(self.user_data)
         self.assertEqual(result, 'Username already exists')
+
 
 
 if __name__ == '__main__':

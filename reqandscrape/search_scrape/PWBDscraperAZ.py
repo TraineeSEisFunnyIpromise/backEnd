@@ -275,8 +275,9 @@ def urlcleaner(url):
 
 def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','w',encoding='utf-8')):
 		for i in asin:
+
 			try:
-				response = requests.get(i)
+				response = requests.get(api_endpoint, url= f'https://www.amazon.com/dp/{i}')
 				
 				if response.status_code == 200:
 					#open text file

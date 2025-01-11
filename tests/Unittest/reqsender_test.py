@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import requests
-from Reqandscrape.Requestsender.chatgptreqsender import change_data, extract_criteria, receiveinput
+from reqandscrape.requestsender.chatgptreqsender import change_data, extract_criteria, receiveinput
 
 class TestChangeData(unittest.TestCase):
 

@@ -2,8 +2,8 @@ import json
 from unittest.mock import patch
 
 # Assuming your Flask application is in a file called app.py
-from Reqandscrape.Requestsender.chatgptreqsender import change_data as reqsender
-from Reqandscrape.zeroshotclassify import calculate_the_zeroshot
+from reqandscrape.requestsender.chatgptreqsender import change_data as reqsender
+from reqandscrape.zeroshotclassify import calculate_the_zeroshot
 
 # Sample data for testing
 sample_search_criteria = "find laptops"

@@ -1,7 +1,7 @@
 from flask import Flask
 from account.Authentication_Controller import auth_bp  # Import the blueprint
 from account.userinfo_Controller import userinformation_bp
-from Reqandscrape.ScrapeController import search_bp
+from reqandscrape.ScrapeController import search_bp
 from flask_session import Session
 from flask_cors import CORS
 

@@ -1,9 +1,9 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
-from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
-from Reqandscrape.zeroshotclassify import calculate_the_zeroshot,calculate_the_zeroshot_test
-from Reqandscrape.search_scrape.PWBDscraperAZ import csv_json_mock,scrape_amazon
-from Reqandscrape.NDcalculate import normal_dist
+from reqandscrape.requestsender.chatgptreqsender import receiveinput
+from reqandscrape.zeroshotclassify import calculate_the_zeroshot
+from reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon
+from reqandscrape.NDcalculate import normal_dist
 #time stuff
 #nested asyncio nice
 import nest_asyncio,pandas

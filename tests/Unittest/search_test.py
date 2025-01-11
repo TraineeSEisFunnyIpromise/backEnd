@@ -4,8 +4,8 @@ import asyncio
 
 # Import your functions
 
-from Reqandscrape.NDcalculate import normal_dist
-from Reqandscrape.Search_scrape.PWBDscraperAZ import item_sorting,get_asin,urlcleaner,clean_html,get_reviews,get_product_detail
+from reqandscrape.NDcalculate import normal_dist
+from reqandscrape.search_scrape.PWBDscraperAZ import item_sorting,get_asin,urlcleaner,clean_html,get_reviews,get_product_detail
 
 class TestSearchReview(unittest.TestCase):
 
@@ -21,8 +21,7 @@ class TestSearchReview(unittest.TestCase):
         self.assertIsNotNone(result)
 
     def test_get_asin(self):
-        items = [{'asin': 'DP123456'},{'asin': 'DP456789'},{'asin': 'DP789012'}]
-        result = get_asin(items)
+        result = get_asin()
         self.assertIsNotNone(result)
     
     def test_clean_html(self):

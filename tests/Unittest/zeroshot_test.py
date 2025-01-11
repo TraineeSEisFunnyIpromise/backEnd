@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from Reqandscrape.zeroshotclassify import calculate_the_zeroshot, classify_and_sum_scores
+from reqandscrape.zeroshotclassify import calculate_the_zeroshot, classify_and_sum_scores
 
 class TestCalculateZeroshot(unittest.TestCase):
 

@@ -47,11 +47,11 @@ async def test_resetpassword_success():
         context = await browser.new_context()
         page = await context.new_page()
 
-        await page.goto("http://localhost:4000/login") 
+        await page.goto("http://localhost:4000/resetpassword") 
 
         await page.fill("#username", "test1")
         await page.fill("#password", "1234")
-        await page.click("#login-button")
+        await page.click("#reset-button")
 
         success_message = await page.text_content(".success-message")
         assert "Login successful" in success_message
@@ -66,14 +66,14 @@ async def test_resetpassword_unsuccess():
         context = await browser.new_context()
         page = await context.new_page()
 
-        await page.goto("http://localhost:4000/login") 
+        await page.goto("http://localhost:4000/resetpassword") 
 
         await page.fill("#username", "test1")
         await page.fill("#password", "1234")
-        await page.click("#login-button")
+        await page.click("#reset-button")
 
         success_message = await page.text_content(".success-message")
-        assert "Login successful" in success_message
+        assert "reset password successful" in success_message
 
         await context.close()
         await browser.close()

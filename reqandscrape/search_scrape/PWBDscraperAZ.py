@@ -31,7 +31,9 @@ from flask_cors import CORS
 
 #----------------------finding prod--------------------------------
 
-api_endpoint = ""
+username = ''
+password = ''
+proxy = f"http://{username}:{password}@"
 AUTH = ''
 SBR_WEBDRIVER = f'https://{AUTH}@'
 
@@ -271,8 +273,13 @@ def urlcleaner(url):
 def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','w',encoding='utf-8')):
 		for i in asin:
 
+			url = f'https://www.amazon.com/dp/{i}'
+
 			try:
-				response = requests.get(api_endpoint, url= f'https://www.amazon.com/dp/{i}')
+				response = requests.get(url,proxies = {
+				'http': proxy,
+				'https': proxy
+            })
 				
 				if response.status_code == 200:
 					#open text file

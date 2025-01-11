@@ -29,7 +29,7 @@ class TestSearchReview(unittest.TestCase):
         result = clean_html(html)
         self.assertIsNotNone(result)
 
-    @patch('Reqandscrape.Search_scrape.PWBDscraperAZ.requests.get')
+    @patch('Reqandscrape.search_scrape.PWBDscraperAZ.requests.get')
     def test_get_reviews(self, mock_get):
         mock_response = AsyncMock()
         mock_response.text = '<div class="review-container"><a class="review-title">Great product</a><span class="review-text">I love it</span><i class="review-rating">5 stars</i></div>'
@@ -43,7 +43,7 @@ class TestSearchReview(unittest.TestCase):
         self.assertEqual(result[0]['review_text'], 'I love it')
         self.assertEqual(result[0]['review_rating'], '5 stars')
 
-    @patch('Reqandscrape.Search_scrape.PWBDscraperAZ.requests.get')
+    @patch('Reqandscrape.search_scrape.PWBDscraperAZ.requests.get')
     def test_get_product_detail(self, mock_get):
         mock_response = AsyncMock()
         mock_response.text = '<div id="feature-bullets"><li>Feature 1</li><li>Feature 2</li></div><i data-hook="average-star-rating">4.5 out of 5 stars</i><div data-hook="total-review-count">100 reviews</div>'

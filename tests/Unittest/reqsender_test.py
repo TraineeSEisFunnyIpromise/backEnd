@@ -5,7 +5,7 @@ from reqandscrape.requestsender.chatgptreqsender import change_data, extract_cri
 
 class TestChangeData(unittest.TestCase):
 
-    @patch('reqandscrape.Requestsender.chatgptreqsender.requests.post')
+    @patch('Reqandscrape.requestsender.chatgptreqsender.requests.post')
     def test_success_change_data(self, mock_post):
         # Mock the response from the OpenAI API
         mock_response = MagicMock()
@@ -27,7 +27,7 @@ class TestChangeData(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertIn('1. Capacity', result)
 
-    @patch('reqandscrape.Requestsender.chatgptreqsender.requests.post')
+    @patch('Reqandscrape.requestsender.chatgptreqsender.requests.post')
     def test_failure_change_data(self, mock_post):
         # Mock a failed response from the OpenAI API
         mock_response = MagicMock()
@@ -51,8 +51,8 @@ class TestChangeData(unittest.TestCase):
         self.assertEqual(result, ['1. Capacity', '2. Slot size', '3. Browning controls', '4. Features', '5. Ease of cleaning', '6. Budget', '7. Style'])
 
 
-    @patch('reqandscrape.Requestsender.chatgptreqsender.change_data')
-    @patch('reqandscrape.Requestsender.chatgptreqsender.check_input_word', return_value="true")
+    @patch('Reqandscrape.requestsender.chatgptreqsender.change_data')
+    @patch('Reqandscrape.requestsender.chatgptreqsender.check_input_word', return_value="true")
     def test_receiveinput(self, mock_check_input_word, mock_change_data):
         mock_change_data.return_value = """1. Capacity: Do you usually toast for one or two people?
     2. Slot size: Consider what types of bread you toast.

@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import patch, AsyncMock
 
 # Import your functions
-from reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon,scrape_amazon_product
-from reqandscrape.requestsender.chatgptreqsender import change_data as reqsender
+from Reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon,scrape_amazon_product
+from Reqandscrape.requestsender.chatgptreqsender import change_data as reqsender
 
 
 class TestSearchReview(unittest.TestCase):

@@ -4,8 +4,8 @@ import asyncio
 
 # Import your functions
 
-from reqandscrape.NDcalculate import normal_dist
-from reqandscrape.search_scrape.PWBDscraperAZ import item_sorting,get_asin,urlcleaner,clean_html,get_reviews,get_product_detail
+from Reqandscrape.NDcalculate import normal_dist
+from Reqandscrape.search_scrape.PWBDscraperAZ import item_sorting,get_asin,urlcleaner,clean_html,get_reviews,get_product_detail
 
 class TestSearchReview(unittest.TestCase):
 

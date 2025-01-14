@@ -71,7 +71,7 @@ def scrape_amazon(inputkeyword,search_group):
 	sbr_connection = ChromiumRemoteConnection(SBR_WEBDRIVER, 'goog', 'chrome')
 	#end of seleniumwire option
 	print("start process")
-	if(api_endpoint != ''):
+	if(proxy != None):
 		try:
 				print("\t\t processing")
 				# Replace with your proxy server URL
@@ -106,6 +106,9 @@ def scrape_amazon(inputkeyword,search_group):
 				# 	driver.quit()
 				# 	return "detected capcha abandon task"
 				
+				with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
+						json.dump([], jsonfile)
+				
 				search_button.click()
 				wait_count = 0
 				page_limit = 0
@@ -116,7 +119,7 @@ def scrape_amazon(inputkeyword,search_group):
 					driver.implicitly_wait(500)
 					try:
 									#class="s-pagination-item s-pagination-button"
-									time.sleep(5000)
+									time.sleep(5)
 									next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
 									next_button.click()
 									wait_count = 0
@@ -132,7 +135,7 @@ def scrape_amazon(inputkeyword,search_group):
 							print(wait_count)
 							print("Error: Encountered delays for too long")
 							driver.quit()
-							break  # Exit the loop if exceeded maximum wait attempts
+							# break  # Exit the loop if exceeded maximum wait attempts
 				print("end of loop")
 
 
@@ -167,22 +170,24 @@ def scrape_amazon(inputkeyword,search_group):
 
 		
 		finally:
-				driver.quit()
+				# driver.quit()
 				print("\t end amazon")
 			#
 				print("\t count and add the ID")
 				with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
-					data = json.load(json_file)
-				id_count = 1
-				for item in data:
-					if 'id' not in item:
-						item['id'] = id_count
-						id_count += 1
-					json.dump(data, json_file, ensure_ascii=False, indent=4)
+					if(json_file != None or json_file != ''):
+						data = json.load(json_file)
+						id_count = 1
+						for item in data:
+							if item is not None:
+								if 'id' not in item:
+									item['id'] = id_count
+									id_count += 1
+								json.dump(data, json_file, ensure_ascii=False, indent=4)
 
 
 					print("\t finalized data")
-				with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
+				with open('temporary_search_result.json', 'w+', encoding='utf-8') as json_file:
 					json.dump(result, json_file, ensure_ascii=False, indent=4)
 
 				print("\t sending")
@@ -207,9 +212,6 @@ def item_sorting(items):
 			data_ratings = []
 			data_asin = []
 
-			with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
-					json.dump([], jsonfile)
-
 			for item_text in items:
 					#
 					product_name = str(item_text.find('h2',class_="a-size-medium a-spacing-none a-color-base a-text-normal"))
@@ -230,7 +232,8 @@ def item_sorting(items):
 								"product name": product_name,
 								"price": product_price,
 								"rating": product_ratings,
-								"ASIN": product_asin
+								"ASIN": product_asin,
+								"url":product_link
 						}
 						data.append(product_data)
 						# if(product_data['product'] is not None):

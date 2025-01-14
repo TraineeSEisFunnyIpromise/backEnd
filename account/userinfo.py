@@ -1,6 +1,6 @@
 # app.py
 from flask import  jsonify, session
-from database.databasemanager import update_user_aboutme,check_database_status,access_database,delete_user,update_password
+from database.databasemanager import update_user_aboutme,check_username,check_database_status,delete_user,update_password,access_database
 #time stuff
 from datetime import datetime, timedelta
 # instantiate the app
@@ -39,12 +39,12 @@ def update_oldpassword(username,get_resetpassword):
 
 
 
-def delete_account(username,password):
-	user_from_db = access_database(username)
-	if password == user_from_db['password']:
+def delete_account(username):
+
+	if (check_username(username) == True):
 		delete_user(username)
 		session.clear()
-		return jsonify({'msg' : 'remove succesful' }), 200
+		return jsonify({'msg' : 'remove succesful' }), True
 	else:
-		return jsonify({'msg': 'incorrect password'}), 400
+		return jsonify({'msg': 'user not found'}), False
 	

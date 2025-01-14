@@ -20,7 +20,7 @@ async def test_aboutme_success():
         page.click("#login-button")  # Replace with your login button selector
 
         # Navigate to the user information page assume the login is worked
-        page.goto('http://localhost:4000/userinfo')
+        page.wait(2000)
 
         # Check if user information is displayed (if logged in)
         username_element = page.locator('.username')  
@@ -43,30 +43,36 @@ async def test_aboutme_success():
         page.fill('input[type="text"]', 'Updated About Me Information')
         page.click('.updateUser')  # Using class for save button
 
-        # Check if update was successful
-        # This example assumes a simple success message
         update_success_element = page.locator('p:text-contains(Updated About Me Information)')
         expect(update_success_element.is_visible()).to_be_truthy()
 
         # Test Delete Functionality
-        page.click('.deleteUserForm')  # Using class for delete button (not logged in)
-        page.wait_for_timeout(2000)  # Wait for confirmation or redirect (adjust as needed)
+        page.click('.deleteUserForm') 
+        page.wait_for_timeout(2000)  
 
-        # Check if user was deleted (implement logic based on your backend response)
-        # This example assumes a redirect to the homepage after deletion
+
         current_url = page.url
         expect(current_url).to_be('http://localhost:4000')  # Replace with your homepage URL
 
-
+@pytest.mark.asyncio
 async def test_updatepassword_success():
     with async_playwright() as p:
-        browser = p.chromium.launch(headless=False)  
+        browser = p.chromium.launch(headless=False) 
+        context = browser.new_context()
+        page = context.new_page()
+
+        page.goto("http://localhost:4000/login")  # Replace with your login page URL
+
+        page.fill("#username", "test1")  # Replace with your username
+        page.fill("#password", "1234")  # Replace with your password
+        page.click("#login-button")  # Replace with your login button selector
+
 
         context = browser.new_context()
         page = context.new_page()
 
-
-async def test_updatepassword_success():
+@pytest.mark.asyncio
+async def test_updatepassword_unsuccess():
     with async_playwright() as p:
         browser = p.chromium.launch(headless=False)  
 

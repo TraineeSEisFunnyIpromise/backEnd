@@ -25,11 +25,12 @@ def update():
 @userinformation_bp.route('/Delete', methods=['POST'])
 def delete_account():
 	data = request.json
+
 	if delete_user(data["username"]) ==True:
-		
-		return jsonify({'msg' : 'remove successful' }), 200
+			
+			return jsonify({'msg' : 'remove successful' }), 200
 	else:
-		return jsonify({'msg': 'profile not found'}), 404
+			return jsonify({'msg': 'remove unsuccessful'}), 404
 
 @userinformation_bp.route('/PasswordUpdate', methods=['POST'])
 def updatepass():

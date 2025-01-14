@@ -68,9 +68,9 @@ async def test_resetpassword_unsuccess():
 
         await page.goto("http://localhost:4000/resetpassword") 
 
-        await page.fill("#username", "test1")
-        await page.fill("#password", "1234")
-        await page.click("#reset-button")
+        await page.fill("#username_reset", "te")
+        await page.click('button[id="submit_resetuser"]')
+
 
         success_message = await page.text_content(".success-message")
         assert "reset password successful" in success_message
@@ -88,12 +88,15 @@ async def test_registration_success():
 
         await page.goto("http://localhost:4000/login") 
 
-        await page.fill("#username", "test1")
-        await page.fill("#password", "1234")
-        await page.click("#login-button")
+        await page.fill("#username_reset", "test1")
+        await page.click('button[id="submit_resetuser"]')
+        
+        await page.fill("#answer", "1234")
+        
+        await page.fill("#password_reset", "12345678")
 
-        success_message = await page.text_content(".success-message")
-        assert "Login successful" in success_message
+        success_message = await page.text_content(".result")
+        assert "Reset password successful" in success_message
 
         await context.close()
         await browser.close()
@@ -112,8 +115,20 @@ async def test_registration_unsuccess():
         await page.fill("#password", "1234")
         await page.click("#login-button")
 
-        success_message = await page.text_content(".success-message")
-        assert "Login successful" in success_message
+        success_message = await page.text_content(".result")
+        assert "user not found" in success_message
+
+        await page.wait_for_timeout(2000)
+
+        await page.fill("#username_reset", "test1")
+        await page.click('button[id="submit_resetuser"]')
+        
+        await page.fill("#answer", "124")
+        
+
+        success_message = await page.text_content(".result")
+        assert "Reset password Unsuccessfully" in success_message
+
 
         await context.close()
         await browser.close()

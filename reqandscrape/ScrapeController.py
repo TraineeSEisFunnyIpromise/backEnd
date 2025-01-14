@@ -51,7 +51,7 @@ nest_asyncio.apply()
 #--------------------------------------------search Prod sender Part--------------------------------------------
 
 @search_bp.route('/scrape', methods=['POST'])
-def scrape():
+def scrape():	
     response = request.get_json()  # Store the JSON body request
     inputsearch = response[0]
     inputpeople = response[1]
@@ -74,7 +74,8 @@ def search_criteria_sender():
 	response = receiveinput(inputsearch,inputpeople)
 	with open("request_criteria.txt", "w+",encoding="utf-8") as f:
 		print("enter loop raw result")
-		f.write(response)
+		if(response is not None):
+			f.write(response)	
 	print("======yeeting data=====")
 
 	if isinstance(type(response),str):

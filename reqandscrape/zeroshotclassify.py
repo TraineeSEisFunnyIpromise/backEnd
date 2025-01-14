@@ -37,8 +37,9 @@ def calculate_the_zeroshot(input_texts, dynamic_labels):
     # Calculate the sum of scores for the dynamic labels
     total_scores = classify_and_sum_scores(input_texts, dynamic_labels)
     for label in total_scores:
-        total_scores[label] = total_scores[label] / len(input_texts)
-        print(f"Total score for {label}: {total_scores[label]}")
+        if len(input_texts!= 0):
+            total_scores[label] = total_scores[label] / len(input_texts)
+            print(f"Total score for {label}: {total_scores[label]}")
 
 
     # Create a list of data rows

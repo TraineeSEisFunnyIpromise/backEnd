@@ -105,7 +105,7 @@ def scrape_amazon(inputkeyword,search_group):
 				# if(driver.find_element(By.ID,'captchacharacters') == True):
 				# 	driver.quit()
 				# 	return "detected capcha abandon task"
-				
+				#dump old data 
 				with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
 						json.dump([], jsonfile)
 				
@@ -118,17 +118,33 @@ def scrape_amazon(inputkeyword,search_group):
 					print("looping")
 					driver.implicitly_wait(500)
 					try:
-									#class="s-pagination-item s-pagination-button"
-									time.sleep(5)
-									next_button = driver.find_element(By.XPATH, "//a[text()='Next']")
-									next_button.click()
-									wait_count = 0
-									page_limit += 1
-									content = driver.page_source
-									soup = BeautifulSoup(content, 'html.parser')
-									items = soup.findAll('div', class_='puisg-row')
-									print("item sorting")
-									item_sorting(items)
+						# Wait for the "Next" button to be clickable
+						next_button = WebDriverWait(driver, 10).until(
+							EC.element_to_be_clickable((By.XPATH, "//a[text()='Next']"))
+						)
+						
+						# Scrape the page source after the list is populated
+						content = driver.page_source
+						soup = BeautifulSoup(content, 'html.parser')
+						items = soup.findAll('div', class_='s-result-item')  # Update the class name if necessary
+						print("item sorting")
+						item_sorting(items)
+						
+						# Click the "Next" button to go to the next page
+						next_button.click()
+						
+						# Update the page limit counter
+						page_limit += 1
+						
+						# Optional: wait between pages to prevent hitting Amazon too quickly
+						time.sleep(3)  # Adjust sleep time as needed between page loads
+
+						
+						# content = driver.page_source
+						# soup = BeautifulSoup(content, 'html.parser')
+						# items = soup.findAll('div', class_='puisg-row')
+						# print("item sorting")
+						# item_sorting(items)
 					except Exception:
 						wait_count += 1
 						if wait_count >= 20 // 2:  # Check after half of max wait time
@@ -206,44 +222,52 @@ def scrape_amazon(inputkeyword,search_group):
 	
 
 def item_sorting(items):
-			data = []
-			data_name = []
-			data_price = []
-			data_ratings = []
-			data_asin = []
-
-			for item_text in items:
-					#
-					product_name = str(item_text.find('h2',class_="a-size-medium a-spacing-none a-color-base a-text-normal"))
-					product_name = clean_html(product_name)
-					data_name.append(product_name)
-					product_price = str(item_text.find('span', class_='a-price-whole'))
-					product_price = clean_html(product_price)
-					data_price.append(product_price)
-					product_ratings = str(item_text.find('span', class_='a-icon-alt'))
-					product_ratings = clean_html(product_ratings)
-					data_ratings.append(product_ratings)
-					product_link = str(item_text.find("a", class_='a-link-normal s-no-outline'))
-					product_asin = urlcleaner(product_link)
-					data_asin.append(product_link)
-				
-					if product_name != None:
-						product_data = {
-								"product name": product_name,
-								"price": product_price,
-								"rating": product_ratings,
-								"ASIN": product_asin,
-								"url":product_link
-						}
-						data.append(product_data)
-						# if(product_data['product'] is not None):
-						#     data.append(product_data)
-			# Write data to JSON
-			with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
-				json.dump(data, jsonfile, indent=4)
-			
-			return product_data
-			
+    data = []
+    
+    for item_text in items:
+        # Extract product name
+        product_name = item_text.find('h2', class_="a-size-medium a-spacing-none a-color-base a-text-normal")
+        if product_name:
+            product_name = clean_html(str(product_name.text))  # Extract text and clean
+        else:
+            product_name = None
+        
+        # Extract product price
+        product_price = item_text.find('span', class_='a-price-whole')
+        if product_price:
+            product_price = clean_html(str(product_price.text))  # Extract text and clean
+        else:
+            product_price = None
+        
+        # Extract product ratings
+        product_ratings = item_text.find('span', class_='a-icon-alt')
+        if product_ratings:
+            product_ratings = clean_html(str(product_ratings.text))  # Extract text and clean
+        else:
+            product_ratings = None
+        
+        # Extract product URL
+        product_link = item_text.find("a", class_='a-link-normal s-no-outline')
+        if product_link and 'href' in product_link.attrs:
+            product_link = product_link.attrs['href']
+        else:
+            product_link = None
+        
+        # Extract ASIN (this assumes `urlcleaner` will extract it correctly)
+        product_asin = urlcleaner(product_link) if product_link else None
+        
+        # Collect the data only if the product name exists
+        if product_name:
+            product_data = {
+                "product name": product_name,
+                "price": product_price,
+                "rating": product_ratings,
+                "ASIN": product_asin,
+                "url": product_link
+            }
+            data.append(product_data)
+    
+    return data
 
 def get_asin():
     data = []

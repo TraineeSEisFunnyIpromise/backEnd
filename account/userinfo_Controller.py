@@ -1,6 +1,6 @@
 # app.py
 from flask import  Blueprint, request, jsonify, session
-from account.userinfo import delete_user,update_aboutme,check_database_status,update_oldpassword
+from account.userinfo import delete_user,update_aboutme,check_database_status,update_oldpassword,access_database
 # import userinfo function
 #time stuff
 
@@ -25,12 +25,21 @@ def update():
 @userinformation_bp.route('/Delete', methods=['POST'])
 def delete_account():
 	data = request.json
+	password_fromfront = data["password"]
+	datafromdb = access_database(data["username"])
+	password_fromdb = datafromdb["password"]
 
-	if delete_user(data["username"]) ==True:
+	if(password_fromfront == password_fromdb):
+			if delete_user(data["username"]) ==True:
 			
-			return jsonify({'msg' : 'remove successful' }), 200
+				return jsonify({'msg' : 'remove successful' }), 200
+			else:
+				return jsonify({'msg': 'remove unsuccessful'}), 404
 	else:
-			return jsonify({'msg': 'remove unsuccessful'}), 404
+		return jsonify({'msg': 'remove unsuccessful'}), 404
+
+	
+
 
 @userinformation_bp.route('/PasswordUpdate', methods=['POST'])
 def updatepass():

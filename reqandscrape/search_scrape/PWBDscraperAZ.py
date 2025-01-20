@@ -8,7 +8,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException 
 import csv,random,json
 from selenium import webdriver
@@ -114,20 +113,29 @@ def scrape_amazon(inputkeyword,search_group):
 				page_limit = 0
 				driver.implicitly_wait(800) 
 				print("before looping")
-				while True and page_limit <= 5:
+				while page_limit <= 5:
 					print("looping")
-					driver.implicitly_wait(500)
+					time.sleep(10)  
 					try:
 						# Wait for the "Next" button to be clickable
 						next_button = WebDriverWait(driver, 10).until(
 							EC.element_to_be_clickable((By.XPATH, "//a[text()='Next']"))
 						)
+						# Wait for the "Next" button to be clickable MUST HAPPEN BEFORE WAITING
+
+						#Wating for 10 seconds...MUST HAPPEN AFTER BUTTON FOUND
+						time.sleep(10)
 						
 						# Scrape the page source after the list is populated
 						content = driver.page_source
 						soup = BeautifulSoup(content, 'html.parser')
-						items = soup.findAll('div', class_='s-result-item')  # Update the class name if necessary
+						items = soup.findAll('div', class_='puisg-row')  # Update the class name if necessary
 						print("item sorting")
+						with open("raw_result.txt", "w",encoding="utf-8") as f:
+						#open temporary search result.json file
+					#write result to text
+							f.write(items + "\n")
+
 						item_sorting(items)
 						
 						# Click the "Next" button to go to the next page
@@ -137,7 +145,7 @@ def scrape_amazon(inputkeyword,search_group):
 						page_limit += 1
 						
 						# Optional: wait between pages to prevent hitting Amazon too quickly
-						time.sleep(3)  # Adjust sleep time as needed between page loads
+						time.sleep(10)  
 
 						
 						# content = driver.page_source

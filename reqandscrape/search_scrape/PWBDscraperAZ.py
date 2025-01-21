@@ -231,39 +231,32 @@ def scrape_amazon(inputkeyword,search_group):
 
 def item_sorting(items):
     data = []
-    
+
     for item_text in items:
-        # Extract product name
-        product_name = item_text.find('h2', class_="a-size-medium a-spacing-none a-color-base a-text-normal")
-        if product_name:
-            product_name = clean_html(str(product_name.text))  # Extract text and clean
-        else:
+        item_soup = BeautifulSoup(item_text, 'html.parser')  # Create BeautifulSoup object
+
+        try:
+            product_name = item_soup.find('h2', class_="a-size-medium a-spacing-none a-color-base a-text-normal").text.strip() 
+        except AttributeError:
             product_name = None
-        
-        # Extract product price
-        product_price = item_text.find('span', class_='a-price-whole')
-        if product_price:
-            product_price = clean_html(str(product_price.text))  # Extract text and clean
-        else:
+
+        try:
+            product_price = item_soup.find('span', class_='a-price-whole').text.strip()
+        except AttributeError:
             product_price = None
-        
-        # Extract product ratings
-        product_ratings = item_text.find('span', class_='a-icon-alt')
-        if product_ratings:
-            product_ratings = clean_html(str(product_ratings.text))  # Extract text and clean
-        else:
+
+        try:
+            product_ratings = item_soup.find('span', class_='a-icon-alt').text.strip()
+        except AttributeError:
             product_ratings = None
-        
-        # Extract product URL
-        product_link = item_text.find("a", class_='a-link-normal s-no-outline')
-        if product_link and 'href' in product_link.attrs:
-            product_link = product_link.attrs['href']
-        else:
+
+        try:
+            product_link = item_soup.find("a", class_='a-link-normal s-no-outline')['href'] 
+        except (AttributeError, KeyError):
             product_link = None
-        
-        # Extract ASIN (this assumes `urlcleaner` will extract it correctly)
-        product_asin = urlcleaner(product_link) if product_link else None
-        
+
+        product_asin = urlcleaner(product_link) if product_link else None 
+
         # Collect the data only if the product name exists
         if product_name:
             product_data = {
@@ -276,6 +269,9 @@ def item_sorting(items):
             data.append(product_data)
     
     return data
+
+        
+
 
 def get_asin():
     data = []
@@ -344,40 +340,71 @@ def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','
 
 
 def get_reviews(response):
-	#for store review
+		#for store review
+  # Set selector to response text
+  sel = Selector(text=response.text)
 
-	#set selector to response text
-	sel = Selector(text=response.text)
-	#find the feature bullets
-	reviews = []
-	for review_element in sel.css("div.review-container"):  # Adjust this selector based on your HTML
-					review = {
-						"review_title": review_element.css("a.review-title ::text").get(),
-						"review_text": review_element.css("span.review-text ::text").get(),
-						"review_rating": review_element.css("i.review-rating ::text").get(),
-							
-					}
-	reviews.append(review)
+  # Find the review containers
+  reviews = []
+  for review_element in sel.css("div.review-container"):  # Adjust this selector based on your HTML
+    review = {}
 
-	return reviews
+    try:
+      review_title = review_element.css("a.review-title ::text").get()
+      if review_title:
+        review["review_title"] = review_title.strip()
+    except NoSuchElementException:
+      review["review_title"] = None
+
+    try:
+      review_text = review_element.css("span.review-text ::text").get()
+      if review_text:
+        review["review_text"] = review_text.strip()
+    except NoSuchElementException:
+      review["review_text"] = None
+
+    try:
+      review_rating = review_element.css("i.review-rating ::text").get()
+      if review_rating:
+        review["review_rating"] = review_rating.strip()
+    except NoSuchElementException:
+      review["review_rating"] = None
+
+    reviews.append(review)
+
+  return reviews
 
 def get_product_detail(response):
-	#for store review
-	product_data_list = []
-	#set selector to response text
-	sel = Selector(text=response.text)
-	#find the feature bullets
-	feature_bullets = [bullet.strip() for bullet in sel.css("#feature-bullets li ::text").getall()]
-	#find price
-	if not price:
-		price = sel.css('.a-price .a-offscreen ::text').get("")
-		#add data column to product data list
-	product_data_list.append({
-		"stars": sel.css("i[data-hook=average-star-rating] ::text").get("").strip(),
-		"rating_count": sel.css("div[data-hook=total-review-count] ::text").get("").strip(),
-		"feature_bullets": feature_bullets,
-	})
-	return product_data_list
+		#for store review
+		product_data_list = []
+		#set selector to response text
+		sel = Selector(text=response.text)
+		#find the feature bullets
+		feature_bullets = [bullet.strip() for bullet in sel.css("#feature-bullets li ::text").getall()]
+		#find price
+		if not price:
+			price = sel.css('.a-price .a-offscreen ::text').get("")
+			#add data column to product data list
+
+		try:
+			stars = sel.css("i[data-hook=average-star-rating] ::text").get("").strip()
+		except NoSuchElementException:
+			stars = None
+
+		try:
+			rating_count = sel.css("div[data-hook=total-review-count] ::text").get("").strip()
+		except NoSuchElementException:
+			rating_count = None
+
+		if stars is None or rating_count is None:
+			return None
+		else:
+			product_data_list.append({
+					"stars": stars,
+					"rating_count": rating_count,
+					"feature_bullets": feature_bullets,
+			})
+		return product_data_list
 
 
 def clean_html(input):

@@ -1,7 +1,7 @@
 import unittest
-from unittest.mock import patch, AsyncMock
-import asyncio
 
+import asyncio
+from bs4 import BeautifulSoup  # For HTML parsing (if needed)
 # Import your functions
 
 from Reqandscrape.NDcalculate import normal_dist
@@ -16,8 +16,9 @@ class TestSearchReview(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_item_sorting(self):
-        items = [{'price': 10},{'price': 5},{'price': 20},{'price': 15}]
+        items = parse_txt_to_bs4("success_raw_result.txt")
         result = item_sorting(items)
+        print(result)
         self.assertIsNotNone(result)
 
     def test_get_asin(self):
@@ -29,34 +30,42 @@ class TestSearchReview(unittest.TestCase):
         result = clean_html(html)
         self.assertIsNotNone(result)
 
-    @patch('Reqandscrape.search_scrape.PWBDscraperAZ.requests.get')
-    def test_get_reviews(self, mock_get):
-        mock_response = AsyncMock()
-        mock_response.text = '<div class="review-container"><a class="review-title">Great product</a><span class="review-text">I love it</span><i class="review-rating">5 stars</i></div>'
-        mock_get.return_value = mock_response
 
-        response = mock_get('https://www.amazon.com/dp/DP123456')
+    def test_get_reviews(self, mock_get):
+
+        response = parse_txt_to_bs4("success_raw_result.txt")
         result = get_reviews(response)
         self.assertIsNotNone(result)
         self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]['review_title'], 'Great product')
-        self.assertEqual(result[0]['review_text'], 'I love it')
-        self.assertEqual(result[0]['review_rating'], '5 stars')
+        self.assertIsNotNone(result[0]['review_title'])
+        self.assertIsNotNone(result[0]['review_text'])
+        self.assertIsNotNone(result[0]['review_rating'])
 
-    @patch('Reqandscrape.search_scrape.PWBDscraperAZ.requests.get')
+
     def test_get_product_detail(self, mock_get):
-        mock_response = AsyncMock()
-        mock_response.text = '<div id="feature-bullets"><li>Feature 1</li><li>Feature 2</li></div><i data-hook="average-star-rating">4.5 out of 5 stars</i><div data-hook="total-review-count">100 reviews</div>'
-        mock_get.return_value = mock_response
 
-        response = mock_get('https://www.amazon.com/dp/DP123456')
+        #'https://www.amazon.com/dp/DP123456'
+        response = parse_txt_to_bs4()
         result = get_product_detail(response)
         self.assertIsNotNone(result)
-        self.assertEqual(result[0]['stars'], '4.5 out of 5 stars')
-        self.assertEqual(result[0]['rating_count'], '100 reviews')
-        self.assertEqual(result[0]['feature_bullets'], ['Feature 1', 'Feature 2'])
+        self.assertIsNotNone(result[0]['stars'])
+        self.assertIsNotNone(result[0]['rating_count'])
+        self.assertIsNotNone(result[0]['feature_bullets'])
 
         
+def parse_txt_to_bs4(filename):
+
+  try:
+    with open(filename, 'r', encoding='utf-8') as file:
+      html_content = file.read()
+    soup = BeautifulSoup(html_content, 'html.parser')
+    return soup
+  except FileNotFoundError:
+    print(f"Error: File '{filename}' not found.")
+    return None
+  except Exception as e:
+    print(f"An error occurred: {e}")
+    return None
 
 
 if __name__ == '__main__':

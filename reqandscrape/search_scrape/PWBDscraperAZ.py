@@ -129,7 +129,7 @@ def scrape_amazon(inputkeyword,search_group):
 						# Scrape the page source after the list is populated
 						content = driver.page_source
 						soup = BeautifulSoup(content, 'html.parser')
-						items = soup.findAll('div', class_='puisg-row')  # Update the class name if necessary
+						items = soup.find_all('div', attrs={'data-component-type': 's-search-result'})#this method work in test
 						print("item sorting")
 						with open("raw_result.txt", "w",encoding="utf-8") as f:
 						#open temporary search result.json file
@@ -267,8 +267,9 @@ def item_sorting(items):
                 "url": product_link
             }
             data.append(product_data)
-    
-    return data
+
+    with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
+      json.dump(data, jsonfile, indent=4)
 
         
 

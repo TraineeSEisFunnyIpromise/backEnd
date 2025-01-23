@@ -232,8 +232,8 @@ def scrape_amazon(inputkeyword,search_group):
 def item_sorting(items):
     data = []
 
-    for item_text in items:
-        item_soup = BeautifulSoup(item_text, 'html.parser')  # Create BeautifulSoup object
+    for item_soup in items:
+        # item_soup = BeautifulSoup(item_text, 'html.parser')  # Create BeautifulSoup object
 
         try:
             product_name = item_soup.find('h2', class_="a-size-medium a-spacing-none a-color-base a-text-normal").text.strip() 
@@ -260,11 +260,11 @@ def item_sorting(items):
         # Collect the data only if the product name exists
         if product_name:
             product_data = {
-                "product name": product_name,
-                "price": product_price,
-                "rating": product_ratings,
-                "ASIN": product_asin,
-                "url": product_link
+                "product name": str(product_name),
+                "price": str(product_price),
+                "rating": str(product_ratings),
+                "ASIN": str(product_asin),
+                "url": str(product_link)
             }
             data.append(product_data)
 

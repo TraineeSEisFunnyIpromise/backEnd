@@ -280,11 +280,10 @@ def get_asin():
             json_data = json.load(jsonfile)
             for asin in json_data:
                 if asin['asin']!=None:
-                    data.append(asin)
+                    data.append(asin['asin'])
                 else:
                     print("Empty ASIN found.")
     print("asin data")
-    print(data)
     return data
 
 

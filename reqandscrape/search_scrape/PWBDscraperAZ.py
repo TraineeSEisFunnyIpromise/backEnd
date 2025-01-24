@@ -15,7 +15,6 @@ from seleniumwire import webdriver as webdriver_wire
 from bs4 import BeautifulSoup
 from selenium.webdriver import Remote, ChromeOptions
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
-from selenium.webdriver.common.by import By
 import time
 import re
 import requests
@@ -263,7 +262,7 @@ def item_sorting(items):
                 "product name": str(product_name),
                 "price": str(product_price),
                 "rating": str(product_ratings),
-                "ASIN": str(product_asin),
+                "asin": str(product_asin),
                 "url": str(product_link)
             }
             data.append(product_data)
@@ -299,7 +298,7 @@ def urlcleaner(url):
             asin = asin_match.group(1)
             # # check is it a valid ASIN
             clean_url = re.fullmatch(r'[A-Z0-9]{10}', asin, flags=re.IGNORECASE)
-    return clean_url
+    return clean_url.group(0) if clean_url else None
 # #----------------review scraping---------------------
 
 def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','w',encoding='utf-8')):

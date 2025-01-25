@@ -302,38 +302,38 @@ def urlcleaner(url):
 
 def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','w',encoding='utf-8')):
 		for i in asin:
-
-			url = f'https://www.amazon.com/dp/{i}'
-
-			try:
-				response = requests.get(url,proxies = {
-				'http': proxy,
-				'https': proxy
-            })
-				
-				if response.status_code == 200:
-					#open text file
-					with open("raw_result_product.txt", "w",encoding="utf-8") as f:
-						#open temporary search result.json file
-						with open(json_file,'r+') as file:
-							#load json file to file_data
-							file_data = json.load(file)
-							#for each item in file
-							for item in file:
-								#set text_content to set file
-								text_content = str(item)
-								#in file data find variable ["ASIN"] and add data to selected row with method get product detail
-								file_data["ASIN"].append(get_product_detail(response))
-								#in file data find variable ["ASIN"] and add data to selected row with method get product review
-								file_data["ASIN"].append(get_reviews(response))
-							json.dump(file_data, file, indent = 4)
-					#write result to text
-					f.write(text_content + "\n")
-			except Exception as e:
-				print("Error", e)
-	
-		with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
-			json.dump(file_data, jsonfile, indent=4)
+			if (i != None) and(i != 'None'):
+				url = f'https://www.amazon.com/dp/{i}'
+				try:
+					response = requests.get(url,proxies = {
+					'http': proxy,
+					'https': proxy
+				})
+					
+					if response.status_code == 200:
+						#open text file
+						with open("raw_result_product.txt", "w",encoding="utf-8") as f:
+							#open temporary search result.json file
+							with open(json_file,'r+') as file:
+								#load json file to file_data
+								file_data = json.load(file)
+								#for each item in file
+								for item in file:
+									#set text_content to set file
+									text_content = str(item)
+									#in file data find variable ["asin"] and add data to selected row with method get product detail
+									file_data["asin"].append(get_product_detail(response))
+									#in file data find variable ["asin"] and add data to selected row with method get product review
+									file_data["asin"].append(get_reviews(response))
+								json.dump(file_data, file, indent = 4)
+						#write result to text
+						f.write(text_content + "\n")
+				except Exception as e:
+					print("Error", e)
+		
+			with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
+				json.dump(file_data, jsonfile, indent=4)
+						
 						
 
 

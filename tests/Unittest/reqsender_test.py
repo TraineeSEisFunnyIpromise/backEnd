@@ -1,12 +1,11 @@
 import unittest
-from unittest.mock import patch, MagicMock
 import requests
 from Reqandscrape.requestsender.chatgptreqsender import change_data, extract_criteria, receiveinput
 
 class TestChangeData(unittest.TestCase):
 
 
-    def test_success_change_data(self, mock_post):
+    def test_success_change_data(self):
         # Mock the response from the OpenAI API
 
 

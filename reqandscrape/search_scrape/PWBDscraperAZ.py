@@ -114,7 +114,7 @@ def scrape_amazon(inputkeyword,search_group):
 				print("before looping")
 				while page_limit <= 5:
 					print("looping")
-					time.sleep(10)  
+					time.sleep(8+ int(random.randrange(5)))  
 					try:
 						# Wait for the "Next" button to be clickable
 						next_button = WebDriverWait(driver, 10).until(
@@ -123,7 +123,7 @@ def scrape_amazon(inputkeyword,search_group):
 						# Wait for the "Next" button to be clickable MUST HAPPEN BEFORE WAITING
 
 						#Wating for 10 seconds...MUST HAPPEN AFTER BUTTON FOUND
-						time.sleep(10)
+						time.sleep(8+ int(random.randrange(5)))
 						
 						# Scrape the page source after the list is populated
 						content = driver.page_source
@@ -144,7 +144,7 @@ def scrape_amazon(inputkeyword,search_group):
 						page_limit += 1
 						
 						# Optional: wait between pages to prevent hitting Amazon too quickly
-						time.sleep(10)  
+						time.sleep(8+ int(random.randrange(5)))  
 
 						
 						# content = driver.page_source
@@ -309,7 +309,7 @@ def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','
 					'http': proxy,
 					'https': proxy
 				})
-					
+					time.sleep(5 + int(random.randrange(5)))
 					if response.status_code == 200:
 						#open text file
 						with open("raw_result_product.txt", "w",encoding="utf-8") as f:
@@ -330,6 +330,8 @@ def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','
 						f.write(text_content + "\n")
 				except Exception as e:
 					print("Error", e)
+				print("ending waiting")
+				time.sleep(5 + int(random.random() * 5))
 		
 			with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
 				json.dump(file_data, jsonfile, indent=4)
@@ -381,27 +383,27 @@ def get_product_detail(response):
 		#find the feature bullets
 		feature_bullets = [bullet.strip() for bullet in sel.css("#feature-bullets li ::text").getall()]
 		#find price
-		if not price:
-			price = sel.css('.a-price .a-offscreen ::text').get("")
+		# if not price:
+		# 	price = sel.css('.a-price .a-offscreen ::text').get("")
 			#add data column to product data list
 
-		try:
-			stars = sel.css("i[data-hook=average-star-rating] ::text").get("").strip()
-		except NoSuchElementException:
-			stars = None
+		# try:
+		# 	stars = sel.css("i[data-hook=average-star-rating] ::text").get("").strip()
+		# except NoSuchElementException:
+		# 	stars = None
 
-		try:
-			rating_count = sel.css("div[data-hook=total-review-count] ::text").get("").strip()
-		except NoSuchElementException:
-			rating_count = None
+		# try:
+		# 	rating_count = sel.css("div[data-hook=total-review-count] ::text").get("").strip()
+		# except NoSuchElementException:
+		# 	rating_count = None
 
-		if stars is None or rating_count is None:
-			return None
-		else:
-			product_data_list.append({
-					"stars": stars,
-					"rating_count": rating_count,
-					"feature_bullets": feature_bullets,
+		# if stars is None or rating_count is None:
+		# 	return None
+		# else:
+		product_data_list.append({
+					# "stars": stars,
+					# "rating_count": rating_count,
+					"description": feature_bullets,
 			})
 		return product_data_list
 

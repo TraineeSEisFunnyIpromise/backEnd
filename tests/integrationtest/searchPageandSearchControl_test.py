@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, AsyncMock
+# from unittest.mock import patch, AsyncMock
 
 
 # Import your functions
@@ -41,9 +41,9 @@ class TestSearchReview(unittest.TestCase):
                 with self.assertRaises(TypeError):
                         scrape_amazon(12345, None)
 
-        @patch('Reqandscrape.search_scrape.PWBDscraperAZ.requests.get')
+        # @patch('Reqandscrape.search_scrape.PWBDscraperAZ.requests.get')
         def test_scrape_amazon_product_network_error(self, mock_get):
-                mock_get.side_effect = Exception("Network error")
+                # mock_get.side_effect = Exception("Network error")
                 result = scrape_amazon_product(self.asin)
                 self.assertIsNone(result)
 

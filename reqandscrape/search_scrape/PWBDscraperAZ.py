@@ -145,13 +145,6 @@ def scrape_amazon(inputkeyword,search_group):
 						
 						# Optional: wait between pages to prevent hitting Amazon too quickly
 						time.sleep(8+ int(random.randrange(5)))  
-
-						
-						# content = driver.page_source
-						# soup = BeautifulSoup(content, 'html.parser')
-						# items = soup.findAll('div', class_='puisg-row')
-						# print("item sorting")
-						# item_sorting(items)
 					except Exception:
 						wait_count += 1
 						if wait_count >= 20 // 2:  # Check after half of max wait time
@@ -174,12 +167,11 @@ def scrape_amazon(inputkeyword,search_group):
 				if isinstance(asin_set, list) and asin_set:
 						print("scraping")
 						print("setting up new driver")
-						for asin in asin_set:
-								print("scraping product")
-								try:
-									scrape_amazon_product(asin)
-								except Exception as e:
-									print(f"An error occurred while scraping product {asin}: {e}")
+						print("scraping product")
+						try:
+							scrape_amazon_product(asin_set)
+						except Exception as e:
+							print(f"An error occurred while scraping product {e}")
 						# scrape_amazon_product(asin_set)
 				else:
 						print("Product scraping failed")
@@ -300,80 +292,96 @@ def urlcleaner(url):
     return clean_url.group(0) if clean_url else None
 # #----------------review scraping---------------------
 
-def scrape_amazon_product(asin,json_file = open('temporary_search_result.json','w',encoding='utf-8')):
-		for i in asin:
-			if (i != None) and(i != 'None'):
-				url = f'https://www.amazon.com/dp/{i}'
-				try:
-					response = requests.get(url,proxies = {
-					'http': proxy,
-					'https': proxy
-				})
-					time.sleep(5 + int(random.randrange(5)))
-					if response.status_code == 200:
-						#open text file
-						with open("raw_result_product.txt", "w",encoding="utf-8") as f:
-							#open temporary search result.json file
-							with open(json_file,'r+') as file:
-								#load json file to file_data
-								file_data = json.load(file)
-								#for each item in file
-								for item in file:
-									#set text_content to set file
-									text_content = str(item)
-									#in file data find variable ["asin"] and add data to selected row with method get product detail
-									file_data["asin"].append(get_product_detail(response))
-									#in file data find variable ["asin"] and add data to selected row with method get product review
-									file_data["asin"].append(get_reviews(response))
-								json.dump(file_data, file, indent = 4)
-						#write result to text
-						f.write(text_content + "\n")
-				except Exception as e:
-					print("Error", e)
-				print("ending waiting")
-				time.sleep(5 + int(random.random() * 5))
-		
-			with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
-				json.dump(file_data, jsonfile, indent=4)
-						
-						
+def scrape_amazon_product(asin, json_file='temporary_search_result.json'):
+    file_data = None
+    print("Before processing ASINs")
 
+    for i in asin:
+        if (i is not None) and (i != 'None'):
+            print("Processing ASIN:", i)
+            url = f'https://www.amazon.com/dp/{i}'
+
+            try:
+                response = requests.get(str(url), proxies={'http': proxy, 'https': proxy})
+                print("Proxy set")
+                time.sleep(3)
+
+                if response.status_code == 200:
+                    # Load or create JSON data
+                    print("Loading JSON data")
+                    with open(json_file, 'r+') as file:
+                        try:
+                            file_data = json.load(file)
+                        except json.JSONDecodeError:
+                            file_data = {}
+
+                    # Extract product details
+                    result_detail = get_product_detail(response)
+                    result_review = get_reviews(response)  # Add this line
+                    print("Extracted product details asin :", i)
+                    print("Extracted product reviews asin :", i)
+
+                    # Find matching object in JSON (assuming unique ASINs)
+                    matching_object = None
+                    for item in file_data:
+                        if item.get('asin') == i:  # Use get() for potential missing key
+                            matching_object = item
+                            break  # Exit loop once a match is found (assuming unique ASINs)
+
+                    if matching_object:
+                        # Add result_detail and result_review to matching object
+                        matching_object['details'] = result_detail 
+                        matching_object['reviews'] = result_review 
+                        print("Appended details and reviews to matching object to asin : ", i)
+                    else:
+                        print("No matching object found for ASIN:", i)
+
+                    # Save updated JSON data
+                    with open(json_file, 'w') as file: 
+                        json.dump(file_data, file, indent=4)
+
+            except Exception as e:
+                print("Error:", e)
+						
+						
 
 
 def get_reviews(response):
-		#for store review
-  # Set selector to response text
-  sel = Selector(text=response.text)
 
-  # Find the review containers
-  reviews = []
-  for review_element in sel.css("div.review-container"):  # Adjust this selector based on your HTML
-    review = {}
+    if response.status_code != 200:
+    # print an error message with the status code
+        print(f"An error occurred with status {response.status_code}")
+    else:
+        # get the page html content
+        html_content = response.text
+        # parse the html content using BeautifulSoup
+        soup = BeautifulSoup(html_content, "html.parser")
 
-    try:
-      review_title = review_element.css("a.review-title ::text").get()
-      if review_title:
-        review["review_title"] = review_title.strip()
-    except NoSuchElementException:
-      review["review_title"] = None
 
-    try:
-      review_text = review_element.css("span.review-text ::text").get()
-      if review_text:
-        review["review_text"] = review_text.strip()
-    except NoSuchElementException:
-      review["review_text"] = None
+        # find all elements with class name "review-title"
+        review_titles = soup.find_all("a", class_="review-title")
+        titles_list = [title.text.replace("5.0 out of 5 stars\n", "").strip() for title in review_titles]
+        
+        # find all elements with class name "review-text-content"
+        review_texts = soup.find_all("span", class_="review-text")
+        review_texts_list = [text.get_text(separator="\n").strip() for text in review_texts]
 
-    try:
-      review_rating = review_element.css("i.review-rating ::text").get()
-      if review_rating:
-        review["review_rating"] = review_rating.strip()
-    except NoSuchElementException:
-      review["review_rating"] = None
 
-    reviews.append(review)
+        # find all elements with class name "review-rating"
+        review_ratings = soup.find_all("i", class_="review-rating")
+        review_ratings_list = [rating.text.strip() for rating in review_ratings]
 
-  return reviews
+
+        # create a dictionary to store the review details
+        reviews = {
+
+            "Review Titles": titles_list,
+            "Review Texts": review_texts_list,
+            "Review Star Ratings": review_ratings_list,
+        }
+
+        # print the dictionary
+    return reviews
 
 def get_product_detail(response):
 		#for store review
@@ -382,24 +390,7 @@ def get_product_detail(response):
 		sel = Selector(text=response.text)
 		#find the feature bullets
 		feature_bullets = [bullet.strip() for bullet in sel.css("#feature-bullets li ::text").getall()]
-		#find price
-		# if not price:
-		# 	price = sel.css('.a-price .a-offscreen ::text').get("")
-			#add data column to product data list
 
-		# try:
-		# 	stars = sel.css("i[data-hook=average-star-rating] ::text").get("").strip()
-		# except NoSuchElementException:
-		# 	stars = None
-
-		# try:
-		# 	rating_count = sel.css("div[data-hook=total-review-count] ::text").get("").strip()
-		# except NoSuchElementException:
-		# 	rating_count = None
-
-		# if stars is None or rating_count is None:
-		# 	return None
-		# else:
 		product_data_list.append({
 					# "stars": stars,
 					# "rating_count": rating_count,

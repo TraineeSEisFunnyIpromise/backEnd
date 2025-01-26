@@ -80,7 +80,7 @@ def scrape_amazon(inputkeyword,search_group):
 				
     	 
 				driver = Remote(sbr_connection, options=options) 
-				
+				print("\tOpen amazon page")
 				driver.get("https://amazon.com")
 
 				#wait for 5 second
@@ -90,21 +90,23 @@ def scrape_amazon(inputkeyword,search_group):
 				# autocapitalize="off" autocorrect="off" type="text">
 
 				#merge word
-				
+				print("\tWait time out 120")
 				#finding search box
-				driver.set_page_load_timeout(30)
+				driver.set_page_load_timeout(120)
 				search = driver.find_element(By.ID, 'twotabsearchtextbox')
 				#set condition if detected abandon task
 				search.send_keys(keyword)
 					# click search button
 				driver.implicitly_wait(2)
+				print("\tSubmit search key")
 				search_button = driver.find_element(By.ID, 'nav-search-submit-button')
 
 				# if(driver.find_element(By.ID,'captchacharacters') == True):
 				# 	driver.quit()
 				# 	return "detected capcha abandon task"
 				#dump old data 
-				with open('temporary_search_result.json', 'w', encoding='utf-8') as jsonfile:
+				print("\tWrite temp file")
+				with open('temporary_search_result.json', 'w+', encoding='utf-8') as jsonfile:
 						json.dump([], jsonfile)
 				
 				search_button.click()
@@ -112,42 +114,52 @@ def scrape_amazon(inputkeyword,search_group):
 				page_limit = 0
 				driver.implicitly_wait(800) 
 				print("before looping")
-				while page_limit <= 5:
+				while page_limit <= 0:
 					print("looping")
 					time.sleep(8+ int(random.randrange(5)))  
 					try:
+						print("\tStarting")
 						# Wait for the "Next" button to be clickable
+						print("\tNext button detection")
 						next_button = WebDriverWait(driver, 10).until(
 							EC.element_to_be_clickable((By.XPATH, "//a[text()='Next']"))
 						)
 						# Wait for the "Next" button to be clickable MUST HAPPEN BEFORE WAITING
-
+						print("\tSleeping")	
 						#Wating for 10 seconds...MUST HAPPEN AFTER BUTTON FOUND
 						time.sleep(8+ int(random.randrange(5)))
-						
+						print("\tScraping")
 						# Scrape the page source after the list is populated
 						content = driver.page_source
 						soup = BeautifulSoup(content, 'html.parser')
 						items = soup.find_all('div', attrs={'data-component-type': 's-search-result'})#this method work in test
 						print("item sorting")
-						with open("raw_result.txt", "w",encoding="utf-8") as f:
+                                          
+						with open("raw_result.txt", "w+",encoding="utf-8") as f:
 						#open temporary search result.json file
 					#write result to text
-							f.write(items + "\n")
-
+							f.write(str(items) + "\n")
+						print("before click button")
 						item_sorting(items)
 						
 						# Click the "Next" button to go to the next page
 						next_button.click()
 						
 						# Update the page limit counter
-						page_limit += 1
+						page_limit = page_limit +  1
+						print("page limit ",page_limit)
 						
 						# Optional: wait between pages to prevent hitting Amazon too quickly
 						time.sleep(8+ int(random.randrange(5)))  
-					except Exception:
+					except Exception as e:
+						print("Exception :",str(e))
+						error_message = str(e)  # Get the error message as a string
+
+						if "target window already closed" in error_message and "web view not found" in error_message:
+							break
+						
 						wait_count += 1
-						if wait_count >= 20 // 2:  # Check after half of max wait time
+						if wait_count >= 120 // 2:  # Check after half of max wait time
 							print(wait_count)
 							print("Error: Encountered delays for too long")
 							driver.quit()
@@ -160,6 +172,7 @@ def scrape_amazon(inputkeyword,search_group):
 
 				print("quit old driver")
 				driver.quit()
+				# print(result = json.load(open('temporary_search_result.json', 'r')) if open('temporary_search_result.json', 'r') else None )
 
 				asin_set = get_asin()
 				# begin product scraping
@@ -187,27 +200,34 @@ def scrape_amazon(inputkeyword,search_group):
 		finally:
 				# driver.quit()
 				print("\t end amazon")
-			#
+
+			
 				print("\t count and add the ID")
 				with open('temporary_search_result.json', 'r', encoding='utf-8') as json_file:
-					if(json_file != None or json_file != ''):
+					try:
 						data = json.load(json_file)
-						id_count = 1
-						for item in data:
-							if item is not None:
-								if 'id' not in item:
-									item['id'] = id_count
-									id_count += 1
-								json.dump(data, json_file, ensure_ascii=False, indent=4)
+					except json.JSONDecodeError as e:
+						print(f"Error loading JSON: {e}")
+						data = []  # Initialize an empty list in case of errors
 
+					id_count = 1
+					for item in data:
+						if item is not None:
+							if 'id' not in item:
+								item['id'] = id_count
+								id_count += 1
+								print(item)
 
-					print("\t finalized data")
-				with open('temporary_search_result.json', 'w+', encoding='utf-8') as json_file:
-					json.dump(result, json_file, ensure_ascii=False, indent=4)
+				print("\t finalized data")
+				with open('temporary_search_result.json', 'w', encoding='utf-8') as json_file:
+					json.dump(data, json_file, ensure_ascii=False, indent=4) 
+                                   
 
-				print("\t sending")
+				result = json.load(open('temporary_search_result.json', 'r',encoding='utf-8')) if open('temporary_search_result.json', 'r') else None 
+				# print("\t sending")
 				if result != None:
 					print("\t Success")
+					print(result)
 					return result
 				else:
 					print("result bad")
@@ -251,7 +271,7 @@ def item_sorting(items):
         # Collect the data only if the product name exists
         if product_name:
             product_data = {
-                "product name": str(product_name),
+                "title": str(product_name),
                 "price": str(product_price),
                 "rating": str(product_ratings),
                 "asin": str(product_asin),

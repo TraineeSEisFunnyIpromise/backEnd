@@ -49,18 +49,18 @@ def calculate_the_zeroshot(input_texts, dynamic_labels):
     return data
 
 
-def calculate_the_zeroshot_test():
-    # Calculate the sum of scores for the dynamic labels
-    text = "I enjoy playing cricket, specializing as a left-arm leg spinner while showcasing my skills as a right-handed one-down batsman." 
-    labels = ['Politics', 'Automobile', 'Sports', 'Business', 'World']  
-    total_scores = classify_and_sum_scores(text, labels)
-    for label in total_scores:
-        total_scores[label] = total_scores[label] / len(text)
+# def calculate_the_zeroshot_test():
+#     # Calculate the sum of scores for the dynamic labels
+#     text = "I enjoy playing cricket, specializing as a left-arm leg spinner while showcasing my skills as a right-handed one-down batsman." 
+#     labels = ['Politics', 'Automobile', 'Sports', 'Business', 'World']  
+#     total_scores = classify_and_sum_scores(text, labels)
+#     for label in total_scores:
+#         total_scores[label] = total_scores[label] / len(text)
         
 
 
-    # Create a list of data rows
-    data= [{'Label': label, 'Score': score} for label, score in total_scores.items()]
-    print(data)
-    return data
+#     # Create a list of data rows
+#     data= [{'Label': label, 'Score': score} for label, score in total_scores.items()]
+#     print(data)
+#     return data
     

@@ -102,12 +102,14 @@ def get_userinfo():
         
         if user is not None:
             # Return user data (excluding sensitive information)
-            print(data)
-            print(type(data))
+            # print(data)
+            # print(type(data))
 
             return_data = []
             return_data.append(data["username"])
             return_data.append(data["userinfo"])
+            return_data.append(data["email"])
+            return_data.append(data["dateOfbirth"])
             print("return data")
             print(return_data)
             

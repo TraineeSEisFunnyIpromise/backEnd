@@ -1,72 +1,100 @@
 import unittest
-from MainApp import app
-from account.userinfo import update_oldpassword,update_aboutme,delete_account
-from pymongo import MongoClient
-
-client = MongoClient('mongodb://localhost:27017')
-db = client['Database1']
-usercollection = db['db1']
+from flask import Flask, session
+from account.userinfo_Controller import userinformation_bp
+from account.userinfo import update_oldpassword, update_aboutme, delete_account
+from unittest.mock import patch
+from datetime import datetime
 
 class TestUserInfo(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        cls.app = Flask(__name__)
+        cls.app.config['TESTING'] = True
+        cls.app.secret_key = 'test_secret_key'
+        cls.app.register_blueprint(userinformation_bp)
+        cls.client = cls.app.test_client()
 
     def setUp(self):
-        self.app = app.test_client()
-        self.user_data = {'name': 'Test1','password': '1234', 'About me':'ye', 'Question for reset password':'slurpy', 
-'Answer for reset password':'slurp'}
-        self.testaboutme = "yes"
-        self.password="1234"
+        with self.app.test_request_context():
+            session.clear()
 
-    
-    def test_success_update_oldpassword(self):
-        username = 'test1'
-        newpassword = "1234567"
-        result = update_oldpassword(username,newpassword)
-        self.assertIsNotNone(result)
-
-    def test_unsuccess_update_oldpassword(self):
-        username = ''
-        newpassword = "1234567"
-        result = update_oldpassword(username,newpassword)
-        self.assertIsNone(result)
-
-    def test_success_update_aboutme(self):
-        username = 'test1'
-        testaboutme = "yes"
-        result = update_aboutme(username,testaboutme)
-        self.assertIsNotNone(result)
-    
-    def test_unsuccess_update_aboutme(self):
-        username = ''
-        testaboutme = "yes"
-        result = update_aboutme(username,testaboutme)
-        self.assertIsNone(result)
-    
-    def test_success_delete_account(self):
-        username = 'test1'
-        password="1234"
-        result = delete_account(username,password)
-        self.assertIsNotNone(result)
-    
-    def test_unsuccess_delete_account(self):
-        username = 'test1'
-        password=""
-        result = delete_account(username,password)
-        self.assertIsNone(result)
-
-
-    def test_information_success(self):
-        response = self.app.post('/userinfo/Information')
+    # ------------------- Test Routes ------------------- #
+    @patch('account.userinfo.update_aboutme', return_value="Update successful")
+    def test_update_success(self, mock_update):
+        payload = {"username": "testuser", "aboutme": "New about me"}
+        response = self.client.post('/Update', json=payload)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json['profile'], self.user_data)
+        self.assertEqual(response.json['message'], "Update successful")
 
-    def test_information_no_session(self):
-        # Simulate no username in session
-        with self.app.session_transaction() as session:
-            session.pop('username', None)
+    @patch('account.userinfo.update_aboutme', return_value="Update failed")
+    def test_update_failure(self, mock_update):
+        payload = {"username": "testuser", "aboutme": "New about me"}
+        response = self.client.post('/Update', json=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json['message'], "Update failed")
 
-        response = self.app.post('/userinfo/Information')
-        self.assertEqual(response.status_code, 401)  # Expect unauthorized without session
+    @patch('account.userinfo.access_database', return_value={"username": "testuser", "password": "password123"})
+    @patch('account.userinfo.delete_user', return_value=True)
+    def test_delete_account_success(self, mock_delete, mock_access):
+        payload = {"username": "testuser", "password": "password123"}
+        response = self.client.post('/Delete', json=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json['msg'], "remove successful")
+
+    @patch('account.userinfo.access_database', return_value={"username": "testuser", "password": "password123"})
+    def test_delete_account_wrong_password(self, mock_access):
+        payload = {"username": "testuser", "password": "wrongpassword"}
+        response = self.client.post('/Delete', json=payload)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json['msg'], "remove unsuccessful")
+
+    @patch('account.userinfo.update_oldpassword', return_value="Password updated successfully")
+    def test_update_password_success(self, mock_update_password):
+        payload = {"username": "testuser", "password": "newpassword123"}
+        response = self.client.post('/PasswordUpdate', json=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, "Password updated successfully")
+
+    @patch('account.userinfo.update_oldpassword', return_value="Password updated successfully")
+    def test_update_password_failure(self, mock_update_password):
+        payload = {"username": "", "password": "newpassword123"}
+        response = self.client.post('/PasswordUpdate', json=payload)
+        self.assertEqual(response.status_code, 400)
+
+    # ------------------- Test Logic Functions ------------------- #
+    @patch('database.databasemanager.update_user_aboutme', return_value=True)
+    def test_update_aboutme_success(self, mock_db_update):
+        result = update_aboutme("testuser", "Updated about me")
+        self.assertEqual(result, "update success")
+
+    @patch('database.databasemanager.update_user_aboutme', return_value=False)
+    def test_update_aboutme_failure(self, mock_db_update):
+        result = update_aboutme("testuser", "Updated about me")
+        self.assertEqual(result, "update unsuccess")
+
+    @patch('database.databasemanager.update_password', return_value=True)
+    def test_update_oldpassword_success(self, mock_db_update):
+        result = update_oldpassword("testuser", "newpassword123")
+        self.assertEqual(result, "Reset password successful")
+
+    @patch('database.databasemanager.update_password', return_value=False)
+    def test_update_oldpassword_failure(self, mock_db_update):
+        result = update_oldpassword("testuser", "newpassword123")
+        self.assertEqual(result, "Reset password unsuccessful")
+
+    @patch('database.databasemanager.check_username', return_value=True)
+    @patch('database.databasemanager.delete_user', return_value=True)
+    def test_delete_account_logic_success(self, mock_delete, mock_check_username):
+        result, success = delete_account("testuser")
+        self.assertTrue(success)
+        self.assertEqual(result.json['msg'], "remove succesful")
+
+    @patch('database.databasemanager.check_username', return_value=False)
+    def test_delete_account_logic_failure(self, mock_check_username):
+        result, success = delete_account("unknownuser")
+        self.assertFalse(success)
+        self.assertEqual(result.json['msg'], "user not found")
 
 if __name__ == '__main__':
     unittest.main()

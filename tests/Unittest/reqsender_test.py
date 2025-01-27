@@ -1,6 +1,6 @@
 import unittest
 import requests
-from Reqandscrape.requestsender.chatgptreqsender import change_data, extract_criteria, receiveinput
+from Reqandscrape.requestsender.chatgptreqsender import change_data, extract_criteria, receiveinput,check_input_word
 
 class TestChangeData(unittest.TestCase):
 
@@ -43,6 +43,13 @@ class TestChangeData(unittest.TestCase):
         input_text = "Toaster criteria"
         group_target = "general"
         result = receiveinput(input_text, group_target)
+        self.assertIsNotNone(result)
+
+    def test_checkinput_word(self):
+
+        input_text = "Toaster criteria"
+        group_target = "general"
+        result = check_input_word(input_text, group_target)
         self.assertIsNotNone(result)
 
 if __name__ == '__main__':

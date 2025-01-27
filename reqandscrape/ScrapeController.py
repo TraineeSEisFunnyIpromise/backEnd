@@ -1,6 +1,6 @@
 
 from flask import Flask, Blueprint, request, jsonify, session
-from Reqandscrape.requestsender.chatgptreqsender import receiveinput
+from Reqandscrape.requestsender.chatgptreqsender import receiveinput,receiveinputtest
 from Reqandscrape.zeroshotclassify import calculate_the_zeroshot
 from Reqandscrape.search_scrape.PWBDscraperAZ import scrape_amazon
 from Reqandscrape.NDcalculate import normal_dist
@@ -94,8 +94,11 @@ def zeroshotstuff():
 	response = request.get_json() # store the json body request
 	inputdata = response[1] 
 	inputcriteria = response[0]
+	# print("input data : " + str(inputdata))
+	# print("input criteria : "+ str(inputcriteria))
 	result = calculate_the_zeroshot(inputdata,inputcriteria)
 	result = json.dumps(result, indent=4)
+	print("critandprod result " + str(result))
 	if session==True:
 		print("save data")
 	return jsonify(result)
@@ -110,21 +113,29 @@ def normaldistribution():
 
 #in case when not using scrape
 # #--------------------------------------------search test Part--------------------------------------------
-# @search_bp.route('/search_criteria_test', methods=['POST'])
-# def search_criteria_test_sender():
-# 	response = request.get_json() # store the json body request
-# 	print(response)
-# 	a = receiveinputtest()
-# 	print(response)
-# 	return jsonify(a)
+@search_bp.route('/search_criteria_test', methods=['POST'])
+def search_criteria_test_sender():
+	response = request.get_json() # store the json body request
+	print(response)
+	a = receiveinputtest()
+	print(response)
+	return jsonify(a)
 
-# @search_bp.route('/scrape_test', methods=['POST'])
-# def scrape_test():
-# 	response = request.get_json() # store the json body request
-# 	print(response)
-# 	results = csv_json_mock()
-# 	# Process scraped results (e.g., convert to JSON, store in database)
-# 	return jsonify(results)
+@search_bp.route('/scrape_test', methods=['POST'])
+def scrape_test():
+    response = request.get_json()  # Store the JSON body request
+    print(response)
+
+    try:
+        with open('sample.json', 'r', encoding='utf-8') as f:
+            results = json.load(f)
+    except FileNotFoundError:
+        return jsonify({"error": "File not found."}), 404
+    except json.JSONDecodeError as e:
+        return jsonify({"error": f"Invalid JSON data: {e}"}), 400
+
+    # Process scraped results (e.g., convert to JSON, store in database)
+    return jsonify(results)
 
 
 # @search_bp.route('/critandprod_test', methods=['POST'])

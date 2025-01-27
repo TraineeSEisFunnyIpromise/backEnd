@@ -34,18 +34,31 @@ def classify_and_sum_scores(input_texts, input_labels):
     return total_scores
 
 def calculate_the_zeroshot(input_texts, dynamic_labels):
-    # Calculate the sum of scores for the dynamic labels
-    total_scores = classify_and_sum_scores(input_texts, dynamic_labels)
-    for label in total_scores:
-        if len(input_texts!= 0):
-            total_scores[label] = total_scores[label] / len(input_texts)
-            print(f"Total score for {label}: {total_scores[label]}")
+    print("Before function:")
 
+    filtered_input_texts = []
+    for item in input_texts:
+        if isinstance(item, dict) and 'Review Texts' in item: 
+            review_text = item['Review Texts'] 
+            if review_text != None and review_text != 'None':
+                filtered_input_texts.append(review_text) 
+
+    print("Filtered input texts:")
+    print(filtered_input_texts)
+    print("Before check")
+    if not filtered_input_texts:
+        return []  # Return an empty list if no valid input texts remain
+
+    # Calculate the sum of scores for the dynamic labels
+    total_scores = classify_and_sum_scores(filtered_input_texts, dynamic_labels) 
+    print("calculate")
+    for label in total_scores:
+        total_scores[label] = total_scores[label] / len(filtered_input_texts)
+        print(f"Total score for {label}: {total_scores[label]}")
 
     # Create a list of data rows
-    data= [{'Label': label, 'Score': score} for label, score in total_scores.items()]
-
-
+    data = [{'Label': label, 'Score': score} for label, score in total_scores.items()]
+    print("exit function")
     return data
 
 
